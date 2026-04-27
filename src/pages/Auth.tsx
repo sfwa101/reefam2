@@ -4,6 +4,8 @@ import { Phone, Lock, User, Sparkles, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import reefLogo from "@/assets/reef-logo.png";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { resolveHomeForUser } from "@/hooks/useRoleHome";
 
 const Auth = () => {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -23,8 +25,15 @@ const Auth = () => {
     setBusy(true);
     try {
       const res = mode === "signin" ? await signInWithPhone(phone, password) : await signUpWithPhone(phone, password, fullName.trim());
-      if (res.error) toast.error(res.error);
-      else { toast.success(mode === "signin" ? "أهلاً بعودتك" : "تم إنشاء حسابك بنجاح"); navigate({ to: "/", replace: true }); }
+      if (res.error) {
+        toast.error(res.error);
+        return;
+      }
+      toast.success(mode === "signin" ? "أهلاً بعودتك" : "تم إنشاء حسابك بنجاح");
+      // Resolve the right shell based on the user's role.
+      const { data: u } = await supabase.auth.getUser();
+      const home = u.user ? await resolveHomeForUser(u.user.id) : "/";
+      navigate({ to: home, replace: true });
     } finally { setBusy(false); }
   };
 
