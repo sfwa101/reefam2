@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
@@ -66,6 +67,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
   '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
@@ -287,6 +295,7 @@ export interface FileRoutesById {
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/products': typeof AdminProductsRoute
   '/_app/': typeof AppIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_app/account/addresses': typeof AppAccountAddressesRoute
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/sections'
     | '/wallet'
     | '/admin/orders'
+    | '/admin/products'
     | '/admin/'
     | '/account/addresses'
     | '/account/favorites'
@@ -355,6 +365,7 @@ export interface FileRouteTypes {
     | '/sections'
     | '/wallet'
     | '/admin/orders'
+    | '/admin/products'
     | '/'
     | '/admin'
     | '/account/addresses'
@@ -390,6 +401,7 @@ export interface FileRouteTypes {
     | '/_app/sections'
     | '/_app/wallet'
     | '/admin/orders'
+    | '/admin/products'
     | '/_app/'
     | '/admin/'
     | '/_app/account/addresses'
@@ -456,6 +468,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/admin/orders': {
       id: '/admin/orders'
@@ -732,11 +751,13 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface AdminRouteChildren {
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminProductsRoute: typeof AdminProductsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminProductsRoute: AdminProductsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
