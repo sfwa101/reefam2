@@ -15,12 +15,12 @@ const Ctx = createContext<ThemeCtx | null>(null);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   // SSR-safe defaults; hydrate from localStorage on mount
-  const [mode, setModeState] = useState<Mode>("system");
+  const [mode, setModeState] = useState<Mode>("light");
   const [colorTheme, setColorThemeState] = useState<ColorTheme>("sage");
   const [systemMode, setSystemMode] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const storedMode = (localStorage.getItem("reef-mode") as Mode | null) || "system";
+    const storedMode = (localStorage.getItem("reef-mode") as Mode | null) || "light";
     const storedColor = (localStorage.getItem("reef-color") as ColorTheme | null) || "sage";
     setModeState(storedMode);
     setColorThemeState(storedColor);

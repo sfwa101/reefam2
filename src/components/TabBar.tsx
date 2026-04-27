@@ -23,7 +23,7 @@ const TabBar = () => {
   return (
     <nav
       aria-label="التنقل الرئيسي"
-      className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5 pt-2"
+      className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5 pt-2 lg:hidden"
       style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
     >
       <div className="glass-strong mx-auto flex max-w-md items-end justify-between rounded-[1.75rem] px-3 py-2 shadow-float">

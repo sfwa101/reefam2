@@ -228,6 +228,63 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_balances: {
+        Row: {
+          balance: number
+          cashback: number
+          coupons: number
+          points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          cashback?: number
+          coupons?: number
+          points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          cashback?: number
+          coupons?: number
+          points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          label: string
+          source: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          label: string
+          source?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          label?: string
+          source?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
