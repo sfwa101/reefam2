@@ -80,6 +80,7 @@ const HomePage = () => {
 
       <Link
         to="/search"
+        search={{ q: "" }}
         className="glass flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-right shadow-soft animate-float-up"
         style={{ animationDelay: "80ms" }}
       >
