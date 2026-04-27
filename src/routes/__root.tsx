@@ -9,6 +9,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import SplashScreen from "@/components/SplashScreen";
+import { registerPWA } from "@/lib/pwa";
 
 function NotFoundComponent() {
   return (
@@ -44,6 +45,10 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "theme-color", content: "#3b7a4d" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "ريف المدينة" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -56,6 +61,9 @@ export const Route = createRootRoute({
         rel: "stylesheet",
         href: appCss,
       },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "icon", href: "/icon-192.png", type: "image/png" },
     ],
   }),
   shellComponent: RootShell,
@@ -85,6 +93,7 @@ function RootComponent() {
   useEffect(() => {
     const t1 = setTimeout(() => setSplashExit(true), 2000);
     const t2 = setTimeout(() => setShowSplash(false), 2500);
+    registerPWA();
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
