@@ -3,11 +3,30 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { retryBackendCall } from "@/lib/backendRetry";
 
-export type AppRole = "admin" | "staff" | "cashier";
+export type AppRole =
+  | "admin"
+  | "staff"
+  | "cashier"
+  | "store_manager"
+  | "collector"
+  | "delivery"
+  | "finance";
+
+const ALL_ROLES: AppRole[] = [
+  "admin",
+  "staff",
+  "cashier",
+  "store_manager",
+  "collector",
+  "delivery",
+  "finance",
+];
 
 const normalizeSessionRoles = (sessionRoles: unknown): AppRole[] => {
   if (!Array.isArray(sessionRoles)) return [];
-  return sessionRoles.filter((role): role is AppRole => role === "admin" || role === "staff" || role === "cashier");
+  return sessionRoles.filter((role): role is AppRole =>
+    typeof role === "string" && (ALL_ROLES as string[]).includes(role),
+  );
 };
 
 export function useAdminRole() {
