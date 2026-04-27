@@ -29,7 +29,7 @@ export default function AdminCustomers() {
     (async () => {
       setLoading(true);
       const { data: profs } = await retryBackendCall<any>(
-        () => supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500),
+        async () => await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500),
         6,
         500,
       );
@@ -45,8 +45,8 @@ export default function AdminCustomers() {
           map[id] = { ordersCount: 0, totalSpent: 0, walletBalance: 0, walletPoints: 0 };
         });
         const [ordersRes, walletsRes] = await Promise.all([
-          retryBackendCall<any>(() => supabase.from("orders").select("user_id,total").in("user_id", ids), 4, 500).catch(() => ({ data: [] })),
-          retryBackendCall<any>(() => supabase.from("wallet_balances").select("user_id,balance,points").in("user_id", ids), 4, 500).catch(() => ({ data: [] })),
+          retryBackendCall<any>(async () => await supabase.from("orders").select("user_id,total").in("user_id", ids), 4, 500).catch(() => ({ data: [] })),
+          retryBackendCall<any>(async () => await supabase.from("wallet_balances").select("user_id,balance,points").in("user_id", ids), 4, 500).catch(() => ({ data: [] })),
         ]);
         ((ordersRes?.data ?? []) as any[]).forEach((o) => {
           if (!map[o.user_id]) return;
