@@ -9,9 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppWalletRouteImport } from './routes/_app/wallet'
+import { Route as AppSectionsRouteImport } from './routes/_app/sections'
+import { Route as AppOffersRouteImport } from './routes/_app/offers'
+import { Route as AppCartRouteImport } from './routes/_app/cart'
+import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppStoreSupermarketRouteImport } from './routes/_app/store.supermarket'
+import { Route as AppStoreSubscriptionRouteImport } from './routes/_app/store.subscription'
+import { Route as AppStoreRecipesRouteImport } from './routes/_app/store.recipes'
+import { Route as AppStoreProduceRouteImport } from './routes/_app/store.produce'
+import { Route as AppStoreKitchenRouteImport } from './routes/_app/store.kitchen'
+import { Route as AppStoreDairyRouteImport } from './routes/_app/store.dairy'
+import { Route as AppProductProductIdRouteImport } from './routes/_app/product.$productId'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -21,32 +39,183 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppWalletRoute = AppWalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSectionsRoute = AppSectionsRouteImport.update({
+  id: '/sections',
+  path: '/sections',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOffersRoute = AppOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCartRoute = AppCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountRoute = AppAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoreSupermarketRoute = AppStoreSupermarketRouteImport.update({
+  id: '/store/supermarket',
+  path: '/store/supermarket',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoreSubscriptionRoute = AppStoreSubscriptionRouteImport.update({
+  id: '/store/subscription',
+  path: '/store/subscription',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoreRecipesRoute = AppStoreRecipesRouteImport.update({
+  id: '/store/recipes',
+  path: '/store/recipes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoreProduceRoute = AppStoreProduceRouteImport.update({
+  id: '/store/produce',
+  path: '/store/produce',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoreKitchenRoute = AppStoreKitchenRouteImport.update({
+  id: '/store/kitchen',
+  path: '/store/kitchen',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppStoreDairyRoute = AppStoreDairyRouteImport.update({
+  id: '/store/dairy',
+  path: '/store/dairy',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProductProductIdRoute = AppProductProductIdRouteImport.update({
+  id: '/product/$productId',
+  path: '/product/$productId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/auth': typeof AuthRoute
+  '/account': typeof AppAccountRoute
+  '/cart': typeof AppCartRoute
+  '/offers': typeof AppOffersRoute
+  '/sections': typeof AppSectionsRoute
+  '/wallet': typeof AppWalletRoute
+  '/product/$productId': typeof AppProductProductIdRoute
+  '/store/dairy': typeof AppStoreDairyRoute
+  '/store/kitchen': typeof AppStoreKitchenRoute
+  '/store/produce': typeof AppStoreProduceRoute
+  '/store/recipes': typeof AppStoreRecipesRoute
+  '/store/subscription': typeof AppStoreSubscriptionRoute
+  '/store/supermarket': typeof AppStoreSupermarketRoute
 }
 export interface FileRoutesByTo {
+  '/auth': typeof AuthRoute
+  '/account': typeof AppAccountRoute
+  '/cart': typeof AppCartRoute
+  '/offers': typeof AppOffersRoute
+  '/sections': typeof AppSectionsRoute
+  '/wallet': typeof AppWalletRoute
   '/': typeof AppIndexRoute
+  '/product/$productId': typeof AppProductProductIdRoute
+  '/store/dairy': typeof AppStoreDairyRoute
+  '/store/kitchen': typeof AppStoreKitchenRoute
+  '/store/produce': typeof AppStoreProduceRoute
+  '/store/recipes': typeof AppStoreRecipesRoute
+  '/store/subscription': typeof AppStoreSubscriptionRoute
+  '/store/supermarket': typeof AppStoreSupermarketRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_app/account': typeof AppAccountRoute
+  '/_app/cart': typeof AppCartRoute
+  '/_app/offers': typeof AppOffersRoute
+  '/_app/sections': typeof AppSectionsRoute
+  '/_app/wallet': typeof AppWalletRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/product/$productId': typeof AppProductProductIdRoute
+  '/_app/store/dairy': typeof AppStoreDairyRoute
+  '/_app/store/kitchen': typeof AppStoreKitchenRoute
+  '/_app/store/produce': typeof AppStoreProduceRoute
+  '/_app/store/recipes': typeof AppStoreRecipesRoute
+  '/_app/store/subscription': typeof AppStoreSubscriptionRoute
+  '/_app/store/supermarket': typeof AppStoreSupermarketRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/account'
+    | '/cart'
+    | '/offers'
+    | '/sections'
+    | '/wallet'
+    | '/product/$productId'
+    | '/store/dairy'
+    | '/store/kitchen'
+    | '/store/produce'
+    | '/store/recipes'
+    | '/store/subscription'
+    | '/store/supermarket'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/_app' | '/_app/'
+  to:
+    | '/auth'
+    | '/account'
+    | '/cart'
+    | '/offers'
+    | '/sections'
+    | '/wallet'
+    | '/'
+    | '/product/$productId'
+    | '/store/dairy'
+    | '/store/kitchen'
+    | '/store/produce'
+    | '/store/recipes'
+    | '/store/subscription'
+    | '/store/supermarket'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/auth'
+    | '/_app/account'
+    | '/_app/cart'
+    | '/_app/offers'
+    | '/_app/sections'
+    | '/_app/wallet'
+    | '/_app/'
+    | '/_app/product/$productId'
+    | '/_app/store/dairy'
+    | '/_app/store/kitchen'
+    | '/_app/store/produce'
+    | '/_app/store/recipes'
+    | '/_app/store/subscription'
+    | '/_app/store/supermarket'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -61,22 +230,140 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/wallet': {
+      id: '/_app/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof AppWalletRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/sections': {
+      id: '/_app/sections'
+      path: '/sections'
+      fullPath: '/sections'
+      preLoaderRoute: typeof AppSectionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/offers': {
+      id: '/_app/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof AppOffersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/cart': {
+      id: '/_app/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof AppCartRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/account': {
+      id: '/_app/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AppAccountRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/store/supermarket': {
+      id: '/_app/store/supermarket'
+      path: '/store/supermarket'
+      fullPath: '/store/supermarket'
+      preLoaderRoute: typeof AppStoreSupermarketRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/store/subscription': {
+      id: '/_app/store/subscription'
+      path: '/store/subscription'
+      fullPath: '/store/subscription'
+      preLoaderRoute: typeof AppStoreSubscriptionRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/store/recipes': {
+      id: '/_app/store/recipes'
+      path: '/store/recipes'
+      fullPath: '/store/recipes'
+      preLoaderRoute: typeof AppStoreRecipesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/store/produce': {
+      id: '/_app/store/produce'
+      path: '/store/produce'
+      fullPath: '/store/produce'
+      preLoaderRoute: typeof AppStoreProduceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/store/kitchen': {
+      id: '/_app/store/kitchen'
+      path: '/store/kitchen'
+      fullPath: '/store/kitchen'
+      preLoaderRoute: typeof AppStoreKitchenRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/store/dairy': {
+      id: '/_app/store/dairy'
+      path: '/store/dairy'
+      fullPath: '/store/dairy'
+      preLoaderRoute: typeof AppStoreDairyRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/product/$productId': {
+      id: '/_app/product/$productId'
+      path: '/product/$productId'
+      fullPath: '/product/$productId'
+      preLoaderRoute: typeof AppProductProductIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAccountRoute: typeof AppAccountRoute
+  AppCartRoute: typeof AppCartRoute
+  AppOffersRoute: typeof AppOffersRoute
+  AppSectionsRoute: typeof AppSectionsRoute
+  AppWalletRoute: typeof AppWalletRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppProductProductIdRoute: typeof AppProductProductIdRoute
+  AppStoreDairyRoute: typeof AppStoreDairyRoute
+  AppStoreKitchenRoute: typeof AppStoreKitchenRoute
+  AppStoreProduceRoute: typeof AppStoreProduceRoute
+  AppStoreRecipesRoute: typeof AppStoreRecipesRoute
+  AppStoreSubscriptionRoute: typeof AppStoreSubscriptionRoute
+  AppStoreSupermarketRoute: typeof AppStoreSupermarketRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAccountRoute: AppAccountRoute,
+  AppCartRoute: AppCartRoute,
+  AppOffersRoute: AppOffersRoute,
+  AppSectionsRoute: AppSectionsRoute,
+  AppWalletRoute: AppWalletRoute,
   AppIndexRoute: AppIndexRoute,
+  AppProductProductIdRoute: AppProductProductIdRoute,
+  AppStoreDairyRoute: AppStoreDairyRoute,
+  AppStoreKitchenRoute: AppStoreKitchenRoute,
+  AppStoreProduceRoute: AppStoreProduceRoute,
+  AppStoreRecipesRoute: AppStoreRecipesRoute,
+  AppStoreSubscriptionRoute: AppStoreSubscriptionRoute,
+  AppStoreSupermarketRoute: AppStoreSupermarketRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
