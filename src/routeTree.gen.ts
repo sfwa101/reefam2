@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -45,14 +48,29 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
@@ -192,6 +210,7 @@ const AppAccountAddressesRoute = AppAccountAddressesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRouteWithChildren
   '/cart': typeof AppCartRoute
@@ -200,6 +219,8 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
   '/account/help': typeof AppAccountHelpRoute
@@ -229,7 +250,9 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/': typeof AppIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
   '/account/help': typeof AppAccountHelpRoute
@@ -254,6 +277,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/cart': typeof AppCartRoute
@@ -262,7 +286,9 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/admin/orders': typeof AdminOrdersRoute
   '/_app/': typeof AppIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/_app/account/addresses': typeof AppAccountAddressesRoute
   '/_app/account/favorites': typeof AppAccountFavoritesRoute
   '/_app/account/help': typeof AppAccountHelpRoute
@@ -288,6 +314,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/account'
     | '/cart'
@@ -296,6 +323,8 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/orders'
+    | '/admin/'
     | '/account/addresses'
     | '/account/favorites'
     | '/account/help'
@@ -325,7 +354,9 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/orders'
     | '/'
+    | '/admin'
     | '/account/addresses'
     | '/account/favorites'
     | '/account/help'
@@ -349,6 +380,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/admin'
     | '/auth'
     | '/_app/account'
     | '/_app/cart'
@@ -357,7 +389,9 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/admin/orders'
     | '/_app/'
+    | '/admin/'
     | '/_app/account/addresses'
     | '/_app/account/favorites'
     | '/_app/account/help'
@@ -382,6 +416,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
 }
 
@@ -394,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -401,12 +443,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_app/': {
       id: '/_app/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_app/wallet': {
       id: '/_app/wallet'
@@ -674,8 +730,21 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AdminRouteChildren {
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
