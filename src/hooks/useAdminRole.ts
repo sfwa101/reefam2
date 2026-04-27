@@ -9,18 +9,22 @@ export function useAdminRole() {
   const { user, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
       setRoles([]);
+      setError(false);
       setLoading(false);
       return;
     }
     let cancelled = false;
     (async () => {
-      const { data, error } = await retryBackendCall(
-        () => supabase
+      setLoading(true);
+      setError(false);
+      const { data, error } = await retryBackendCall<any>(
+        async () => await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id),
@@ -29,6 +33,7 @@ export function useAdminRole() {
       );
       if (cancelled) return;
       if (error) {
+        setError(true);
         setLoading(false);
         return;
       }
@@ -42,5 +47,5 @@ export function useAdminRole() {
 
   const isStaff = roles.length > 0;
   const isAdmin = roles.includes("admin");
-  return { roles, isStaff, isAdmin, loading: loading || authLoading };
+  return { roles, isStaff, isAdmin, loading: loading || authLoading, error };
 }
