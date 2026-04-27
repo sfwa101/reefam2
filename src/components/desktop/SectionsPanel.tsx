@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 
-const stores = [
+const stores: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/", label: "الرئيسية", icon: Home, exact: true },
   { to: "/sections", label: "كل الأقسام", icon: LayoutGrid },
   { to: "/store/supermarket", label: "السوبرماركت", icon: ShoppingBasket },
@@ -28,13 +28,13 @@ const stores = [
   { to: "/store/pharmacy", label: "الصيدلية", icon: Pill },
   { to: "/store/wholesale", label: "ريف الجملة", icon: Package },
   { to: "/store/home", label: "الأدوات المنزلية", icon: Wrench },
-] as const;
+];
 
-const utility = [
+const utility: { to: string; label: string; icon: any }[] = [
   { to: "/offers", label: "العروض", icon: Tag },
   { to: "/wallet", label: "المحفظة", icon: WalletIcon },
   { to: "/account", label: "حسابي", icon: User },
-] as const;
+];
 
 const SectionsPanel = () => {
   const { pathname } = useLocation();
@@ -51,7 +51,7 @@ const SectionsPanel = () => {
         return (
           <Link
             key={to}
-            to={to}
+            to={to as any}
             className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition ${
               active
                 ? "bg-primary text-primary-foreground shadow-pill"
@@ -71,7 +71,7 @@ const SectionsPanel = () => {
         return (
           <Link
             key={to}
-            to={to}
+            to={to as any}
             className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition ${
               active
                 ? "bg-primary text-primary-foreground shadow-pill"
