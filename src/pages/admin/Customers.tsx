@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, User, Phone, ShoppingBag, Wallet as WalletIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { retryBackendCall } from "@/lib/backendRetry";
 
 type Profile = {
   id: string;
@@ -27,36 +28,38 @@ export default function AdminCustomers() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const { data: profs } = await supabase
-        .from("profiles").select("*")
-        .order("created_at", { ascending: false }).limit(500);
+      const { data: profs } = await retryBackendCall<any>(
+        async () => await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(500),
+        6,
+        500,
+      );
       const list = (profs ?? []) as Profile[];
       setProfiles(list);
+      setLoading(false);
 
-      // fetch orders + wallets in bulk
+      // fetch orders + wallets in bulk (best-effort, do not block list)
       const ids = list.map((p) => p.id);
       if (ids.length > 0) {
-        const [{ data: orders }, { data: wallets }] = await Promise.all([
-          supabase.from("orders").select("user_id,total").in("user_id", ids),
-          supabase.from("wallet_balances").select("user_id,balance,points").in("user_id", ids),
-        ]);
         const map: Record<string, CustomerStats> = {};
         ids.forEach((id) => {
           map[id] = { ordersCount: 0, totalSpent: 0, walletBalance: 0, walletPoints: 0 };
         });
-        (orders ?? []).forEach((o: any) => {
+        const [ordersRes, walletsRes] = await Promise.all([
+          retryBackendCall<any>(async () => await supabase.from("orders").select("user_id,total").in("user_id", ids), 4, 500).catch(() => ({ data: [] })),
+          retryBackendCall<any>(async () => await supabase.from("wallet_balances").select("user_id,balance,points").in("user_id", ids), 4, 500).catch(() => ({ data: [] })),
+        ]);
+        ((ordersRes?.data ?? []) as any[]).forEach((o) => {
           if (!map[o.user_id]) return;
           map[o.user_id].ordersCount += 1;
           map[o.user_id].totalSpent += Number(o.total ?? 0);
         });
-        (wallets ?? []).forEach((w: any) => {
+        ((walletsRes?.data ?? []) as any[]).forEach((w) => {
           if (!map[w.user_id]) return;
           map[w.user_id].walletBalance = Number(w.balance ?? 0);
           map[w.user_id].walletPoints = Number(w.points ?? 0);
         });
         setStats(map);
       }
-      setLoading(false);
     })();
   }, []);
 
