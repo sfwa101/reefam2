@@ -129,7 +129,7 @@ const humanize = (msg: string): string => {
   if (m.includes("invalid login")) return "رقم الهاتف أو كلمة السر غير صحيحة";
   if (m.includes("already registered") || m.includes("already in use") || m.includes("user already")) return "هذا الرقم مسجّل بالفعل، سجّل الدخول";
   if (m.includes("password")) return "كلمة السر يجب ألا تقل عن 6 أحرف";
-  if (m.includes("database error querying schema") || m.includes("schema cache") || m.includes("unexpected eof")) {
+  if (m.includes("database error querying schema") || m.includes("schema cache") || m.includes("unexpected eof") || m.includes("no connection to the server") || m.includes("database client error")) {
     return "الخدمة كانت مشغولة للحظات، حاولنا تلقائياً ويمكنك المتابعة الآن";
   }
   return msg;
