@@ -19,8 +19,6 @@ import { Route as AppOrderSuccessRouteImport } from './routes/_app/order-success
 import { Route as AppOffersRouteImport } from './routes/_app/offers'
 import { Route as AppCartRouteImport } from './routes/_app/cart'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
-import { Route as AppSearchRouteImport } from './routes/_app/search'
-import { Route as AppOrderSuccessRouteImport } from './routes/_app/order-success'
 import { Route as AppAccountIndexRouteImport } from './routes/_app/account.index'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
 import { Route as AppStoreSupermarketRouteImport } from './routes/_app/store.supermarket'
@@ -50,16 +48,6 @@ const AuthRoute = AuthRouteImport.update({
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppSearchRoute = AppSearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppOrderSuccessRoute = AppOrderSuccessRouteImport.update({
-  id: '/order-success',
-  path: '/order-success',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
