@@ -111,32 +111,32 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          image: string | null
-          name: string
           order_id: string
           price: number
           product_id: string
-          qty: number
+          product_image: string | null
+          product_name: string
+          quantity: number
         }
         Insert: {
           created_at?: string
           id?: string
-          image?: string | null
-          name: string
           order_id: string
           price?: number
           product_id: string
-          qty?: number
+          product_image?: string | null
+          product_name: string
+          quantity?: number
         }
         Update: {
           created_at?: string
           id?: string
-          image?: string | null
-          name?: string
           order_id?: string
           price?: number
           product_id?: string
-          qty?: number
+          product_image?: string | null
+          product_name?: string
+          quantity?: number
         }
         Relationships: [
           {
@@ -159,6 +159,7 @@ export type Database = {
           total: number
           updated_at: string
           user_id: string
+          whatsapp_sent: boolean
         }
         Insert: {
           address_id?: string | null
@@ -170,6 +171,7 @@ export type Database = {
           total?: number
           updated_at?: string
           user_id: string
+          whatsapp_sent?: boolean
         }
         Update: {
           address_id?: string | null
@@ -181,6 +183,7 @@ export type Database = {
           total?: number
           updated_at?: string
           user_id?: string
+          whatsapp_sent?: boolean
         }
         Relationships: [
           {
