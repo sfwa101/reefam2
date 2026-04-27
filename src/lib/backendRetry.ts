@@ -7,6 +7,21 @@ type BackendErrorLike = {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const RETRYABLE_STATUS_CODES = new Set([500, 502, 503, 504]);
+const RETRYABLE_MESSAGE_FRAGMENTS = [
+  "no connection to the server",
+  "database client error",
+  "schema cache",
+  "database error querying schema",
+  "unexpected eof",
+  "failed to fetch",
+  "network request failed",
+  "fetch failed",
+  "recovery mode",
+  "eof detected",
+  "terminating connection",
+];
+
 export const isRetryableBackendError = (error: BackendErrorLike | null | undefined) => {
   if (!error) return false;
 
@@ -14,15 +29,8 @@ export const isRetryableBackendError = (error: BackendErrorLike | null | undefin
   return (
     error.code === "PGRST001" ||
     error.code === "PGRST002" ||
-    error.status === 503 ||
-    message.includes("no connection to the server") ||
-    message.includes("database client error") ||
-    message.includes("schema cache") ||
-    message.includes("database error querying schema") ||
-    message.includes("unexpected eof") ||
-    message.includes("failed to fetch") ||
-    message.includes("network request failed") ||
-    message.includes("fetch failed")
+    (typeof error.status === "number" && RETRYABLE_STATUS_CODES.has(error.status)) ||
+    RETRYABLE_MESSAGE_FRAGMENTS.some((fragment) => message.includes(fragment))
   );
 };
 
@@ -48,7 +56,8 @@ export async function retryBackendCall<T extends { error?: BackendErrorLike | nu
       }
     }
 
-    await sleep(baseDelayMs * (attempt + 1));
+    const delay = Math.min(baseDelayMs * 2 ** attempt, 4000);
+    await sleep(delay);
   }
 
   return lastResult as T;
