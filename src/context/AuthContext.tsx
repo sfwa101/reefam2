@@ -42,10 +42,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = async (uid: string) => {
     // profiles table not yet created; gracefully no-op until DB schema is added
     try {
-      const { data } = await (supabase.from("profiles" as never) as never)
-        .select("*")
-        .eq("id", uid)
-        .maybeSingle();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const client = supabase as any;
+      const { data } = await client.from("profiles").select("*").eq("id", uid).maybeSingle();
       setProfile((data as Profile) ?? null);
     } catch {
       setProfile(null);
