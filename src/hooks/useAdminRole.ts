@@ -5,8 +5,13 @@ import { retryBackendCall } from "@/lib/backendRetry";
 
 export type AppRole = "admin" | "staff" | "cashier";
 
+const normalizeSessionRoles = (sessionRoles: unknown): AppRole[] => {
+  if (!Array.isArray(sessionRoles)) return [];
+  return sessionRoles.filter((role): role is AppRole => role === "admin" || role === "staff" || role === "cashier");
+};
+
 export function useAdminRole() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -21,6 +26,18 @@ export function useAdminRole() {
     }
     let cancelled = false;
     (async () => {
+      const appMeta = user.app_metadata as { role?: unknown; roles?: unknown } | undefined;
+      const claimRoles = normalizeSessionRoles(appMeta?.roles);
+      if (appMeta?.role === "admin" && !claimRoles.includes("admin")) {
+        claimRoles.unshift("admin");
+      }
+      if (claimRoles.length > 0) {
+        setRoles(claimRoles);
+        setError(false);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError(false);
       const { data, error } = await retryBackendCall<any>(
@@ -43,7 +60,7 @@ export function useAdminRole() {
     return () => {
       cancelled = true;
     };
-  }, [user, authLoading]);
+  }, [user, session, authLoading]);
 
   const isStaff = roles.length > 0;
   const isAdmin = roles.includes("admin");
