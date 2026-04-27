@@ -19,6 +19,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+import { retryBackendCall } from "@/lib/backendRetry";
 
 type Stats = {
   todayRevenue: number;
@@ -72,17 +73,25 @@ export default function AdminDashboard() {
       sevenDaysAgo.setHours(0, 0, 0, 0);
 
       const [ordersRes, productsRes, customersRes, recentRes] = await Promise.all([
-        supabase
-          .from("orders")
-          .select("id, total, status, created_at")
-          .gte("created_at", sevenDaysAgo.toISOString()),
-        supabase.from("products").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase
-          .from("orders")
-          .select("id, total, status, created_at")
-          .order("created_at", { ascending: false })
-          .limit(8),
+        retryBackendCall(
+          async () => await supabase
+            .from("orders")
+            .select("id, total, status, created_at")
+            .gte("created_at", sevenDaysAgo.toISOString()),
+          8,
+          700,
+        ).catch(() => ({ data: [] })),
+        retryBackendCall(async () => await supabase.from("products").select("id", { count: "exact", head: true }), 8, 700).catch(() => ({ count: 0 })),
+        retryBackendCall(async () => await supabase.from("profiles").select("id", { count: "exact", head: true }), 8, 700).catch(() => ({ count: 0 })),
+        retryBackendCall(
+          async () => await supabase
+            .from("orders")
+            .select("id, total, status, created_at")
+            .order("created_at", { ascending: false })
+            .limit(8),
+          8,
+          700,
+        ).catch(() => ({ data: [] })),
       ]);
 
       if (cancelled) return;

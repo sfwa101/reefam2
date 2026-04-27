@@ -44,8 +44,8 @@ const Profile = () => {
       async () => await supabase
         .from("profiles")
         .upsert(payload, { onConflict: "id" }),
-      5,
-      500,
+      8,
+      700,
     );
     setBusy(false);
     if (error) {

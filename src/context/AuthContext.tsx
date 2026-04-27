@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { retryBackendCall } from "@/lib/backendRetry";
+import { isRetryableBackendError, retryBackendCall } from "@/lib/backendRetry";
 
 export type Profile = {
   id: string;
@@ -34,6 +34,31 @@ const normalizePhone = (raw: string): string => {
 };
 const phoneToEmail = (phone: string) => `${normalizePhone(phone)}@reef.local`;
 
+const ensureUserRecords = async (authUser: User) => {
+  const fullName = typeof authUser.user_metadata?.full_name === "string" ? authUser.user_metadata.full_name : null;
+  const phone = typeof authUser.user_metadata?.phone === "string" ? authUser.user_metadata.phone : authUser.phone ?? null;
+
+  await retryBackendCall(
+    async () => await supabase
+      .from("profiles")
+      .upsert({
+        id: authUser.id,
+        full_name: fullName,
+        phone,
+      }, { onConflict: "id" }),
+    6,
+    700,
+  );
+
+  await retryBackendCall(
+    async () => await supabase
+      .from("wallet_balances")
+      .upsert({ user_id: authUser.id }, { onConflict: "user_id" }),
+    6,
+    700,
+  ).catch(() => undefined);
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -63,7 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => fetchProfile(s.user.id), 0);
+        setTimeout(() => {
+          void ensureUserRecords(s.user);
+          void fetchProfile(s.user.id);
+        }, 0);
       } else {
         setProfile(null);
       }
@@ -72,7 +100,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) fetchProfile(s.user.id);
+      if (s?.user) {
+        void ensureUserRecords(s.user);
+        void fetchProfile(s.user.id);
+      }
       setLoading(false);
     });
 
@@ -82,10 +113,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUpWithPhone: AuthCtx["signUpWithPhone"] = async (phone, password, fullName) => {
     const email = phoneToEmail(phone);
     const normalized = normalizePhone(phone);
+    const normalizedPassword = password.trim();
     const { error } = await retryBackendCall(
       () => supabase.auth.signUp({
         email,
-        password,
+        password: normalizedPassword,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
           data: { phone: normalized, full_name: fullName },
@@ -95,15 +127,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       500,
     );
     if (error) return { error: humanize(error.message) };
+
+    const signInResult = await retryBackendCall(
+      () => supabase.auth.signInWithPassword({ email, password: normalizedPassword }),
+      6,
+      700,
+    );
+
+    if (signInResult.error && !isRetryableBackendError(signInResult.error)) {
+      return { error: humanize(signInResult.error.message ?? "تعذّر تسجيل الدخول بعد إنشاء الحساب") };
+    }
+
+    const { data: currentUser } = await supabase.auth.getUser();
+    if (currentUser.user) {
+      await ensureUserRecords(currentUser.user);
+    }
+
     return {};
   };
 
   const signInWithPhone: AuthCtx["signInWithPhone"] = async (phone, password) => {
     const email = phoneToEmail(phone);
+    const normalizedPassword = password.trim();
     const { error } = await retryBackendCall(
-      () => supabase.auth.signInWithPassword({ email, password }),
-      4,
-      500,
+      () => supabase.auth.signInWithPassword({ email, password: normalizedPassword }),
+      6,
+      700,
     );
     if (error) return { error: humanize(error.message) };
     return {};
@@ -128,7 +177,7 @@ const humanize = (msg: string): string => {
   const m = msg.toLowerCase();
   if (m.includes("invalid login")) return "رقم الهاتف أو كلمة السر غير صحيحة";
   if (m.includes("already registered") || m.includes("already in use") || m.includes("user already")) return "هذا الرقم مسجّل بالفعل، سجّل الدخول";
-  if (m.includes("password")) return "كلمة السر يجب ألا تقل عن 6 أحرف";
+  if (m.includes("password") || m.includes("weak_password")) return "كلمة السر يجب ألا تقل عن 6 خانات ويمكن أن تكون أرقامًا فقط";
   if (m.includes("database error querying schema") || m.includes("schema cache") || m.includes("unexpected eof") || m.includes("no connection to the server") || m.includes("database client error")) {
     return "الخدمة كانت مشغولة للحظات، حاولنا تلقائياً ويمكنك المتابعة الآن";
   }
