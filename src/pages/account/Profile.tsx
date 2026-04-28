@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { User, Phone, Calendar, UserCircle2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { isRetryableBackendError, retryBackendCall } from "@/lib/backendRetry";
 
 const Profile = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -32,22 +33,23 @@ const Profile = () => {
   const save = async () => {
     if (!user) return;
     setBusy(true);
-    const { error } = await supabase
-      .from("profiles")
-      .upsert(
-        {
-          id: user.id,
-          full_name: name.trim() || null,
-          phone: phone || user.phone || null,
-          birth_date: birth || null,
-          gender,
-        },
-        { onConflict: "id" }
-      );
+    const payload = {
+      id: user.id,
+      full_name: name.trim() || null,
+      phone: profile?.phone ?? user.user_metadata?.phone ?? null,
+      birth_date: birth || null,
+      gender,
+    };
+    const { error } = await retryBackendCall(
+      async () => await supabase
+        .from("profiles")
+        .upsert(payload, { onConflict: "id" }),
+      8,
+      700,
+    );
     setBusy(false);
     if (error) {
-      console.error("profile save error", error);
-      toast.error(`تعذّر الحفظ — ${error.message}`);
+      toast.error(isRetryableBackendError(error) ? "الخدمة تأخرت للحظات، أعد المحاولة الآن" : "تعذّر الحفظ — حاول لاحقاً");
       return;
     }
     await refreshProfile();

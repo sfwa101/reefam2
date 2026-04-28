@@ -56,59 +56,6 @@ export type Database = {
         }
         Relationships: []
       }
-      delivery_tasks: {
-        Row: {
-          created_at: string
-          delivered_at: string | null
-          delivery_photo_url: string | null
-          driver_id: string | null
-          driver_lat: number | null
-          driver_lng: number | null
-          estimated_minutes: number | null
-          id: string
-          order_id: string
-          started_at: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          delivered_at?: string | null
-          delivery_photo_url?: string | null
-          driver_id?: string | null
-          driver_lat?: number | null
-          driver_lng?: number | null
-          estimated_minutes?: number | null
-          id?: string
-          order_id: string
-          started_at?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          delivered_at?: string | null
-          delivery_photo_url?: string | null
-          driver_id?: string | null
-          driver_lat?: number | null
-          driver_lng?: number | null
-          estimated_minutes?: number | null
-          id?: string
-          order_id?: string
-          started_at?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_tasks_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       favorites: {
         Row: {
           created_at: string
@@ -170,8 +117,6 @@ export type Database = {
           product_image: string | null
           product_name: string
           quantity: number
-          store_id: string | null
-          sub_order_id: string | null
         }
         Insert: {
           created_at?: string
@@ -182,8 +127,6 @@ export type Database = {
           product_image?: string | null
           product_name: string
           quantity?: number
-          store_id?: string | null
-          sub_order_id?: string | null
         }
         Update: {
           created_at?: string
@@ -194,8 +137,6 @@ export type Database = {
           product_image?: string | null
           product_name?: string
           quantity?: number
-          store_id?: string | null
-          sub_order_id?: string | null
         }
         Relationships: [
           {
@@ -203,20 +144,6 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_sub_order_id_fkey"
-            columns: ["sub_order_id"]
-            isOneToOne: false
-            referencedRelation: "sub_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -285,7 +212,6 @@ export type Database = {
           sort_order: number
           source: string
           stock: number
-          store_id: string | null
           sub_category: string | null
           unit: string
           updated_at: string
@@ -307,7 +233,6 @@ export type Database = {
           sort_order?: number
           source?: string
           stock?: number
-          store_id?: string | null
           sub_category?: string | null
           unit?: string
           updated_at?: string
@@ -329,21 +254,12 @@ export type Database = {
           sort_order?: number
           source?: string
           stock?: number
-          store_id?: string | null
           sub_category?: string | null
           unit?: string
           updated_at?: string
           variants?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -405,192 +321,26 @@ export type Database = {
         }
         Relationships: []
       }
-      store_settlements: {
-        Row: {
-          commission_amount: number
-          commission_pct: number
-          created_at: string
-          gross_sales: number
-          id: string
-          net_payout: number
-          paid_at: string | null
-          period_end: string
-          period_start: string
-          status: string
-          store_id: string
-        }
-        Insert: {
-          commission_amount?: number
-          commission_pct?: number
-          created_at?: string
-          gross_sales?: number
-          id?: string
-          net_payout?: number
-          paid_at?: string | null
-          period_end: string
-          period_start: string
-          status?: string
-          store_id: string
-        }
-        Update: {
-          commission_amount?: number
-          commission_pct?: number
-          created_at?: string
-          gross_sales?: number
-          id?: string
-          net_payout?: number
-          paid_at?: string | null
-          period_end?: string
-          period_start?: string
-          status?: string
-          store_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "store_settlements_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      stores: {
-        Row: {
-          address: string | null
-          commission_pct: number
-          created_at: string
-          id: string
-          is_active: boolean
-          logo_url: string | null
-          name: string
-          owner_user_id: string | null
-          phone: string | null
-          slug: string
-          type: string
-          updated_at: string
-        }
-        Insert: {
-          address?: string | null
-          commission_pct?: number
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          logo_url?: string | null
-          name: string
-          owner_user_id?: string | null
-          phone?: string | null
-          slug: string
-          type?: string
-          updated_at?: string
-        }
-        Update: {
-          address?: string | null
-          commission_pct?: number
-          created_at?: string
-          id?: string
-          is_active?: boolean
-          logo_url?: string | null
-          name?: string
-          owner_user_id?: string | null
-          phone?: string | null
-          slug?: string
-          type?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      sub_orders: {
-        Row: {
-          assigned_collector_id: string | null
-          confirmed_at: string | null
-          created_at: string
-          id: string
-          notes: string | null
-          order_id: string
-          ready_at: string | null
-          status: string
-          store_id: string
-          total: number
-          updated_at: string
-        }
-        Insert: {
-          assigned_collector_id?: string | null
-          confirmed_at?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          order_id: string
-          ready_at?: string | null
-          status?: string
-          store_id: string
-          total?: number
-          updated_at?: string
-        }
-        Update: {
-          assigned_collector_id?: string | null
-          confirmed_at?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          order_id?: string
-          ready_at?: string | null
-          status?: string
-          store_id?: string
-          total?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sub_orders_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sub_orders_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           created_at: string
           id: string
-          is_active: boolean
           role: Database["public"]["Enums"]["app_role"]
-          store_id: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          is_active?: boolean
           role: Database["public"]["Enums"]["app_role"]
-          store_id?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          is_active?: boolean
           role?: Database["public"]["Enums"]["app_role"]
-          store_id?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       wallet_balances: {
         Row: {
@@ -662,17 +412,9 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
-      user_store_ids: { Args: { _user_id: string }; Returns: string[] }
     }
     Enums: {
-      app_role:
-        | "admin"
-        | "staff"
-        | "cashier"
-        | "store_manager"
-        | "collector"
-        | "delivery"
-        | "finance"
+      app_role: "admin" | "staff" | "cashier"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -800,15 +542,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: [
-        "admin",
-        "staff",
-        "cashier",
-        "store_manager",
-        "collector",
-        "delivery",
-        "finance",
-      ],
+      app_role: ["admin", "staff", "cashier"],
     },
   },
 } as const

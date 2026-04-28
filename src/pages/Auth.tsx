@@ -18,7 +18,7 @@ const Auth = () => {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (phone.replace(/\D/g, "").length < 10) { toast.error("أدخل رقم هاتف صحيح"); return; }
-    if (password.length < 6) { toast.error("كلمة السر يجب أن تكون 6 أحرف على الأقل"); return; }
+    if (password.trim().length < 6) { toast.error("كلمة السر يجب أن تكون 6 خانات على الأقل ويمكن أن تكون أرقامًا فقط"); return; }
     if (mode === "signup" && fullName.trim().length < 2) { toast.error("أدخل اسمك الكامل"); return; }
     setBusy(true);
     try {
