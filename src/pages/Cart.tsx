@@ -667,7 +667,21 @@ const Cart = () => {
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-bold tabular-nums">{fmtMoney(subtotal)}</span></div>
         {discount > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">خصم ({appliedPromo?.code})</span><span className="font-bold tabular-nums text-primary">-{fmtMoney(discount)}</span></div>}
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">التوصيل</span><span className="font-bold tabular-nums">{delivery === 0 ? <span className="text-primary">مجاني 🚚</span> : fmtMoney(delivery)}</span></div>
+        {billSavings > 0 && (
+          <div className="flex items-center justify-between rounded-[10px] bg-primary/8 px-2 py-1.5 text-[12px]">
+            <span className="flex items-center gap-1 font-extrabold text-primary">
+              <Sparkles className="h-3 w-3" /> وفّرت في هذه الفاتورة
+            </span>
+            <span className="font-display font-extrabold tabular-nums text-primary">{fmtMoney(billSavings)}</span>
+          </div>
+        )}
         {tip > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">إكرامية</span><span className="font-bold tabular-nums">{fmtMoney(tip)}</span></div>}
+        {isSplit && (
+          <div className="rounded-[10px] bg-accent/10 p-2 text-[11px]">
+            <div className="flex justify-between"><span className="text-muted-foreground">من المحفظة</span><span className="font-extrabold text-primary tabular-nums">{fmtMoney(walletApplied)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{secondaryLabel}</span><span className="font-extrabold tabular-nums">{fmtMoney(walletShortfall)}</span></div>
+          </div>
+        )}
         <div className="my-2 h-px bg-border" />
         <div className="flex items-baseline justify-between">
           <span className="font-display text-base font-bold">الإجمالي</span>
