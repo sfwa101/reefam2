@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
+import { useCompare, type CompareItem } from "@/context/CompareContext";
 import type { Product } from "@/lib/products";
 import BackHeader from "@/components/BackHeader";
 import { storeThemes } from "@/lib/storeThemes";
@@ -27,6 +29,9 @@ import {
   Crown,
   CheckCircle2,
   ChevronLeft,
+  Scale,
+  SlidersHorizontal,
+  ArrowUpDown,
   type LucideIcon,
 } from "lucide-react";
 
