@@ -103,8 +103,28 @@ const ProductDetail = () => {
     add({ ...product, id: customId, name: `${product.name}${suffix}`, price: unitPrice }, qty);
   };
 
-  const goPrev = () => setGalleryIndex((i) => (i - 1 + gallery.length) % gallery.length);
-  const goNext = () => setGalleryIndex((i) => (i + 1) % gallery.length);
+  const goPrev = () => {
+    const next = (galleryIndex - 1 + gallery.length) % gallery.length;
+    setGalleryIndex(next);
+    galleryRef.current?.scrollTo({ left: next * (galleryRef.current.clientWidth || 0), behavior: "smooth" });
+  };
+  const goNext = () => {
+    const next = (galleryIndex + 1) % gallery.length;
+    setGalleryIndex(next);
+    galleryRef.current?.scrollTo({ left: next * (galleryRef.current.clientWidth || 0), behavior: "smooth" });
+  };
+
+  // Track scroll to keep dots in sync when user swipes
+  useEffect(() => {
+    const el = galleryRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const idx = Math.round(el.scrollLeft / (el.clientWidth || 1));
+      setGalleryIndex((prev) => (prev === idx ? prev : idx));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
