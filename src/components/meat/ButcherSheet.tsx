@@ -254,11 +254,11 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
               </motion.div>
 
               {/* Weight */}
-              <section>
-                <div className="mb-2 flex items-center gap-2">
-                  <Scale className="h-4 w-4 text-rose-600" />
-                  <h3 className="text-sm font-extrabold">اختر الوزن</h3>
-                </div>
+              <Panel
+                icon={<Scale className="h-4 w-4 text-rose-600" />}
+                title="اختر الوزن"
+                defaultOpen
+              >
                 <div className="grid grid-cols-2 gap-2">
                   {rules.weights.map((w) => {
                     const active = w.id === weightId;
@@ -285,14 +285,14 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                   <Info className="mt-0.5 h-3 w-3 shrink-0" />
                   الوزن المذكور هو الوزن التقريبي قبل التنظيف والتحضير.
                 </p>
-              </section>
+              </Panel>
 
               {/* Prep */}
-              <section>
-                <div className="mb-2 flex items-center gap-2">
-                  <ChefHat className="h-4 w-4 text-rose-600" />
-                  <h3 className="text-sm font-extrabold">طريقة التحضير</h3>
-                </div>
+              <Panel
+                icon={<ChefHat className="h-4 w-4 text-rose-600" />}
+                title="طريقة التحضير"
+                defaultOpen
+              >
                 <div className="grid grid-cols-1 gap-2">
                   {rules.preps.map((p) => {
                     const active = p.id === prepId;
@@ -330,18 +330,16 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                     );
                   })}
                 </div>
-              </section>
+              </Panel>
 
               {/* Conditional addons */}
               {visibleAddons.length > 0 && (
-                <section>
-                  <div className="mb-2 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-rose-600" />
-                    <h3 className="text-sm font-extrabold">
-                      إضافات{" "}
-                      <span className="text-[10px] font-bold text-muted-foreground">(حسب التحضير)</span>
-                    </h3>
-                  </div>
+                <Panel
+                  icon={<Sparkles className="h-4 w-4 text-rose-600" />}
+                  title="إضافات"
+                  hint="(حسب التحضير)"
+                  defaultOpen={false}
+                >
                   <div className="grid grid-cols-1 gap-2">
                     {visibleAddons.map((a) => {
                       const active = addonIds.includes(a.id);
@@ -370,15 +368,15 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                       );
                     })}
                   </div>
-                </section>
+                </Panel>
               )}
 
               {/* Packaging */}
-              <section>
-                <div className="mb-2 flex items-center gap-2">
-                  <Package className="h-4 w-4 text-rose-600" />
-                  <h3 className="text-sm font-extrabold">التغليف</h3>
-                </div>
+              <Panel
+                icon={<Package className="h-4 w-4 text-rose-600" />}
+                title="التغليف"
+                defaultOpen={false}
+              >
                 <div className="grid grid-cols-2 gap-2">
                   {rules.packaging.map((p) => {
                     const active = p.id === packagingId;
@@ -400,63 +398,83 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                     );
                   })}
                 </div>
-              </section>
+              </Panel>
 
               {/* Recipe Upsell */}
               {rules.recipe && (
-                <section className="overflow-hidden rounded-2xl bg-gradient-to-l from-amber-500/15 via-rose-500/10 to-orange-500/15 p-3 ring-1 ring-amber-500/30">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    navigate({
+                      to: "/store/recipes",
+                      search: { tag: product.name } as never,
+                    });
+                  }}
+                  className="group block w-full overflow-hidden rounded-2xl bg-gradient-to-l from-amber-500/20 via-rose-500/10 to-orange-500/20 p-3.5 text-right ring-1 ring-amber-500/40 transition active:scale-[0.99]"
+                >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500/25 text-2xl">
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/25 text-3xl shadow-soft">
                       {rules.recipe.emoji}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10.5px] font-extrabold text-amber-800 dark:text-amber-300">
-                        تبحث عن وجبة متكاملة؟
+                        ✨ بوابة وصفات الشيف
                       </p>
-                      <p className="truncate text-[12.5px] font-extrabold text-foreground">
-                        {rules.recipe.title}
+                      <p className="truncate text-[13px] font-extrabold text-foreground">
+                        اكتشف أشهى الوصفات لهذه القطعية!
                       </p>
                       <p className="truncate text-[10.5px] text-muted-foreground">
-                        {rules.recipe.subtitle}
+                        {rules.recipe.title}
                       </p>
                     </div>
-                    <button
-                      onClick={() => {
-                        toast.success(`تم فتح وصفة ${rules.recipe!.title}`);
-                      }}
-                      className="flex shrink-0 items-center gap-1 rounded-full bg-amber-600 px-3 py-1.5 text-[11px] font-extrabold text-white shadow-pill"
-                    >
-                      {toLatin(rules.recipe.price)} ج.م
-                      <ChevronLeft className="h-3.5 w-3.5" />
-                    </button>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-600 text-white shadow-pill transition group-hover:translate-x-[-2px]">
+                      <ChevronLeft className="h-4 w-4" />
+                    </span>
                   </div>
-                </section>
+                </button>
               )}
 
               {/* Cross-sell */}
               {rules.crossSell.length > 0 && (
                 <section>
-                  <h3 className="mb-2 text-sm font-extrabold">منتجات مكملة</h3>
-                  <div className="-mx-4 overflow-x-auto px-4">
-                    <div className="flex gap-2 pb-1">
+                  <div className="mb-2 flex items-center justify-between px-1">
+                    <h3 className="text-sm font-extrabold">منتجات مكملة</h3>
+                    <span className="text-[10px] font-bold text-muted-foreground">
+                      اسحب يميناً ←
+                    </span>
+                  </div>
+                  <div className="-mx-4 overflow-x-auto px-4 no-scrollbar">
+                    <div className="flex gap-2.5 pb-2">
                       {rules.crossSell.map((c) => {
                         const active = crossIds.includes(c.id);
                         return (
-                          <button
+                          <div
                             key={c.id}
-                            onClick={() => toggle(c.id, crossIds, setCrossIds)}
-                            className={`flex w-[110px] shrink-0 flex-col items-center gap-1 rounded-2xl border-2 p-2 transition ${
+                            className={`relative flex w-[120px] shrink-0 flex-col items-center gap-1 rounded-2xl border-2 p-2.5 transition ${
                               active
                                 ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10"
-                                : "border-border bg-background"
+                                : "border-border bg-card"
                             }`}
                           >
-                            <span className="text-2xl">{c.emoji}</span>
+                            <span className="text-3xl">{c.emoji}</span>
                             <span className="line-clamp-1 text-[11px] font-extrabold">{c.label}</span>
                             <span className="text-[10px] font-extrabold tabular-nums text-rose-700 dark:text-rose-300">
                               +{toLatin(c.price)} ج.م
                             </span>
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => toggle(c.id, crossIds, setCrossIds)}
+                              aria-label={active ? "إزالة" : "إضافة"}
+                              className={`mt-1 flex h-7 w-7 items-center justify-center rounded-full shadow-pill transition active:scale-90 ${
+                                active
+                                  ? "bg-emerald-500 text-white"
+                                  : "bg-rose-600 text-white"
+                              }`}
+                            >
+                              {active ? <Check className="h-3.5 w-3.5" strokeWidth={3.5} /> : <Plus className="h-3.5 w-3.5" strokeWidth={3.5} />}
+                            </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -465,20 +483,25 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
               )}
 
               {/* Note */}
-              <section>
-                <div className="mb-2 flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-rose-600" />
-                  <h3 className="text-sm font-extrabold">ملاحظات للجزار/الشيف</h3>
+              <Panel
+                icon={<MessageSquare className="h-4 w-4 text-rose-600" />}
+                title="ملاحظات للجزار/الشيف"
+                defaultOpen={false}
+              >
+                <div className="relative">
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="مثال: تقطيع الشاورما رفيع جداً، فصل الرأس عن السمك، تتبيل خفيف بدون شطة…"
+                    rows={3}
+                    maxLength={140}
+                    className="w-full resize-none rounded-xl border-2 border-border bg-background p-3 text-[12px] font-bold leading-relaxed outline-none ring-rose-500/40 placeholder:font-medium placeholder:text-muted-foreground/70 focus:border-rose-500 focus:ring-2"
+                  />
+                  <span className="pointer-events-none absolute bottom-2 left-3 text-[10px] font-bold tabular-nums text-muted-foreground">
+                    {toLatin(note.length)}/{toLatin(140)}
+                  </span>
                 </div>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="مثال: تقطيع الشاورما رفيع جداً، أو فصل الرأس عن السمك"
-                  rows={2}
-                  maxLength={140}
-                  className="w-full resize-none rounded-2xl border-2 border-border bg-background p-3 text-[12px] font-bold leading-relaxed outline-none ring-rose-500/40 placeholder:font-medium placeholder:text-muted-foreground focus:border-rose-500 focus:ring-2"
-                />
-              </section>
+              </Panel>
 
               {/* Qty + total */}
               <section className="flex items-center justify-between gap-3 rounded-2xl bg-foreground/5 p-3">
@@ -500,7 +523,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                 <div className="text-left">
                   <p className="text-[10px] font-bold text-muted-foreground">الإجمالي</p>
                   <p className="font-display text-lg font-extrabold tabular-nums text-foreground">
-                    {fmtMoney(grand)}
+                    <AnimatedNumber value={grand} /> ج.م
                   </p>
                 </div>
               </section>
@@ -513,7 +536,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-600 py-3 font-display text-sm font-extrabold text-white shadow-pill transition active:scale-[0.98]"
               >
                 <ShoppingBag className="h-4 w-4" />
-                أضف إلى السلة · {fmtMoney(grand)}
+                أضف إلى السلة · <AnimatedNumber value={grand} /> ج.م
               </button>
             </div>
           </motion.div>
