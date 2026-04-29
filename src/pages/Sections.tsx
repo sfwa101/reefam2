@@ -1,13 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Gift,
   Sprout,
   Wheat,
   Boxes,
   Cookie,
   Nut,
   CupSoda,
-  SprayCan,
   Baby,
   Sparkles,
   PartyPopper,
@@ -26,29 +24,33 @@ type LargeSection = {
 };
 
 // Bento grid (3 columns). Rows MUST sum to 3 to avoid gaps.
-// Palette: calm & refined — muted sage, warm taupe, dusty teal, soft clay.
+// Palette: vibrant yet refined — jewel tones with depth and life.
 const largeSections: LargeSection[] = [
   // Row 1 — full width hero
-  { id: "supermarket",   title: "السوبر ماركت",         subtitle: "كل مقاضي البيت في مكان واحد", to: "/store/supermarket",   emoji: "🏪", bg: "#4A6B52", span: "full" },
+  { id: "supermarket",   title: "السوبر ماركت",         subtitle: "كل مقاضي البيت في مكان واحد", to: "/store/supermarket",   emoji: "🏪", bg: "#1F7A4D", span: "full" },
   // Row 2 — 2/3 + 1/3
-  { id: "kitchen",       title: "مطبخ ريف المدينة",     subtitle: "مشويات وساندوتشات",          to: "/store/kitchen",       emoji: "🍱", bg: "#B07A5B", span: "two" },
-  { id: "subscriptions", title: "اشتراكات الريف",       subtitle: "وفّر شهرياً",                  to: "/store/subscription",  emoji: "🎟️", bg: "#EFE7DA", ink: "#3B2A1A", span: "one" },
+  { id: "kitchen",       title: "مطبخ ريف المدينة",     subtitle: "مشويات وساندوتشات",          to: "/store/kitchen",       emoji: "🍱", bg: "#D85A3C", span: "two" },
+  { id: "subscriptions", title: "اشتراكات الطعام",      subtitle: "وفّر شهرياً",                  to: "/store/subscription",  emoji: "🎟️", bg: "#6B4FB8", span: "one" },
   // Row 3 — 1/3 + 2/3
-  { id: "restaurants",   title: "مطاعم",                 subtitle: "مختارة",                     to: "/store/restaurants",   emoji: "🍽️", bg: "#3E5C66", span: "one" },
-  { id: "produce",       title: "الخضراوات والفواكه",  subtitle: "حصاد اليوم من المزرعة",       to: "/store/produce",       emoji: "🥗", bg: "#6B8E5A", span: "two" },
+  { id: "restaurants",   title: "مطاعم",                 subtitle: "مختارة",                     to: "/store/restaurants",   emoji: "🍽️", bg: "#0F4C5C", span: "one" },
+  { id: "produce",       title: "الخضراوات والفواكه",  subtitle: "حصاد اليوم من المزرعة",       to: "/store/produce",       emoji: "🥗", bg: "#4E9F3D", span: "two" },
   // Row 4 — 2/3 + 1/3
-  { id: "dairy",         title: "منتجات الألبان",       subtitle: "من المزرعة",                  to: "/store/dairy",         emoji: "🥛", bg: "#D9B679", span: "two" },
-  { id: "meat",          title: "اللحوم والمجمدات",    subtitle: "طازجة بأعلى جودة",           to: "/store/meat",          emoji: "🥩", bg: "#8C4A4A", span: "one" },
+  { id: "dairy",         title: "منتجات الألبان",       subtitle: "من المزرعة",                  to: "/store/dairy",         emoji: "🥛", bg: "#F2A93B", span: "two" },
+  { id: "meat",          title: "اللحوم والمجمدات",    subtitle: "طازجة بأعلى جودة",           to: "/store/meat",          emoji: "🥩", bg: "#A82A2A", span: "one" },
   // Row 5 — 1/3 + 2/3
-  { id: "wholesale",     title: "قسم الجملة",           subtitle: "وفّر بالكمية",                 to: "/store/wholesale",     emoji: "📦", bg: "#3D4F66", span: "one" },
-  { id: "baskets",       title: "سلال الريف",           subtitle: "وفّر أسبوعياً",                 to: "/store/baskets",       emoji: "🧺", bg: "#C9A36A", span: "two" },
+  { id: "wholesale",     title: "قسم الجملة",           subtitle: "وفّر بالكمية",                 to: "/store/wholesale",     emoji: "📦", bg: "#1E3A8A", span: "one" },
+  { id: "baskets",       title: "سلال الريف",           subtitle: "وفّر أسبوعياً",                 to: "/store/baskets",       emoji: "🧺", bg: "#C8862A", span: "two" },
   // Row 6 — 2/3 + 1/3
-  { id: "village",       title: "منتجات القرية",        subtitle: "خيرات الريف",                 to: "/store/village",       emoji: "🍯", bg: "#F4F1EA", ink: "#3B2A1A", span: "two" },
-  { id: "sweets",        title: "الحلويات والتورتة",   subtitle: "لمسة حلوة لكل مناسبة",         to: "/store/sweets",        emoji: "🎂", bg: "#B98897", span: "one" },
-  // Row 7 — three equal
-  { id: "pharmacy",      title: "الصيدلية",              subtitle: "صحتك أولاً",                   to: "/store/pharmacy",      emoji: "💊", bg: "#5C8A93", span: "one" },
-  { id: "personal",      title: "العناية الشخصية",      subtitle: "إطلالة وراحة",                 to: "/sub/personal",        emoji: "🧴", bg: "#A87C8E", span: "one" },
-  { id: "kitchenTools",  title: "أدوات المطبخ",         subtitle: "كل ما تحتاجه",                 to: "/sub/kitchen-tools",   emoji: "🍳", bg: "#7A8C8E", span: "one" },
+  { id: "village",       title: "منتجات القرية",        subtitle: "خيرات الريف",                 to: "/store/village",       emoji: "🍯", bg: "#8B6F3E", span: "two" },
+  { id: "sweets",        title: "الحلويات والتورتة",   subtitle: "لمسة حلوة لكل مناسبة",         to: "/store/sweets",        emoji: "🎂", bg: "#D14B7E", span: "one" },
+  // Row 7 — full width pharmacy bar
+  { id: "pharmacy",      title: "الصيدلية",              subtitle: "صحتك أولاً · توصيل سريع",      to: "/store/pharmacy",      emoji: "💊", bg: "#0E8A8C", span: "full" },
+  // Row 8 — three equal
+  { id: "personal",      title: "العناية الشخصية",      subtitle: "إطلالة وراحة",                 to: "/sub/personal",        emoji: "🧴", bg: "#9B3A6E", span: "one" },
+  { id: "kitchenTools",  title: "أدوات المطبخ",         subtitle: "كل ما تحتاجه",                 to: "/sub/kitchen-tools",   emoji: "🍳", bg: "#3D6B7A", span: "one" },
+  { id: "paper",         title: "ورقيات ومنظفات",       subtitle: "نظافة ولمعان",                 to: "/sub/paper",           emoji: "🧼", bg: "#2E7DAF", span: "one" },
+  // Row 9 — full width
+  { id: "gifts",         title: "الهدايا والتغليف",     subtitle: "لكل مناسبة هدية مميزة",        to: "/sub/gifts",           emoji: "🎁", bg: "#6E3FA3", span: "full" },
 ];
 
 type SmallSection = {
@@ -60,19 +62,17 @@ type SmallSection = {
   ink: string; // icon color
 };
 
-// Calm, harmonious soft tones — all low saturation, gentle on the eye.
+// Vibrant pastel tints with rich icon colors — lively and refined.
 const smallSections: SmallSection[] = [
-  { id: "village",      title: "منتجات القرية",            to: "/store/village",     icon: Sprout,      tint: "85 28% 90%",  ink: "95 30% 32%" },
-  { id: "rice",         title: "أرز وبقالة",                to: "/sub/rice",          icon: Wheat,       tint: "38 35% 90%",  ink: "32 35% 36%" },
-  { id: "canned",       title: "معلبات",                    to: "/sub/canned",        icon: Boxes,       tint: "200 25% 90%", ink: "205 30% 36%" },
-  { id: "bakery",       title: "مخبوزات",                   to: "/sub/bakery",        icon: Cookie,      tint: "28 38% 90%",  ink: "22 35% 38%" },
-  { id: "treats",       title: "مفرحات",                    to: "/sub/treats",        icon: PartyPopper, tint: "335 30% 92%", ink: "335 28% 44%" },
-  { id: "snacks",       title: "تسالي ومكسرات",            to: "/sub/snacks",        icon: Nut,         tint: "30 32% 90%",  ink: "28 32% 36%" },
-  { id: "drinks",       title: "مشروبات",                   to: "/sub/drinks",        icon: CupSoda,     tint: "190 28% 90%", ink: "195 30% 36%" },
-  { id: "paper",        title: "ورقيات ومنظفات",           to: "/sub/paper",         icon: SprayCan,    tint: "215 22% 91%", ink: "218 28% 38%" },
-  { id: "baby",         title: "العناية بالطفل",            to: "/sub/baby",          icon: Baby,        tint: "200 35% 91%", ink: "205 35% 40%" },
-  { id: "women",        title: "عالم المرأة والإكسسوارات", to: "/sub/women",         icon: Sparkles,    tint: "320 22% 92%", ink: "320 28% 44%" },
-  { id: "gifts",        title: "الهدايا والتغليف",          to: "/sub/gifts",         icon: Gift,        tint: "260 22% 92%", ink: "260 28% 44%" },
+  { id: "village", title: "منتجات القرية",            to: "/store/village", icon: Sprout,      tint: "95 55% 88%",  ink: "120 55% 28%" },
+  { id: "rice",    title: "أرز وبقالة",                to: "/sub/rice",      icon: Wheat,       tint: "38 80% 88%",  ink: "28 75% 38%" },
+  { id: "canned",  title: "معلبات",                    to: "/sub/canned",    icon: Boxes,       tint: "200 70% 88%", ink: "210 70% 38%" },
+  { id: "bakery",  title: "مخبوزات",                   to: "/sub/bakery",    icon: Cookie,      tint: "22 80% 88%",  ink: "18 75% 40%" },
+  { id: "treats",  title: "مفرحات",                    to: "/sub/treats",    icon: PartyPopper, tint: "340 80% 90%", ink: "335 70% 50%" },
+  { id: "snacks",  title: "تسالي ومكسرات",            to: "/sub/snacks",    icon: Nut,         tint: "32 75% 87%",  ink: "25 70% 38%" },
+  { id: "drinks",  title: "مشروبات",                   to: "/sub/drinks",    icon: CupSoda,     tint: "188 75% 88%", ink: "192 75% 36%" },
+  { id: "baby",    title: "العناية بالطفل",            to: "/sub/baby",      icon: Baby,        tint: "205 80% 90%", ink: "210 75% 44%" },
+  { id: "women",   title: "عالم المرأة والإكسسوارات", to: "/sub/women",     icon: Sparkles,    tint: "315 70% 90%", ink: "315 60% 48%" },
 ];
 
 const Sections = () => {
