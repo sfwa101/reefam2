@@ -1,8 +1,8 @@
 import BackHeader from "@/components/BackHeader";
 import { useCart } from "@/context/CartContext";
-import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check } from "lucide-react";
+import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check, PiggyBank } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -129,6 +129,8 @@ const Cart = () => {
   const [submitting, setSubmitting] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
+  const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
+  const [saveChange, setSaveChange] = useState<boolean>(true);
 
   useEffect(() => {
     if (!user) { setAddresses([]); setAddrId(""); setWalletBalance(0); return; }
@@ -149,6 +151,21 @@ const Cart = () => {
   const discount = appliedPromo ? Math.round(subtotal * appliedPromo.pct) : 0;
   const delivery = subtotal === 0 ? 0 : subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 25;
   const grand = Math.max(0, subtotal - discount + delivery + tip);
+
+  /* Savings on this bill: discount + (free delivery saved) */
+  const billSavings = discount + (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? 25 : 0);
+
+  /* Split payment: wallet pays partial, remainder in secondary method */
+  const isWalletPay = payment === "wallet";
+  const walletShortfall = isWalletPay ? Math.max(0, grand - walletBalance) : 0;
+  const walletApplied = isWalletPay ? Math.min(walletBalance, grand) : 0;
+  const isSplit = isWalletPay && walletShortfall > 0 && walletBalance > 0;
+
+  /* Smart change-jar: round-up suggestion when paying cash (whole or split-cash) */
+  const cashAmount = !isWalletPay ? grand : (isSplit && secondaryPayment === "cash" ? walletShortfall : 0);
+  const roundedCash = cashAmount > 0 ? Math.ceil(cashAmount / 10) * 10 : 0;
+  const changeRemainder = roundedCash - cashAmount;
+  const showChangeJar = changeRemainder > 0 && changeRemainder <= 10 && [3, 5, 10].some((r) => changeRemainder <= r) && cashAmount > 0;
 
   /* Smart progress bar */
   const progress = useMemo(() => {
@@ -207,18 +224,13 @@ const Cart = () => {
   };
 
   const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
+  const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
   const selectedAddr = addresses.find((a) => a.id === addrId);
-  const walletInsufficient = payment === "wallet" && walletBalance < grand;
 
   const checkoutWA = async () => {
     if (!user) {
       toast.error("سجّل الدخول أولًا لإتمام الطلب");
       navigate({ to: "/auth" });
-      return;
-    }
-    if (walletInsufficient) {
-      toast.error("رصيد المحفظة غير كافٍ، اشحن أو اختر طريقة دفع أخرى");
-      setShowRecharge(true);
       return;
     }
     setSubmitting(true);
@@ -227,6 +239,8 @@ const Cart = () => {
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
         tip > 0 ? `إكرامية: ${tip}` : null,
         !selectedAddr && guestNotes ? `العنوان: ${guestNotes}` : null,
+        isSplit ? `دفع مُجزّأ: محفظة ${Math.round(walletApplied)} + ${secondaryLabel} ${Math.round(walletShortfall)}` : null,
+        showChangeJar && saveChange ? `ادخار الفكة: ${changeRemainder} ج.م للحصّالة` : null,
       ].filter(Boolean);
 
       const { data: order, error } = await supabase
@@ -267,6 +281,32 @@ const Cart = () => {
       }
 
       const orderNum = `RF-${order.id.slice(0, 8).toUpperCase()}`;
+
+      // Auto-save change to savings jar (only if cash + user opted-in)
+      if (showChangeJar && saveChange && changeRemainder > 0) {
+        try {
+          const { data: jarRow } = await supabase
+            .from("savings_jar")
+            .select("balance,auto_save_enabled,round_to,goal,goal_label")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const newBalance = Number(jarRow?.balance ?? 0) + changeRemainder;
+          if (jarRow) {
+            await supabase.from("savings_jar").update({ balance: newBalance }).eq("user_id", user.id);
+          } else {
+            await supabase.from("savings_jar").insert({ user_id: user.id, balance: newBalance });
+          }
+          await supabase.from("savings_transactions").insert({
+            user_id: user.id,
+            amount: changeRemainder,
+            kind: "deposit",
+            label: `ادخار فكة طلب ${orderNum}`,
+          });
+        } catch (e) {
+          console.warn("savings jar update skipped", e);
+        }
+      }
+
       const lineItems = lines
         .map((l, i) => `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(l.product.price * l.qty)}`)
         .join("\n");
@@ -286,7 +326,10 @@ const Cart = () => {
         `🚚 التوصيل: ${delivery === 0 ? "مجاني" : fmtMoney(delivery)}\n` +
         (tip > 0 ? `💚 إكرامية: ${fmtMoney(tip)}\n` : "") +
         `\n*💰 الإجمالي:* *${fmtMoney(grand)}*\n\n` +
-        `💳 *طريقة الدفع:* ${paymentLabel}\n` +
+        (isSplit
+          ? `💳 *طريقة الدفع:* مُجزّأ\n   • محفظة: ${fmtMoney(walletApplied)}\n   • ${secondaryLabel}: ${fmtMoney(walletShortfall)}\n`
+          : `💳 *طريقة الدفع:* ${paymentLabel}\n`) +
+        (showChangeJar && saveChange ? `🐷 *ادخار الفكة:* ${fmtMoney(changeRemainder)} للحصّالة\n` : "") +
         `📍 *العنوان:* ${addrLine}\n\n` +
         `✅ برجاء تأكيد الطلب`;
 
