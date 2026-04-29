@@ -296,7 +296,7 @@ const HomePage = () => {
       <PromoCarousel />
 
       {/* BUY IT AGAIN — only when we have history */}
-      {buyAgain.length > 0 && (
+      {mounted && buyAgain.length > 0 && (
         <ProductCarousel
           title="اشترِ مجدداً"
           subtitle="منتجات اعتدت طلبها — أعدها بضغطة"
