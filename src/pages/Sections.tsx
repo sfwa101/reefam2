@@ -18,22 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import tileSupermarket from "@/assets/tile-supermarket.jpg";
-import tileVillage from "@/assets/tile-village.jpg";
-import tileKitchen from "@/assets/tile-kitchen.jpg";
-import tileProduce from "@/assets/tile-produce.jpg";
-import tileDairy from "@/assets/tile-dairy.jpg";
-import tileMeat from "@/assets/tile-meat.jpg";
-import tileSweets from "@/assets/tile-sweets.jpg";
-import tileRestaurants from "@/assets/tile-restaurants.jpg";
-import tileBaskets from "@/assets/tile-baskets.jpg";
-import tileRecipes from "@/assets/tile-recipes.jpg";
-import tileWholesale from "@/assets/tile-wholesale.jpg";
-import tileSubscription from "@/assets/tile-subscription.jpg";
-import tilePharmacy from "@/assets/tile-pharmacy.jpg";
-import tileLibrary from "@/assets/tile-library.jpg";
-import tileHome from "@/assets/tile-home.jpg";
-import tileGifts from "@/assets/tile-gifts.jpg";
+import { VectorBackdrop, motifInk, type MotifId } from "@/components/sections/VectorBackdrop";
 
 /* ------------------------------------------------------------------ */
 /* Adaptive accent palette (kept for chips + smart-shopping cards)     */
@@ -55,7 +40,7 @@ const accents = {
 type AccentKey = keyof typeof accents;
 
 /* ------------------------------------------------------------------ */
-/* Image-driven cards                                                  */
+/* Vector-driven cards — no images, pastel SVG backdrops                */
 /* ------------------------------------------------------------------ */
 
 type HeroCard = {
@@ -63,67 +48,31 @@ type HeroCard = {
   title: string;
   desc: string;
   to: string;
-  image: string;
-  overlay: string;
+  motif: MotifId;
   badge?: string;
 };
 
 const heroPrimary: (HeroCard & { size: "wide" | "tall" | "half" })[] = [
-  {
-    id: "village",
-    title: "منتجات القرية",
-    desc: "بوتيك المزرعة الفاخر · 150+ منتج طبيعي",
-    to: "/store/village",
-    image: tileVillage,
-    overlay: "30 45% 18%",
-    badge: "حصري",
-    size: "wide",
-  },
-  {
-    id: "supermarket",
-    title: "السوبر ماركت",
-    desc: "كل المقاضي في مكان واحد",
-    to: "/store/supermarket",
-    image: tileSupermarket,
-    overlay: "150 35% 14%",
-    badge: "الأكثر طلباً",
-    size: "tall",
-  },
-  {
-    id: "kitchen",
-    title: "مطبخ ريف",
-    desc: "وجبات جاهزة طازجة يومياً",
-    to: "/store/kitchen",
-    image: tileKitchen,
-    overlay: "14 40% 16%",
-    size: "half",
-  },
-  {
-    id: "produce",
-    title: "الخضار والفواكه",
-    desc: "حصاد اليوم من المزرعة",
-    to: "/store/produce",
-    image: tileProduce,
-    overlay: "100 35% 14%",
-    size: "half",
-  },
+  { id: "village",     title: "منتجات القرية",  desc: "بوتيك المزرعة الفاخر · 150+ منتج طبيعي", to: "/store/village",     motif: "village",     badge: "حصري",        size: "wide" },
+  { id: "supermarket", title: "السوبر ماركت",   desc: "كل المقاضي في مكان واحد",                 to: "/store/supermarket", motif: "supermarket", badge: "الأكثر طلباً", size: "tall" },
+  { id: "kitchen",     title: "مطبخ ريف",       desc: "وجبات جاهزة طازجة يومياً",                to: "/store/kitchen",     motif: "kitchen",     size: "half" },
+  { id: "produce",     title: "الخضار والفواكه", desc: "حصاد اليوم من المزرعة",                  to: "/store/produce",     motif: "produce",     size: "half" },
 ];
 
 const heroSecondary: HeroCard[] = [
-  { id: "dairy",       title: "الألبان",        desc: "من المزرعة مباشرة",     to: "/store/dairy",       image: tileDairy,       overlay: "32 45% 16%" },
-  { id: "meat",        title: "اللحوم",         desc: "طازجة وموثوقة",          to: "/store/meat",        image: tileMeat,        overlay: "5 50% 12%" },
-  { id: "restaurants", title: "مطاعم مختارة",   desc: "أفضل مطاعم المدينة",     to: "/store/restaurants", image: tileRestaurants, overlay: "200 45% 12%" },
-  { id: "sweets",      title: "حلويات وتورتة",  desc: "لمسة حلوة لكل مناسبة",   to: "/store/sweets",      image: tileSweets,      overlay: "335 40% 18%" },
-  { id: "baskets",     title: "سلال الريف",     desc: "سلال أسبوعية موفّرة",    to: "/store/baskets",     image: tileBaskets,     overlay: "28 45% 16%", badge: "وفّر 20%" },
-  { id: "recipes",     title: "وصفات الشيف",    desc: "أطباق بخطوات سهلة",      to: "/store/recipes",     image: tileRecipes,     overlay: "15 45% 16%" },
+  { id: "dairy",       title: "الألبان",        desc: "من المزرعة مباشرة",     to: "/store/dairy",       motif: "dairy" },
+  { id: "meat",        title: "اللحوم",         desc: "طازجة وموثوقة",          to: "/store/meat",        motif: "meat" },
+  { id: "restaurants", title: "مطاعم مختارة",   desc: "أفضل مطاعم المدينة",     to: "/store/restaurants", motif: "restaurants" },
+  { id: "sweets",      title: "حلويات وتورتة",  desc: "لمسة حلوة لكل مناسبة",   to: "/store/sweets",      motif: "sweets" },
+  { id: "baskets",     title: "سلال الريف",     desc: "سلال أسبوعية موفّرة",    to: "/store/baskets",     motif: "baskets", badge: "وفّر 20%" },
+  { id: "recipes",     title: "وصفات الشيف",    desc: "أطباق بخطوات سهلة",      to: "/store/recipes",     motif: "recipes" },
 ];
 
-/* Specialty stores — promoted from "services" to image hero cards */
 const specialty: HeroCard[] = [
-  { id: "pharmacy", title: "صيدلية ريف",      desc: "صحتك أولاً · فيتامينات وأدوية", to: "/store/pharmacy",  image: tilePharmacy, overlay: "168 40% 14%" },
-  { id: "library",  title: "مكتبة الطلبة",    desc: "قرطاسية وطباعة وأدوات مدرسية",   to: "/store/library",   image: tileLibrary,  overlay: "205 45% 14%" },
-  { id: "home",     title: "أدوات المنزل",    desc: "كل ما يحتاجه بيتك",              to: "/store/home",      image: tileHome,     overlay: "215 25% 14%", badge: "جديد" },
-  { id: "gifts",    title: "الهدايا والتغليف",desc: "تغليف فاخر لكل مناسبة",          to: "/sub/gifts",       image: tileGifts,    overlay: "345 40% 18%" },
+  { id: "pharmacy", title: "صيدلية ريف",       desc: "صحتك أولاً · فيتامينات وأدوية", to: "/store/pharmacy", motif: "pharmacy" },
+  { id: "library",  title: "مكتبة الطلبة",     desc: "قرطاسية وطباعة وأدوات مدرسية",   to: "/store/library",  motif: "library" },
+  { id: "home",     title: "أدوات المنزل",     desc: "كل ما يحتاجه بيتك",              to: "/store/home",     motif: "home", badge: "جديد" },
+  { id: "gifts",    title: "الهدايا والتغليف", desc: "تغليف فاخر لكل مناسبة",          to: "/sub/gifts",      motif: "gifts" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -136,32 +85,13 @@ type SmartCard = {
   pitch: string;
   saving: string;
   to: string;
-  image: string;
-  gradient: string;
+  motif: MotifId;
   icon: LucideIcon;
 };
 
 const smartShopping: SmartCard[] = [
-  {
-    id: "subs",
-    title: "الاشتراكات الأسبوعية",
-    pitch: "اضمن حصتك أسبوعياً · توصيل تلقائي",
-    saving: "وفّر حتى 15%",
-    to: "/store/subscription",
-    image: tileSubscription,
-    gradient: "linear-gradient(135deg, hsl(150 50% 28%) 0%, hsl(165 45% 22%) 100%)",
-    icon: Ticket,
-  },
-  {
-    id: "wholesale",
-    title: "ريف الجملة",
-    pitch: "اشترِ بالكمية للبيت أو المشروع",
-    saving: "وفّر حتى 30%",
-    to: "/store/wholesale",
-    image: tileWholesale,
-    gradient: "linear-gradient(135deg, hsl(28 65% 32%) 0%, hsl(18 60% 24%) 100%)",
-    icon: Package,
-  },
+  { id: "subs",      title: "الاشتراكات الأسبوعية", pitch: "اضمن حصتك أسبوعياً · توصيل تلقائي", saving: "وفّر حتى 15%", to: "/store/subscription", motif: "subs",      icon: Ticket },
+  { id: "wholesale", title: "ريف الجملة",            pitch: "اشترِ بالكمية للبيت أو المشروع",   saving: "وفّر حتى 30%", to: "/store/wholesale",    motif: "wholesale", icon: Package },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -187,34 +117,11 @@ const personalRail: PantryChip[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Lazy image — native lazy, no React state churn                      */
+/* Tiles — vector backdrops, defined OUTSIDE the page                  */
 /* ------------------------------------------------------------------ */
 
-const LazyImg = ({
-  src,
-  alt = "",
-  className = "",
-}: {
-  src: string;
-  alt?: string;
-  className?: string;
-}) => (
-  <img
-    src={src}
-    alt={alt}
-    loading="lazy"
-    decoding="async"
-    width={1024}
-    height={768}
-    className={className}
-  />
-);
-
-/* ------------------------------------------------------------------ */
-/* Tiles — defined OUTSIDE the page so they don't re-create per render */
-/* ------------------------------------------------------------------ */
-
-const TILE_SHADOW = "0 8px 22px -14px rgba(0,0,0,.22)";
+const TILE_SHADOW =
+  "0 1px 2px rgba(0,0,0,.03), 0 8px 22px -14px rgba(0,0,0,.18)";
 
 const HeroTile = ({
   card,
@@ -224,39 +131,41 @@ const HeroTile = ({
   card: HeroCard;
   className: string;
   onPick: (to: string) => void;
-}) => (
-  <button
-    onClick={() => onPick(card.to)}
-    className={`relative overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97] ${className}`}
-    style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
-    aria-label={card.title}
-  >
-    <LazyImg
-      src={card.image}
-      className="absolute inset-0 h-full w-full object-cover"
-    />
-    <span
-      aria-hidden
-      className="absolute inset-0"
-      style={{
-        background: `linear-gradient(180deg, hsl(${card.overlay} / 0.05) 0%, hsl(${card.overlay} / 0.45) 55%, hsl(${card.overlay} / 0.88) 100%)`,
-      }}
-    />
-    {card.badge && (
-      <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-foreground shadow-sm">
-        {card.badge}
-      </span>
-    )}
-    <div className="relative flex h-full w-full flex-col justify-end p-4">
-      <h3 className="font-display text-[19px] font-extrabold leading-tight text-white drop-shadow-sm">
-        {card.title}
-      </h3>
-      <p className="mt-1 text-[12px] font-medium leading-snug text-white/85 line-clamp-2">
-        {card.desc}
-      </p>
-    </div>
-  </button>
-);
+}) => {
+  const ink = motifInk(card.motif);
+  return (
+    <button
+      onClick={() => onPick(card.to)}
+      className={`relative overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97] ${className}`}
+      style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
+      aria-label={card.title}
+    >
+      <VectorBackdrop motif={card.motif} />
+      {card.badge && (
+        <span
+          className="absolute right-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-extrabold shadow-sm"
+          style={{ color: ink }}
+        >
+          {card.badge}
+        </span>
+      )}
+      <div className="relative flex h-full w-full flex-col justify-end p-4">
+        <h3
+          className="font-display text-[19px] font-extrabold leading-tight"
+          style={{ color: ink }}
+        >
+          {card.title}
+        </h3>
+        <p
+          className="mt-1 text-[12px] font-medium leading-snug line-clamp-2"
+          style={{ color: ink, opacity: 0.72 }}
+        >
+          {card.desc}
+        </p>
+      </div>
+    </button>
+  );
+};
 
 const SmartTile = ({
   s,
@@ -264,37 +173,48 @@ const SmartTile = ({
 }: {
   s: SmartCard;
   onPick: (to: string) => void;
-}) => (
-  <button
-    onClick={() => onPick(s.to)}
-    className="relative h-[150px] overflow-hidden rounded-[22px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97]"
-    style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
-    aria-label={s.title}
-  >
-    <LazyImg
-      src={s.image}
-      className="absolute inset-0 h-full w-full object-cover opacity-50"
-    />
-    <span aria-hidden className="absolute inset-0" style={{ background: s.gradient, opacity: 0.85 }} />
-    <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-extrabold text-foreground shadow-sm">
-      💸 {s.saving}
-    </span>
-    <div className="relative flex h-full w-full flex-col justify-between p-4">
-      <s.icon className="h-6 w-6 text-white/95" strokeWidth={2.2} />
-      <div>
-        <h3 className="font-display text-[18px] font-extrabold leading-tight text-white drop-shadow-sm">
-          {s.title}
-        </h3>
-        <p className="mt-1 text-[11.5px] font-medium leading-snug text-white/85 line-clamp-2">
-          {s.pitch}
-        </p>
-        <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-white/95">
-          ابدأ التوفير <ArrowLeft className="h-3 w-3" />
-        </span>
+}) => {
+  const ink = motifInk(s.motif);
+  return (
+    <button
+      onClick={() => onPick(s.to)}
+      className="relative h-[150px] overflow-hidden rounded-[22px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97]"
+      style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
+      aria-label={s.title}
+    >
+      <VectorBackdrop motif={s.motif} />
+      <span
+        className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold shadow-sm"
+        style={{ color: ink }}
+      >
+        💸 {s.saving}
+      </span>
+      <div className="relative flex h-full w-full flex-col justify-between p-4">
+        <s.icon className="h-6 w-6" strokeWidth={2.2} style={{ color: ink, opacity: 0.85 }} />
+        <div>
+          <h3
+            className="font-display text-[18px] font-extrabold leading-tight"
+            style={{ color: ink }}
+          >
+            {s.title}
+          </h3>
+          <p
+            className="mt-1 text-[11.5px] font-medium leading-snug line-clamp-2"
+            style={{ color: ink, opacity: 0.72 }}
+          >
+            {s.pitch}
+          </p>
+          <span
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold"
+            style={{ color: ink }}
+          >
+            ابدأ التوفير <ArrowLeft className="h-3 w-3" />
+          </span>
+        </div>
       </div>
-    </div>
-  </button>
-);
+    </button>
+  );
+};
 
 const RailChip = ({
   c,
