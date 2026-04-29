@@ -314,6 +314,16 @@ const Sections = () => {
   const navigate = useNavigate();
   const go = (to: string) => navigate({ to: to as never });
 
+  /* Show skeleton for one frame so first paint is instant + stable.
+     Lower sections use `content-visibility: auto` to skip off-screen layout. */
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  if (!ready) return <SectionsSkeleton />;
+
   return (
     <div className="space-y-7 pb-6">
       {/* Page header */}
@@ -359,7 +369,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Curated Experiences ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-3 px-1">
           <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
             تجارب مختارة
@@ -376,7 +386,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Specialty Stores ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-3 px-1">
           <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
             متاجر متخصصة
@@ -393,7 +403,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Personal Care rail ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-2 px-1">
           <h2 className="font-display text-[15px] font-extrabold leading-tight text-foreground">
             العناية الشخصية والمنزلية
@@ -409,7 +419,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Smart Shopping ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-3 px-1">
           <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
             طرق تسوّق ذكية
