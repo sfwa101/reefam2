@@ -217,6 +217,18 @@ export const products: Product[] = [
     badge: "premium" as const,
     addons: mealAddons,
   })),
+
+  // ========== Kitchen Tools (used by Chef Recipes "tools" tab) ==========
+  // Only the items listed here are considered IN-STOCK. Tools referenced by
+  // a recipe but missing from this list will render as "غير متوفر".
+  { id: "kt-pan-24",      name: "مقلاة تيفال ٢٤سم",       unit: "قطعة", price: 380, image: pUtensils, rating: 4.7, category: "ادوات المطبخ", subCategory: "مقالي وحلل", source: "kitchen" },
+  { id: "kt-pot-4l",      name: "حلة استانلس ٤ لتر",       unit: "قطعة", price: 620, image: pUtensils, rating: 4.8, category: "ادوات المطبخ", subCategory: "مقالي وحلل", source: "kitchen", badge: "best" },
+  { id: "kt-knife-chef",  name: "سكين شيف ٢٠سم",           unit: "قطعة", price: 320, image: pUtensils, rating: 4.9, category: "ادوات المطبخ", subCategory: "أدوات تقطيع", source: "kitchen" },
+  { id: "kt-board",       name: "لوح تقطيع خشبي",          unit: "قطعة", price: 180, image: pUtensils, rating: 4.6, category: "ادوات المطبخ", subCategory: "أدوات تقطيع", source: "kitchen" },
+  { id: "kt-whisk",       name: "مضرب يدوي",               unit: "قطعة", price: 90,  image: pUtensils, rating: 4.5, category: "ادوات المطبخ", subCategory: "إكسسوارات", source: "kitchen" },
+  { id: "kt-measure",     name: "أكواب وملاعق قياس",        unit: "طقم",  price: 110, image: pUtensils, rating: 4.7, category: "ادوات المطبخ", subCategory: "إكسسوارات", source: "kitchen" },
+  { id: "kt-bowl-cer",    name: "بول تقديم سيراميك",       unit: "قطعة", price: 140, image: pUtensils, rating: 4.6, category: "ادوات المطبخ", subCategory: "تقديم", source: "kitchen" },
+  { id: "kt-tray-bake",   name: "صينية فرن مينا",          unit: "قطعة", price: 280, image: pUtensils, rating: 4.7, category: "ادوات المطبخ", subCategory: "أدوات فرن", source: "kitchen" },
 ];
 
 // Dynamically-generated product variants (e.g. wholesale bulk packs) register
