@@ -7,6 +7,13 @@ const cats: StoreCategory[] = [
   { id: "all", name: "كل الوجبات", match: (p) => p.source === "kitchen" || p.source === "recipes" },
   { id: "meals", name: "أطباق رئيسية", match: (p) => p.source === "kitchen" },
   { id: "recipes", name: "وصفات الشيف", match: (p) => p.source === "recipes" },
+  // === أدوات المطبخ (مرتبة حسب الاستخدام) ===
+  { id: "tools-all",   name: "كل الأدوات",   match: (p) => p.category === "ادوات المطبخ" },
+  { id: "tools-pans",  name: "مقالي وحلل",   match: (p) => p.category === "ادوات المطبخ" && p.subCategory === "مقالي وحلل" },
+  { id: "tools-cut",   name: "أدوات تقطيع",  match: (p) => p.category === "ادوات المطبخ" && p.subCategory === "أدوات تقطيع" },
+  { id: "tools-oven",  name: "أدوات فرن",    match: (p) => p.category === "ادوات المطبخ" && p.subCategory === "أدوات فرن" },
+  { id: "tools-serve", name: "تقديم",        match: (p) => p.category === "ادوات المطبخ" && p.subCategory === "تقديم" },
+  { id: "tools-acc",   name: "إكسسوارات",    match: (p) => p.category === "ادوات المطبخ" && p.subCategory === "إكسسوارات" },
 ];
 
 const Kitchen = () => {
