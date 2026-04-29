@@ -18,22 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import tileSupermarket from "@/assets/tile-supermarket.jpg";
-import tileVillage from "@/assets/tile-village.jpg";
-import tileKitchen from "@/assets/tile-kitchen.jpg";
-import tileProduce from "@/assets/tile-produce.jpg";
-import tileDairy from "@/assets/tile-dairy.jpg";
-import tileMeat from "@/assets/tile-meat.jpg";
-import tileSweets from "@/assets/tile-sweets.jpg";
-import tileRestaurants from "@/assets/tile-restaurants.jpg";
-import tileBaskets from "@/assets/tile-baskets.jpg";
-import tileRecipes from "@/assets/tile-recipes.jpg";
-import tileWholesale from "@/assets/tile-wholesale.jpg";
-import tileSubscription from "@/assets/tile-subscription.jpg";
-import tilePharmacy from "@/assets/tile-pharmacy.jpg";
-import tileLibrary from "@/assets/tile-library.jpg";
-import tileHome from "@/assets/tile-home.jpg";
-import tileGifts from "@/assets/tile-gifts.jpg";
+import { VectorBackdrop, motifInk, type MotifId } from "@/components/sections/VectorBackdrop";
 
 /* ------------------------------------------------------------------ */
 /* Adaptive accent palette (kept for chips + smart-shopping cards)     */
