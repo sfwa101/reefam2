@@ -123,8 +123,22 @@ const Account = () => {
   return (
     <div className="space-y-6">
       <section>
-        <h1 className="font-display text-3xl font-extrabold">حسابي</h1>
-        <p className="mt-1 text-xs text-muted-foreground">أدر بياناتك، طلباتك، ومحفظتك في مكان واحد.</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <h1 className="font-display text-3xl font-extrabold">حسابي</h1>
+            <p className="mt-1 text-xs text-muted-foreground">أدر بياناتك، طلباتك، ومحفظتك في مكان واحد.</p>
+          </div>
+          <a
+            href={BACKEND_CONSOLE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="أدوات المطوّر"
+            title="أدوات المطوّر · Backend"
+            className="mt-1 inline-flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5 text-muted-foreground ring-1 ring-border/60 transition hover:bg-foreground/10 hover:text-foreground active:scale-95"
+          >
+            <Wrench className="h-4 w-4" strokeWidth={2.4} />
+          </a>
+        </div>
       </section>
       <Link
         to="/account/profile"
