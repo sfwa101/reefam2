@@ -634,6 +634,7 @@ const ProductDetail = () => {
         )}
 
         <div className="h-28" />
+        </div>
       </motion.div>
 
       {/* ===== Sticky bottom CTA ===== */}
