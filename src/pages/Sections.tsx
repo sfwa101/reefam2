@@ -1,13 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
 import {
-  Gift,
   Sprout,
   Wheat,
   Boxes,
   Cookie,
   Nut,
   CupSoda,
-  SprayCan,
   Baby,
   Sparkles,
   PartyPopper,
