@@ -10,8 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminMoreRouteImport } from './routes/admin.more'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -19,7 +24,10 @@ import { Route as AppOrderSuccessRouteImport } from './routes/_app/order-success
 import { Route as AppOffersRouteImport } from './routes/_app/offers'
 import { Route as AppCartRouteImport } from './routes/_app/cart'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
 import { Route as AppAccountIndexRouteImport } from './routes/_app/account.index'
+import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
+import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
 import { Route as AppStoreVillageRouteImport } from './routes/_app/store.village'
@@ -56,14 +64,39 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMoreRoute = AdminMoreRouteImport.update({
+  id: '/more',
+  path: '/more',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
@@ -100,11 +133,27 @@ const AppAccountRoute = AppAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppAccountIndexRoute = AppAccountIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppAccountRoute,
 } as any)
+const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCustomersCustomerIdRoute =
+  AdminCustomersCustomerIdRouteImport.update({
+    id: '/$customerId',
+    path: '/$customerId',
+    getParentRoute: () => AdminCustomersRoute,
+  } as any)
 const AppSubSlugRoute = AppSubSlugRouteImport.update({
   id: '/sub/$slug',
   path: '/sub/$slug',
@@ -258,6 +307,7 @@ const AppAccountAddressesRoute = AppAccountAddressesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRouteWithChildren
   '/cart': typeof AppCartRoute
@@ -266,6 +316,10 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/more': typeof AdminMoreRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
   '/account/help': typeof AppAccountHelpRoute
@@ -296,7 +350,10 @@ export interface FileRoutesByFullPath {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/account/': typeof AppAccountIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -306,7 +363,11 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/more': typeof AdminMoreRoute
+  '/admin/products': typeof AdminProductsRoute
   '/': typeof AppIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
   '/account/help': typeof AppAccountHelpRoute
@@ -337,11 +398,15 @@ export interface FileRoutesByTo {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/account': typeof AppAccountIndexRoute
+  '/admin/orders': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/cart': typeof AppCartRoute
@@ -350,7 +415,11 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/more': typeof AdminMoreRoute
+  '/admin/products': typeof AdminProductsRoute
   '/_app/': typeof AppIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/_app/account/addresses': typeof AppAccountAddressesRoute
   '/_app/account/favorites': typeof AppAccountFavoritesRoute
   '/_app/account/help': typeof AppAccountHelpRoute
@@ -381,12 +450,16 @@ export interface FileRoutesById {
   '/_app/store/village': typeof AppStoreVillageRoute
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
+  '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/_app/account/': typeof AppAccountIndexRoute
+  '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/account'
     | '/cart'
@@ -395,6 +468,10 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/customers'
+    | '/admin/more'
+    | '/admin/products'
+    | '/admin/'
     | '/account/addresses'
     | '/account/favorites'
     | '/account/help'
@@ -425,7 +502,10 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/admin/customers/$customerId'
+    | '/admin/orders/$orderId'
     | '/account/'
+    | '/admin/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -435,7 +515,11 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/customers'
+    | '/admin/more'
+    | '/admin/products'
     | '/'
+    | '/admin'
     | '/account/addresses'
     | '/account/favorites'
     | '/account/help'
@@ -466,10 +550,14 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/admin/customers/$customerId'
+    | '/admin/orders/$orderId'
     | '/account'
+    | '/admin/orders'
   id:
     | '__root__'
     | '/_app'
+    | '/admin'
     | '/auth'
     | '/_app/account'
     | '/_app/cart'
@@ -478,7 +566,11 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/admin/customers'
+    | '/admin/more'
+    | '/admin/products'
     | '/_app/'
+    | '/admin/'
     | '/_app/account/addresses'
     | '/_app/account/favorites'
     | '/_app/account/help'
@@ -509,11 +601,15 @@ export interface FileRouteTypes {
     | '/_app/store/village'
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
+    | '/admin/customers/$customerId'
+    | '/admin/orders/$orderId'
     | '/_app/account/'
+    | '/admin/orders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
 }
 
@@ -526,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -533,12 +636,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_app/': {
       id: '/_app/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/more': {
+      id: '/admin/more'
+      path: '/more'
+      fullPath: '/admin/more'
+      preLoaderRoute: typeof AdminMoreRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_app/wallet': {
       id: '/_app/wallet'
@@ -589,12 +720,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/orders/': {
+      id: '/admin/orders/'
+      path: '/orders'
+      fullPath: '/admin/orders/'
+      preLoaderRoute: typeof AdminOrdersIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_app/account/': {
       id: '/_app/account/'
       path: '/'
       fullPath: '/account/'
       preLoaderRoute: typeof AppAccountIndexRouteImport
       parentRoute: typeof AppAccountRoute
+    }
+    '/admin/orders/$orderId': {
+      id: '/admin/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/admin/orders/$orderId'
+      preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/customers/$customerId': {
+      id: '/admin/customers/$customerId'
+      path: '/$customerId'
+      fullPath: '/admin/customers/$customerId'
+      preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
+      parentRoute: typeof AdminCustomersRoute
     }
     '/_app/sub/$slug': {
       id: '/_app/sub/$slug'
@@ -905,8 +1057,41 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AdminCustomersRouteChildren {
+  AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
+}
+
+const AdminCustomersRouteChildren: AdminCustomersRouteChildren = {
+  AdminCustomersCustomerIdRoute: AdminCustomersCustomerIdRoute,
+}
+
+const AdminCustomersRouteWithChildren = AdminCustomersRoute._addFileChildren(
+  AdminCustomersRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
+  AdminMoreRoute: typeof AdminMoreRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
+  AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminCustomersRoute: AdminCustomersRouteWithChildren,
+  AdminMoreRoute: AdminMoreRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
+  AdminOrdersIndexRoute: AdminOrdersIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
