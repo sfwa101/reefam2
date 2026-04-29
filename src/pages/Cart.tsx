@@ -1,8 +1,8 @@
 import BackHeader from "@/components/BackHeader";
 import { useCart } from "@/context/CartContext";
-import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check } from "lucide-react";
+import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check, PiggyBank } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -129,6 +129,8 @@ const Cart = () => {
   const [submitting, setSubmitting] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
+  const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
+  const [saveChange, setSaveChange] = useState<boolean>(true);
 
   useEffect(() => {
     if (!user) { setAddresses([]); setAddrId(""); setWalletBalance(0); return; }
@@ -149,6 +151,21 @@ const Cart = () => {
   const discount = appliedPromo ? Math.round(subtotal * appliedPromo.pct) : 0;
   const delivery = subtotal === 0 ? 0 : subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 25;
   const grand = Math.max(0, subtotal - discount + delivery + tip);
+
+  /* Savings on this bill: discount + (free delivery saved) */
+  const billSavings = discount + (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? 25 : 0);
+
+  /* Split payment: wallet pays partial, remainder in secondary method */
+  const isWalletPay = payment === "wallet";
+  const walletShortfall = isWalletPay ? Math.max(0, grand - walletBalance) : 0;
+  const walletApplied = isWalletPay ? Math.min(walletBalance, grand) : 0;
+  const isSplit = isWalletPay && walletShortfall > 0 && walletBalance > 0;
+
+  /* Smart change-jar: round-up suggestion when paying cash (whole or split-cash) */
+  const cashAmount = !isWalletPay ? grand : (isSplit && secondaryPayment === "cash" ? walletShortfall : 0);
+  const roundedCash = cashAmount > 0 ? Math.ceil(cashAmount / 10) * 10 : 0;
+  const changeRemainder = roundedCash - cashAmount;
+  const showChangeJar = changeRemainder > 0 && changeRemainder <= 10 && [3, 5, 10].some((r) => changeRemainder <= r) && cashAmount > 0;
 
   /* Smart progress bar */
   const progress = useMemo(() => {
@@ -207,18 +224,13 @@ const Cart = () => {
   };
 
   const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
+  const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
   const selectedAddr = addresses.find((a) => a.id === addrId);
-  const walletInsufficient = payment === "wallet" && walletBalance < grand;
 
   const checkoutWA = async () => {
     if (!user) {
       toast.error("سجّل الدخول أولًا لإتمام الطلب");
       navigate({ to: "/auth" });
-      return;
-    }
-    if (walletInsufficient) {
-      toast.error("رصيد المحفظة غير كافٍ، اشحن أو اختر طريقة دفع أخرى");
-      setShowRecharge(true);
       return;
     }
     setSubmitting(true);
@@ -227,6 +239,8 @@ const Cart = () => {
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
         tip > 0 ? `إكرامية: ${tip}` : null,
         !selectedAddr && guestNotes ? `العنوان: ${guestNotes}` : null,
+        isSplit ? `دفع مُجزّأ: محفظة ${Math.round(walletApplied)} + ${secondaryLabel} ${Math.round(walletShortfall)}` : null,
+        showChangeJar && saveChange ? `ادخار الفكة: ${changeRemainder} ج.م للحصّالة` : null,
       ].filter(Boolean);
 
       const { data: order, error } = await supabase
@@ -267,6 +281,32 @@ const Cart = () => {
       }
 
       const orderNum = `RF-${order.id.slice(0, 8).toUpperCase()}`;
+
+      // Auto-save change to savings jar (only if cash + user opted-in)
+      if (showChangeJar && saveChange && changeRemainder > 0) {
+        try {
+          const { data: jarRow } = await supabase
+            .from("savings_jar")
+            .select("balance,auto_save_enabled,round_to,goal,goal_label")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const newBalance = Number(jarRow?.balance ?? 0) + changeRemainder;
+          if (jarRow) {
+            await supabase.from("savings_jar").update({ balance: newBalance }).eq("user_id", user.id);
+          } else {
+            await supabase.from("savings_jar").insert({ user_id: user.id, balance: newBalance });
+          }
+          await supabase.from("savings_transactions").insert({
+            user_id: user.id,
+            amount: changeRemainder,
+            kind: "deposit",
+            label: `ادخار فكة طلب ${orderNum}`,
+          });
+        } catch (e) {
+          console.warn("savings jar update skipped", e);
+        }
+      }
+
       const lineItems = lines
         .map((l, i) => `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(l.product.price * l.qty)}`)
         .join("\n");
@@ -286,7 +326,10 @@ const Cart = () => {
         `🚚 التوصيل: ${delivery === 0 ? "مجاني" : fmtMoney(delivery)}\n` +
         (tip > 0 ? `💚 إكرامية: ${fmtMoney(tip)}\n` : "") +
         `\n*💰 الإجمالي:* *${fmtMoney(grand)}*\n\n` +
-        `💳 *طريقة الدفع:* ${paymentLabel}\n` +
+        (isSplit
+          ? `💳 *طريقة الدفع:* مُجزّأ\n   • محفظة: ${fmtMoney(walletApplied)}\n   • ${secondaryLabel}: ${fmtMoney(walletShortfall)}\n`
+          : `💳 *طريقة الدفع:* ${paymentLabel}\n`) +
+        (showChangeJar && saveChange ? `🐷 *ادخار الفكة:* ${fmtMoney(changeRemainder)} للحصّالة\n` : "") +
         `📍 *العنوان:* ${addrLine}\n\n` +
         `✅ برجاء تأكيد الطلب`;
 
@@ -460,26 +503,88 @@ const Cart = () => {
                   {isWallet && user ? (
                     <p className="text-[10px] font-bold text-primary">
                       متاح: {toLatin(Math.round(walletBalance))} ج.م
-                      {walletInsufficient && active && <span className="ms-1 text-destructive"> · غير كافٍ</span>}
                     </p>
                   ) : (
                     <p className="text-[10px] text-muted-foreground">{m.sub}</p>
                   )}
                 </div>
-                {isWallet && walletInsufficient && active && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setShowRecharge(true); }}
-                    className="rounded-[10px] bg-accent px-2.5 py-1.5 text-[10px] font-extrabold text-accent-foreground shadow-pill"
-                  >
-                    شحن الآن
-                  </button>
-                )}
                 <div className={`h-4 w-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
               </motion.button>
             );
           })}
         </div>
+
+        {/* Split-payment helper when wallet < grand */}
+        <AnimatePresence>
+          {isSplit && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-accent/10 to-primary/5 p-3 ring-1 ring-accent/20"
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[11px] font-extrabold text-foreground">دفع الباقي عبر</p>
+                <span className="rounded-md bg-accent/20 px-2 py-0.5 text-[10px] font-extrabold text-accent-foreground">
+                  {toLatin(Math.round(walletShortfall))} ج.م متبقّية
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {paymentOptions.filter((p) => p.id !== "wallet").map((m) => {
+                  const Icon = m.icon;
+                  const a = secondaryPayment === m.id;
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setSecondaryPayment(m.id)}
+                      className={`flex flex-col items-center gap-1 rounded-[12px] border-2 p-2 transition ${a ? "border-primary bg-primary-soft" : "border-border bg-background"}`}
+                    >
+                      <Icon className={`h-4 w-4 ${a ? "text-primary" : "text-muted-foreground"}`} strokeWidth={2.4} />
+                      <span className="text-[10px] font-bold leading-tight">{m.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground">
+                <span>محفظة: <span className="text-primary">{fmtMoney(walletApplied)}</span></span>
+                <button
+                  type="button"
+                  onClick={() => setShowRecharge(true)}
+                  className="rounded-[8px] bg-accent/20 px-2 py-1 text-[10px] font-extrabold text-accent-foreground"
+                >
+                  شحن المحفظة
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Smart change-jar (round-up cash) */}
+        <AnimatePresence>
+          {showChangeJar && (
+            <motion.label
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mt-3 flex cursor-pointer items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 to-[hsl(45_70%_92%)] p-3 ring-1 ring-primary/20"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-gradient-to-br from-primary to-[hsl(45_80%_55%)] text-white shadow-pill">
+                <PiggyBank className="h-5 w-5" strokeWidth={2.2} />
+              </div>
+              <div className="flex-1">
+                <p className="text-[12px] font-extrabold">ادفع {toLatin(roundedCash)} ج.م رقم صحيح</p>
+                <p className="text-[10px] text-muted-foreground">الفكة <span className="font-extrabold text-primary">{toLatin(changeRemainder)} ج.م</span> تدخل حصّالتك تلقائياً</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={saveChange}
+                onChange={(e) => setSaveChange(e.target.checked)}
+                className="h-5 w-5 cursor-pointer accent-primary"
+              />
+            </motion.label>
+          )}
+        </AnimatePresence>
       </section>
 
       {/* ============ Promo code (premium inline) ============ */}
@@ -562,7 +667,21 @@ const Cart = () => {
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">المجموع الفرعي</span><span className="font-bold tabular-nums">{fmtMoney(subtotal)}</span></div>
         {discount > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">خصم ({appliedPromo?.code})</span><span className="font-bold tabular-nums text-primary">-{fmtMoney(discount)}</span></div>}
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">التوصيل</span><span className="font-bold tabular-nums">{delivery === 0 ? <span className="text-primary">مجاني 🚚</span> : fmtMoney(delivery)}</span></div>
+        {billSavings > 0 && (
+          <div className="flex items-center justify-between rounded-[10px] bg-primary/8 px-2 py-1.5 text-[12px]">
+            <span className="flex items-center gap-1 font-extrabold text-primary">
+              <Sparkles className="h-3 w-3" /> وفّرت في هذه الفاتورة
+            </span>
+            <span className="font-display font-extrabold tabular-nums text-primary">{fmtMoney(billSavings)}</span>
+          </div>
+        )}
         {tip > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">إكرامية</span><span className="font-bold tabular-nums">{fmtMoney(tip)}</span></div>}
+        {isSplit && (
+          <div className="rounded-[10px] bg-accent/10 p-2 text-[11px]">
+            <div className="flex justify-between"><span className="text-muted-foreground">من المحفظة</span><span className="font-extrabold text-primary tabular-nums">{fmtMoney(walletApplied)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">{secondaryLabel}</span><span className="font-extrabold tabular-nums">{fmtMoney(walletShortfall)}</span></div>
+          </div>
+        )}
         <div className="my-2 h-px bg-border" />
         <div className="flex items-baseline justify-between">
           <span className="font-display text-base font-bold">الإجمالي</span>
