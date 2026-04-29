@@ -141,22 +141,44 @@ const ProductDetail = () => {
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.name, url });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+      }
+    } catch { /* ignore */ }
+  };
+
   return (
     <>
       <motion.div
-        className="space-y-5"
+        className={isVillage ? "" : "space-y-5"}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
       >
-        <BackHeader title={product.category} />
+        {!isVillage && <BackHeader title={product.category} />}
 
         {/* ===== Hero gallery with zoom ===== */}
-        <section className="space-y-2">
-          <div className="relative overflow-hidden rounded-[1.75rem] bg-secondary/30 shadow-tile">
+        <section className={isVillage ? "" : "space-y-2"}>
+          <div
+            className={
+              isVillage
+                ? "relative -mx-4 -mt-4 overflow-hidden bg-secondary/30"
+                : "relative overflow-hidden rounded-[1.75rem] bg-secondary/30 shadow-tile"
+            }
+          >
             <div
               ref={galleryRef}
-              className="flex aspect-square w-full snap-x snap-mandatory overflow-x-auto no-scrollbar"
+              className={
+                isVillage
+                  ? "flex w-full snap-x snap-mandatory overflow-x-auto no-scrollbar"
+                  : "flex aspect-square w-full snap-x snap-mandatory overflow-x-auto no-scrollbar"
+              }
+              style={isVillage ? { height: "55vh" } : undefined}
             >
               {gallery.map((src, i) => (
                 <button
@@ -175,8 +197,47 @@ const ProductDetail = () => {
               ))}
             </div>
 
+            {/* Bottom fade for legibility on village hero */}
+            {isVillage && (
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-32"
+                style={{ background: "linear-gradient(180deg, transparent, rgba(40,35,18,0.45))" }}
+              />
+            )}
+
+            {/* Floating glassmorphism back/share buttons (village only) */}
+            {isVillage && (
+              <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3"
+                style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+              >
+                <button
+                  onClick={() => router.history.back()}
+                  aria-label="رجوع"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-soft backdrop-blur-xl ring-1 ring-white/30 transition active:scale-90"
+                >
+                  <ArrowRight className="h-4 w-4" strokeWidth={2.6} />
+                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleShare}
+                    aria-label="مشاركة"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-soft backdrop-blur-xl ring-1 ring-white/30 transition active:scale-90"
+                  >
+                    <Share2 className="h-4 w-4" strokeWidth={2.4} />
+                  </button>
+                  <button
+                    onClick={() => toggle(product.id)}
+                    aria-label="مفضلة"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-soft backdrop-blur-xl ring-1 ring-white/30 transition active:scale-90"
+                  >
+                    <Heart className={`h-4 w-4 transition ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Arrows (visible only when more than one slide) */}
-            {gallery.length > 1 && (
+            {gallery.length > 1 && !isVillage && (
               <>
                 <button
                   onClick={goPrev}
@@ -195,14 +256,16 @@ const ProductDetail = () => {
               </>
             )}
 
-            {/* Zoom hint */}
-            <button
-              onClick={() => setZoomOpen(true)}
-              className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[10px] font-extrabold text-foreground shadow-soft backdrop-blur-md ring-1 ring-border/40"
-            >
-              <ZoomIn className="h-3 w-3" strokeWidth={2.6} />
-              تكبير
-            </button>
+            {/* Zoom hint — hidden on village */}
+            {!isVillage && (
+              <button
+                onClick={() => setZoomOpen(true)}
+                className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[10px] font-extrabold text-foreground shadow-soft backdrop-blur-md ring-1 ring-border/40"
+              >
+                <ZoomIn className="h-3 w-3" strokeWidth={2.6} />
+                تكبير
+              </button>
+            )}
 
             {/* Dots */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -210,13 +273,18 @@ const ProductDetail = () => {
                 <span
                   key={i}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === galleryIndex ? "w-5 bg-primary" : "w-1.5 bg-foreground/30"
+                    i === galleryIndex
+                      ? isVillage ? "w-5 bg-white" : "w-5 bg-primary"
+                      : isVillage ? "w-1.5 bg-white/50" : "w-1.5 bg-foreground/30"
                   }`}
                 />
               ))}
             </div>
           </div>
         </section>
+
+        {/* Wrapper for the rest of village content (re-establish vertical rhythm) */}
+        <div className={isVillage ? "mt-5 space-y-5" : ""}>
 
         {/* ===== Title + Trust Badges ===== */}
         <section className="space-y-3">
