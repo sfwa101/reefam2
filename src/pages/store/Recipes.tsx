@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import {
   Clock, Users, Flame, X, Minus, Plus, Check, Calendar, Sparkles,
   Sun, Sunset, Moon, Flame as FlameIcon, TrendingUp, Timer, Zap, BadgePercent, Truck,
+  Lock, PlayCircle, ChefHat, Utensils, ShoppingBasket, Repeat,
 } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import type { Product } from "@/lib/products";
