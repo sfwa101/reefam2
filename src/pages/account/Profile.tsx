@@ -42,9 +42,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import DateWheelPicker from "@/components/DateWheelPicker";
 import { cn } from "@/lib/utils";
 
 type Gender = "male" | "female" | "unspecified";
@@ -93,10 +92,9 @@ const EMPTY_FORM: ProfileForm = {
   budgetRange: "",
 };
 
-const genderOptions: Array<{ value: Gender; label: string; note: string }> = [
-  { value: "male", label: "ذكر", note: "تخصيصات مناسبة" },
-  { value: "female", label: "أنثى", note: "واجهة ألطف وعروض مناسبة" },
-  { value: "unspecified", label: "أفضّل عدم الإفصاح", note: "إعداد محايد" },
+const genderOptions: Array<{ value: Exclude<Gender, "unspecified">; label: string }> = [
+  { value: "male", label: "ذكر" },
+  { value: "female", label: "أنثى" },
 ];
 
 const occupations: Array<{ value: string; label: string; icon: LucideIcon }> = [
