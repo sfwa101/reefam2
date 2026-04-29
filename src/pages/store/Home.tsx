@@ -558,11 +558,48 @@ const HomeStore = () => {
           ))}
         </div>
         {filtered.length === 0 && (
-          <p className="mt-10 text-center text-sm text-muted-foreground">
-            لا توجد نتائج — جرّب كلمة أخرى.
-          </p>
+          <div className="mt-10 flex flex-col items-center gap-2 text-center">
+            <p className="text-sm font-bold text-muted-foreground">
+              لا توجد نتائج تطابق بحثك
+            </p>
+            <button
+              onClick={() => {
+                setQ("");
+                setFulFilter("all");
+                setPriceMax(priceMaxAvail);
+                setSort("relevance");
+                setCat("all");
+              }}
+              className="rounded-full bg-primary px-4 py-2 text-[11px] font-extrabold text-primary-foreground shadow-pill"
+            >
+              إعادة ضبط الفلاتر
+            </button>
+          </div>
         )}
       </section>
+
+      {/* Compare floating bar */}
+      <CompareBar />
+
+      {/* Filters sheet */}
+      {filtersOpen && (
+        <FiltersSheet
+          sort={sort}
+          setSort={setSort}
+          priceMax={priceMax}
+          setPriceMax={setPriceMax}
+          priceMaxAvail={priceMaxAvail}
+          fulFilter={fulFilter}
+          setFulFilter={setFulFilter}
+          onClose={() => setFiltersOpen(false)}
+          onReset={() => {
+            setFulFilter("all");
+            setPriceMax(priceMaxAvail);
+            setSort("relevance");
+          }}
+          hue={theme.hue}
+        />
+      )}
 
       {/* Detail overlay */}
       {opened && <DetailSheet product={opened} onClose={() => setOpenId(null)} />}
