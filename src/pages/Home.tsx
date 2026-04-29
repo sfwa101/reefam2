@@ -73,6 +73,9 @@ const HomePage = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [hasReferralCode, setHasReferralCode] = useState(false);
   const [, force] = useState(0);
+  // SSR-safe: time-based copy only renders after hydration to avoid mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // Re-evaluate time-based content every 5 min
   useEffect(() => {
@@ -130,8 +133,8 @@ const HomePage = () => {
     : "حدد عنوان التوصيل";
 
   const greetingName = profile?.full_name?.split(" ")[0];
-  const greeting = getSmartGreeting();
-  const welcome = getWelcomeLine();
+  const greeting = mounted ? getSmartGreeting() : "أهلًا بك";
+  const welcome = mounted ? getWelcomeLine() : "تسوّق ما يناسب يومك";
   const slot = getTimeSlot();
   const meta = slotMeta[slot];
 
