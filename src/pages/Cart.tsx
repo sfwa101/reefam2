@@ -115,7 +115,12 @@ const Cart = () => {
         quantity: l.qty,
       }));
       const { error: itemsErr } = await supabase.from("order_items").insert(items);
-      if (itemsErr) console.error(itemsErr);
+      if (itemsErr) {
+        console.error(itemsErr);
+        toast.error("تعذّر حفظ تفاصيل الطلب، حاول مرة أخرى");
+        setSubmitting(false);
+        return;
+      }
 
       const lineItems = lines
         .map((l, i) => `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(l.product.price * l.qty)}`)
