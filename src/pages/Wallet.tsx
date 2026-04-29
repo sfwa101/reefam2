@@ -375,6 +375,8 @@ const TopupDialog = ({ onClose, phone, userId }: { onClose: () => void; phone: s
     const text = `🌿 *ريف المدينة - شحن محفظة*\n\n• كود العميل: ${customerCode}\n• المبلغ: ${finalAmount} ج.م${bonus ? `\n• المكافأة: ${bonus.label}` : ""}\n• وسيلة الدفع: ${m.label}\n\nسأقوم بإرسال إثبات الدفع الآن.`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank", "noopener,noreferrer");
+    fireConfetti();
+    toast.success("تم إرسال طلب الشحن بنجاح! 🎉", { description: bonus ? `ستحصل على: ${bonus.label}` : undefined });
     onClose();
   };
 
