@@ -1,10 +1,11 @@
 import { Plus, Minus, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import type { Product } from "@/lib/products";
+import { isPerishable, type Product } from "@/lib/products";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useFavorites } from "@/lib/favorites";
 import { toLatin } from "@/lib/format";
+import { useLocation } from "@/context/LocationContext";
 
 interface ProductCardProps {
   product: Product;
@@ -21,10 +22,13 @@ const badgeStyle: Record<string, { label: string; cls: string }> = {
 const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
   const { add, setQty, lines } = useCart();
   const { has, toggle } = useFavorites();
+  const { zone } = useLocation();
   const badge = product.badge ? badgeStyle[product.badge] : null;
   const line = lines.find((l) => l.product.id === product.id);
   const qty = line?.qty ?? 0;
   const fav = has(product.id);
+
+  const unavailable = !zone.acceptsPerishables && isPerishable(product);
 
   const [pulse, setPulse] = useState(0);
   const lastQtyRef = useRef(qty);
@@ -57,7 +61,14 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
   };
 
   return (
-    <article className={`glass-strong group relative flex flex-col overflow-hidden rounded-2xl shadow-soft ${widthCls}`}>
+    <article className={`glass-strong group relative flex flex-col overflow-hidden rounded-2xl shadow-soft ${widthCls} ${unavailable ? "opacity-95" : ""}`}>
+      {unavailable && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-background/60 backdrop-blur-[2px]">
+          <span className="rounded-full bg-foreground/85 px-3 py-1.5 text-[10px] font-extrabold text-background shadow-pill">
+            قريبًا في منطقتك
+          </span>
+        </div>
+      )}
       <Link
         to="/product/$productId"
         params={{ productId: product.id }}

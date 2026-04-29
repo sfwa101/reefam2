@@ -10,10 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 import { products as allProducts, type Product } from "@/lib/products";
 import { fireConfetti, fireMiniConfetti } from "@/lib/confetti";
+import { useLocation } from "@/context/LocationContext";
+import { detectZoneFromAddress } from "@/lib/geoZones";
 
 const WA_NUMBER = "201080068689";
-const FREE_DELIVERY_THRESHOLD = 300;
-const GIFT_THRESHOLD = 500;
+const GIFT_BONUS = 200; // gift threshold = free-delivery + this
 
 type Addr = {
   id: string; label: string; city: string; district: string | null;
@@ -119,6 +120,7 @@ const Cart = () => {
   const { lines, total, count, setQty, remove, add, clear } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { zone, setFromAddress } = useLocation();
   const [promo, setPromo] = useState("");
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; pct: number } | null>(null);
   const [tip, setTip] = useState(0);
@@ -147,13 +149,33 @@ const Cart = () => {
     })();
   }, [user]);
 
+  // When the active address changes, sync the global zone
+  useEffect(() => {
+    const a = addresses.find((x) => x.id === addrId);
+    if (a) setFromAddress(a.city, a.district);
+  }, [addrId, addresses, setFromAddress]);
+
+  // If the active zone disallows COD, drop "cash" selections silently
+  useEffect(() => {
+    if (!zone.codAllowed) {
+      if (payment === "cash") setPayment("wallet");
+      if (secondaryPayment === "cash") setSecondaryPayment("instapay");
+    }
+  }, [zone.codAllowed, payment, secondaryPayment]);
+
   const subtotal = total;
   const discount = appliedPromo ? Math.round(subtotal * appliedPromo.pct) : 0;
-  const delivery = subtotal === 0 ? 0 : subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 25;
+  const FREE_DELIVERY_THRESHOLD = zone.freeDeliveryThreshold ?? Infinity;
+  const GIFT_THRESHOLD = isFinite(FREE_DELIVERY_THRESHOLD) ? FREE_DELIVERY_THRESHOLD + GIFT_BONUS : Infinity;
+  const delivery = subtotal === 0
+    ? 0
+    : subtotal >= FREE_DELIVERY_THRESHOLD
+      ? 0
+      : zone.deliveryFee;
   const grand = Math.max(0, subtotal - discount + delivery + tip);
 
   /* Savings on this bill: discount + (free delivery saved) */
-  const billSavings = discount + (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? 25 : 0);
+  const billSavings = discount + (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? zone.deliveryFee : 0);
 
   /* Split payment: wallet pays partial, remainder in secondary method */
   const isWalletPay = payment === "wallet";
@@ -169,6 +191,9 @@ const Cart = () => {
 
   /* Smart progress bar */
   const progress = useMemo(() => {
+    if (!isFinite(FREE_DELIVERY_THRESHOLD)) {
+      return { pct: 0, label: `🚚 رسوم التوصيل ${toLatin(zone.deliveryFee)} ج.م لمنطقتك`, done: false };
+    }
     if (subtotal >= GIFT_THRESHOLD) {
       return { pct: 100, label: "🎁 طلبك مؤهل لهدية مفاجئة + توصيل مجاني!", done: true };
     }
@@ -186,7 +211,7 @@ const Cart = () => {
       label: `أضف ${toLatin(remain)} ج.م لتحصل على توصيل مجاني 🚚`,
       done: false,
     };
-  }, [subtotal]);
+  }, [subtotal, FREE_DELIVERY_THRESHOLD, GIFT_THRESHOLD, zone.deliveryFee]);
 
   /* Cross-sell: suggest complementary products */
   const crossSell = useMemo<Product[]>(() => {
@@ -482,9 +507,18 @@ const Cart = () => {
 
       {/* ============ Payment ============ */}
       <section className="rounded-2xl bg-card p-4 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
-        <p className="mb-2 text-sm font-bold">طريقة الدفع</p>
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-sm font-bold">طريقة الدفع</p>
+          {!zone.codAllowed && (
+            <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-extrabold text-amber-700 dark:text-amber-400">
+              الدفع عند الاستلام غير متاح في {zone.shortName}
+            </span>
+          )}
+        </div>
         <div className="space-y-2">
-          {paymentOptions.map((m) => {
+          {paymentOptions
+            .filter((m) => zone.codAllowed || m.id !== "cash")
+            .map((m) => {
             const Icon = m.icon;
             const active = payment === m.id;
             const isWallet = m.id === "wallet";
@@ -530,7 +564,10 @@ const Cart = () => {
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {paymentOptions.filter((p) => p.id !== "wallet").map((m) => {
+                {paymentOptions
+                  .filter((p) => p.id !== "wallet")
+                  .filter((p) => zone.codAllowed || p.id !== "cash")
+                  .map((m) => {
                   const Icon = m.icon;
                   const a = secondaryPayment === m.id;
                   return (
@@ -659,7 +696,13 @@ const Cart = () => {
       {/* ============ ETA ============ */}
       <div className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
         <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary-soft"><Clock className="h-4 w-4 text-primary" /></div>
-        <div className="flex-1"><p className="text-xs font-bold">وقت التوصيل المتوقّع</p><p className="text-[10px] text-muted-foreground">خلال 60 - 90 دقيقة</p></div>
+        <div className="flex-1">
+          <p className="text-xs font-bold">وقت التوصيل لمنطقتك ({zone.shortName})</p>
+          <p className="text-[10px] text-muted-foreground">{zone.etaLabel}</p>
+        </div>
+        <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-extrabold text-muted-foreground">
+          نطاق {zone.id}
+        </span>
       </div>
 
       {/* ============ Summary ============ */}
