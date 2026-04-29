@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -125,7 +126,20 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
     onClose();
   };
 
-  return (
+  // Lock body scroll while the sheet is open so the underlying page
+  // can't peek through and create the illusion of an inline panel.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -133,7 +147,7 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 sm:items-center"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center"
         >
           <motion.div
             initial={{ y: 80, opacity: 0 }}
@@ -601,7 +615,8 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 };
 
