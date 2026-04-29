@@ -675,17 +675,27 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
   };
 
   const addTool = (t: ToolItem) => {
-    if (!t.productId) {
-      toast.error("هذه الأداة غير متوفرة حاليًا في المتجر");
-      return;
+    // 1) primary product
+    if (t.productId) {
+      const primary = getById(t.productId);
+      if (primary) {
+        add(primary, 1);
+        toast.success(`تمت إضافة ${primary.name} إلى السلة`);
+        return;
+      }
     }
-    const product = getById(t.productId);
-    if (!product) {
-      toast.error(`${t.name} نفذ من المخزون — جرّب البديل`);
-      return;
+    // 2) auto fallback
+    if (t.fallbackId) {
+      const fb = getById(t.fallbackId);
+      if (fb) {
+        add(fb, 1);
+        toast.success(`تمت إضافة البديل: ${fb.name}`, {
+          description: `${t.name} غير متوفر حاليًا — أضفنا البديل المناسب.`,
+        });
+        return;
+      }
     }
-    add(product, 1);
-    toast.success(`تمت إضافة ${product.name} إلى السلة`);
+    toast.error(`${t.name} غير متوفر حاليًا في المتجر`);
   };
 
   return (
