@@ -1,6 +1,6 @@
 import BackHeader from "@/components/BackHeader";
 import { useCart } from "@/context/CartContext";
-import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check, PiggyBank } from "lucide-react";
+import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check, PiggyBank, Store, ChefHat, Utensils } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
@@ -12,6 +12,12 @@ import { products as allProducts, type Product } from "@/lib/products";
 import { fireConfetti, fireMiniConfetti } from "@/lib/confetti";
 import { useLocation } from "@/context/LocationContext";
 import { detectZoneFromAddress } from "@/lib/geoZones";
+import {
+  vendorForProduct,
+  vendorLabel,
+  vendorBrandHue,
+  type VendorKey,
+} from "@/lib/restaurants";
 
 const WA_NUMBER = "201080068689";
 const GIFT_BONUS = 200; // gift threshold = free-delivery + this
@@ -231,6 +237,50 @@ const Cart = () => {
     return ranked;
   }, [lines]);
 
+  /* ============ Multi-vendor segmentation ============
+   * Group cart lines by their originating vendor (restaurant / kitchen / store)
+   * so we can render a separate visual block per vendor and route a separate
+   * WhatsApp message to each vendor's management number on checkout.
+   */
+  type VendorGroup = {
+    key: string;
+    vendor: VendorKey;
+    lines: { product: Product; qty: number }[];
+    subtotal: number;
+    cashback: number; // EGP credited to wallet if user pays with wallet
+  };
+  const vendorGroups = useMemo<VendorGroup[]>(() => {
+    const map = new Map<string, VendorGroup>();
+    for (const l of lines) {
+      const v = vendorForProduct(l.product.id, l.product.source);
+      const key =
+        v.kind === "restaurant" ? `r:${v.restaurant.id}` : v.kind === "kitchen" ? "k" : "s";
+      if (!map.has(key)) {
+        map.set(key, { key, vendor: v, lines: [], subtotal: 0, cashback: 0 });
+      }
+      const g = map.get(key)!;
+      g.lines.push(l);
+      g.subtotal += l.product.price * l.qty;
+    }
+    // Cashback = restaurant cashback% applied on its sub-subtotal (only when paying via wallet)
+    for (const g of map.values()) {
+      if (g.vendor.kind === "restaurant") {
+        g.cashback = Math.round((g.subtotal * g.vendor.restaurant.cashbackPct) / 100);
+      }
+    }
+    // Stable order: restaurants first, then kitchen, then store
+    return Array.from(map.values()).sort((a, b) => {
+      const order = (v: VendorKey) => (v.kind === "restaurant" ? 0 : v.kind === "kitchen" ? 1 : 2);
+      return order(a.vendor) - order(b.vendor);
+    });
+  }, [lines]);
+
+  const isMultiVendor = vendorGroups.length > 1;
+  const totalCashback = useMemo(
+    () => (payment === "wallet" ? vendorGroups.reduce((s, g) => s + g.cashback, 0) : 0),
+    [vendorGroups, payment],
+  );
+
   const applyPromo = () => {
     const code = promo.trim().toUpperCase();
     if (!code) return;
@@ -332,6 +382,38 @@ const Cart = () => {
         }
       }
 
+      /* ============ Wallet cashback (only when paying via wallet) ============ */
+      if (payment === "wallet" && totalCashback > 0) {
+        try {
+          const { data: bal } = await supabase
+            .from("wallet_balances")
+            .select("balance,cashback")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const newBalance = Number(bal?.balance ?? 0) + totalCashback;
+          const newCashback = Number(bal?.cashback ?? 0) + totalCashback;
+          if (bal) {
+            await supabase
+              .from("wallet_balances")
+              .update({ balance: newBalance, cashback: newCashback })
+              .eq("user_id", user.id);
+          } else {
+            await supabase
+              .from("wallet_balances")
+              .insert({ user_id: user.id, balance: newBalance, cashback: newCashback });
+          }
+          await supabase.from("wallet_transactions").insert({
+            user_id: user.id,
+            kind: "credit",
+            amount: totalCashback,
+            label: `كاش باك المطاعم — طلب ${orderNum}`,
+            source: "restaurants_cashback",
+          });
+        } catch (e) {
+          console.warn("cashback credit skipped", e);
+        }
+      }
+
       const lineItems = lines
         .map((l, i) => `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(l.product.price * l.qty)}`)
         .join("\n");
@@ -339,11 +421,21 @@ const Cart = () => {
         ? `${[selectedAddr.label, selectedAddr.street, selectedAddr.building, selectedAddr.district, selectedAddr.city].filter(Boolean).join("، ")}`
         : guestNotes || "—";
 
-      const message =
+      /* ============ Per-vendor WhatsApp routing ============
+       * Open ONE main WhatsApp message to the platform (with the full bill),
+       * then a separate message for each restaurant vendor with only their
+       * items + the platform commission breakdown.
+       */
+      const mainMessage =
         `🌿 *طلب جديد — ريف المدينة*\n` +
         `━━━━━━━━━━━━━━\n` +
         `🆔 *رقم الطلب:* ${orderNum}\n` +
         `👤 *العميل:* ${user.email ?? "عميل"}\n\n` +
+        (isMultiVendor
+          ? `🧩 *موردون متعدّدون:* ${toLatin(vendorGroups.length)}\n` +
+            vendorGroups.map((g) => `• ${vendorLabel(g.vendor)} — ${fmtMoney(g.subtotal)}`).join("\n") +
+            `\n\n`
+          : "") +
         `🛒 *المنتجات:*\n${lineItems}\n\n` +
         `━━━━━━━━━━━━━━\n` +
         `💵 المجموع الفرعي: ${fmtMoney(subtotal)}\n` +
@@ -354,12 +446,51 @@ const Cart = () => {
         (isSplit
           ? `💳 *طريقة الدفع:* مُجزّأ\n   • محفظة: ${fmtMoney(walletApplied)}\n   • ${secondaryLabel}: ${fmtMoney(walletShortfall)}\n`
           : `💳 *طريقة الدفع:* ${paymentLabel}\n`) +
+        (payment === "wallet" && totalCashback > 0
+          ? `🎁 *كاش باك المحفظة:* +${fmtMoney(totalCashback)} (تمت إضافته لرصيدك)\n`
+          : "") +
         (showChangeJar && saveChange ? `🐷 *ادخار الفكة:* ${fmtMoney(changeRemainder)} للحصّالة\n` : "") +
         `📍 *العنوان:* ${addrLine}\n\n` +
         `✅ برجاء تأكيد الطلب`;
 
-      const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(message)}`;
-      window.open(url, "_blank");
+      const mainUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(mainMessage)}`;
+      window.open(mainUrl, "_blank");
+
+      // Per-restaurant routing: each restaurant gets its own message with
+      // only its lines + commission breakdown. Stagger window.open calls
+      // to avoid popup blocking by browsers.
+      const restaurantGroups = vendorGroups.filter(
+        (g) => g.vendor.kind === "restaurant",
+      );
+      restaurantGroups.forEach((g, idx) => {
+        if (g.vendor.kind !== "restaurant") return;
+        const r = g.vendor.restaurant;
+        const commission = Math.round((g.subtotal * r.commissionPct) / 100);
+        const netToVendor = g.subtotal - commission;
+        const vendorLines = g.lines
+          .map(
+            (l, i) =>
+              `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(
+                l.product.price * l.qty,
+              )}`,
+          )
+          .join("\n");
+        const vendorMsg =
+          `🍽️ *طلب جديد عبر ريف المدينة*\n` +
+          `━━━━━━━━━━━━━━\n` +
+          `🆔 *رقم الطلب:* ${orderNum}\n` +
+          `🏷️ *المطعم:* ${r.name}\n\n` +
+          `🛒 *الأصناف المطلوبة:*\n${vendorLines}\n\n` +
+          `━━━━━━━━━━━━━━\n` +
+          `💵 إجمالي المطعم: ${fmtMoney(g.subtotal)}\n` +
+          `📊 عمولة المنصة (${toLatin(r.commissionPct)}٪): -${fmtMoney(commission)}\n` +
+          `💰 *صافي المستحق للمطعم:* *${fmtMoney(netToVendor)}*\n\n` +
+          `📍 *عنوان التوصيل:*\n${addrLine}\n\n` +
+          `✅ برجاء البدء بالتجهيز`;
+        const vUrl = `https://wa.me/${r.whatsapp}?text=${encodeURIComponent(vendorMsg)}`;
+        // Stagger to bypass popup blocking
+        setTimeout(() => window.open(vUrl, "_blank"), 600 * (idx + 1));
+      });
 
       const orderId = order.id;
       const orderTotal = grand;
@@ -414,23 +545,75 @@ const Cart = () => {
         </div>
       </motion.div>
 
-      {/* ============ Cart Lines (swipe) ============ */}
-      <div className="space-y-2.5">
-        <AnimatePresence initial={false}>
-          {lines.map((l) => (
-            <motion.div
-              key={l.product.id}
-              layout
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
-              transition={{ type: "spring", damping: 26, stiffness: 280 }}
+      {/* ============ Multi-vendor Cart Lines ============ */}
+      <div className="space-y-4">
+        {isMultiVendor && (
+          <div className="flex items-start gap-2 rounded-2xl bg-accent/10 p-2.5 ring-1 ring-accent/20">
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-foreground" />
+            <p className="text-[11px] font-bold text-foreground">
+              طلبك يحتوي على <span className="text-accent-foreground">{toLatin(vendorGroups.length)} موردين</span> — كل قسم سيصل من مصدره الخاص.
+            </p>
+          </div>
+        )}
+
+        {vendorGroups.map((g) => {
+          const v = g.vendor;
+          const hue = vendorBrandHue(v);
+          const Icon = v.kind === "restaurant" ? Utensils : v.kind === "kitchen" ? ChefHat : Store;
+          return (
+            <div
+              key={g.key}
+              className="overflow-hidden rounded-2xl bg-card/60 ring-1 ring-border/40"
+              style={{ borderTop: `3px solid hsl(${hue})` }}
             >
-              <CartLineItem l={l} setQty={setQty} remove={remove} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        <p className="px-1 text-center text-[10px] text-muted-foreground">💡 اسحب المنتج لليسار للحذف السريع</p>
+              {/* Vendor header */}
+              <div className="flex items-center justify-between gap-2 px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="flex h-7 w-7 items-center justify-center rounded-[10px] text-white"
+                    style={{ background: `hsl(${hue})` }}
+                  >
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                  </div>
+                  <div className="leading-tight">
+                    <p className="text-[12px] font-extrabold">{vendorLabel(v)}</p>
+                    <p className="text-[9.5px] text-muted-foreground">
+                      {toLatin(g.lines.length)} منتج · إجمالي {fmtMoney(g.subtotal)}
+                    </p>
+                  </div>
+                </div>
+                {v.kind === "restaurant" && payment === "wallet" && g.cashback > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold text-white shadow-pill"
+                    style={{ background: `hsl(${hue})` }}
+                  >
+                    <WalletIcon className="h-2.5 w-2.5" />
+                    +{toLatin(g.cashback)} ج.م
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2 px-2 pb-2">
+                <AnimatePresence initial={false}>
+                  {g.lines.map((l) => (
+                    <motion.div
+                      key={l.product.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
+                      transition={{ type: "spring", damping: 26, stiffness: 280 }}
+                    >
+                      <CartLineItem l={l} setQty={setQty} remove={remove} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          );
+        })}
+        <p className="px-1 text-center text-[10px] text-muted-foreground">
+          💡 اسحب المنتج لليسار للحذف السريع
+        </p>
       </div>
 
       {/* ============ Cross-sell ============ */}
