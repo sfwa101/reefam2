@@ -219,10 +219,19 @@ const Wallet = () => {
             <button onClick={openTopup} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-xs font-extrabold text-foreground shadow-pill transition active:scale-95">
               <Plus className="h-3.5 w-3.5" /> شحن الرصيد
             </button>
-            <button onClick={() => toast.info("التحويل قريباً")} className="flex-1 rounded-xl bg-white/15 py-2.5 text-xs font-extrabold text-white backdrop-blur transition active:scale-95">
-              تحويل
+            <button onClick={() => setShowTransfer(true)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/15 py-2.5 text-xs font-extrabold text-white backdrop-blur transition active:scale-95">
+              <Send className="h-3.5 w-3.5" /> تحويل
             </button>
           </div>
+
+          {trustLimit > 0 && (
+            <div className="mt-2.5 flex items-center gap-2 rounded-xl bg-white/10 p-2 backdrop-blur ring-1 ring-white/15">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-white/90" />
+              <p className="flex-1 text-[10px] font-bold text-white/90">
+                رصيد ثقة متاح حتى <span className="font-extrabold tabular-nums">{toLatin(trustLimit)} ج.م</span> · يُستخدم تلقائيًا عند الحاجة
+              </p>
+            </div>
+          )}
         </div>
       </motion.section>
 
