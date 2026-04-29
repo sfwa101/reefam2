@@ -5,6 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import {
   Clock, Users, Flame, X, Minus, Plus, Check, Calendar, Sparkles,
   Sun, Sunset, Moon, Flame as FlameIcon, TrendingUp, Timer, Zap, BadgePercent, Truck,
+  Lock, PlayCircle, ChefHat, Utensils, ShoppingBasket, Repeat,
 } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import type { Product } from "@/lib/products";
@@ -20,7 +21,166 @@ type Recipe = {
   baseServings: number;
   cookTime: number;
   calories: number;
-  ingredients: { id: string; name: string; cost: number }[];
+  ingredients: { id: string; name: string; cost: number; essential?: boolean }[];
+};
+
+// ===== Per-recipe content: nutrition, steps, video, kitchen tools =====
+type Nutrition = { protein: number; carbs: number; fat: number; fiber: number };
+type ToolItem = {
+  id: string;
+  name: string;
+  /** Product id in Kitchen-Tools store, if available for purchase */
+  productId?: string;
+  /** Suggested retail price (EGP) when available */
+  price?: number;
+  /** Image url (optional) */
+  image?: string;
+  /** Cheaper / acceptable alternatives (text only) */
+  alternatives?: string[];
+};
+type RecipeContent = {
+  nutrition: Nutrition;
+  prepTime: number;     // minutes (separate from cookTime)
+  difficulty: "سهل" | "متوسط" | "متقدم";
+  videoUrl?: string;    // mp4 / youtube embed
+  steps: string[];
+  tools: ToolItem[];
+};
+
+// Default tool catalog — products that exist (or could exist) in "ادوات المطبخ"
+const TOOLS = {
+  pan:       { id: "t-pan",       name: "مقلاة تيفال ٢٤سم",       productId: "kt-pan-24",     price: 380, alternatives: ["أي مقلاة قاعها سميك"] },
+  nonstick:  { id: "t-nonstick",  name: "مقلاة جرانيت غير لاصقة", productId: "kt-pan-granite",price: 520, alternatives: ["مقلاة تيفال عادية"] },
+  pot:       { id: "t-pot",       name: "حلة استانلس ٤ لتر",       productId: "kt-pot-4l",     price: 620, alternatives: ["أي حلة بقاع سميك"] },
+  ovenTray:  { id: "t-tray",      name: "صينية فرن مينا",          productId: "kt-tray-bake", price: 280, alternatives: ["صينية ألومنيوم"] },
+  grill:     { id: "t-grill",     name: "مشواية حديد مضلعة",       productId: "kt-grill-pan", price: 540, alternatives: ["شواية كهربائية"] },
+  blender:   { id: "t-blender",   name: "خلاط كهربائي ٧٠٠وات",     productId: "kt-blender",   price: 850, alternatives: ["محضر طعام يدوي"] },
+  bowl:      { id: "t-bowl",      name: "بول تقديم سيراميك",       productId: "kt-bowl-cer",  price: 140, alternatives: ["أي بول عميق"] },
+  knife:     { id: "t-knife",     name: "سكين شيف ٢٠سم",           productId: "kt-knife-chef",price: 320, alternatives: ["أي سكين حاد"] },
+  board:     { id: "t-board",     name: "لوح تقطيع خشبي",          productId: "kt-board",     price: 180, alternatives: ["لوح بلاستيك"] },
+  whisk:     { id: "t-whisk",     name: "مضرب يدوي",               productId: "kt-whisk",     price: 90,  alternatives: ["شوكة كبيرة"] },
+  measuring: { id: "t-measure",   name: "أكواب وملاعق قياس",        productId: "kt-measure",   price: 110, alternatives: ["تقدير يدوي"] },
+} satisfies Record<string, ToolItem>;
+
+const RECIPE_CONTENT: Record<string, RecipeContent> = {
+  "r-eggs": {
+    nutrition: { protein: 22, carbs: 6, fat: 24, fiber: 2 },
+    prepTime: 5, difficulty: "سهل",
+    videoUrl: "https://www.youtube.com/embed/PUP7U5vTMM0",
+    steps: [
+      "اخفقي البيض مع الملح والفلفل في بول.",
+      "سخّني المقلاة على نار متوسطة وأضيفي زيت الزيتون.",
+      "اسكبي البيض ثم وزّعي الخضار والجبنة فوقه.",
+      "اطوي الأومليت بلطف بعد ٣ دقائق وقدميه ساخنًا.",
+    ],
+    tools: [TOOLS.nonstick, TOOLS.whisk, TOOLS.bowl],
+  },
+  "r-cereal": {
+    nutrition: { protein: 14, carbs: 58, fat: 9, fiber: 7 },
+    prepTime: 5, difficulty: "سهل",
+    steps: [
+      "ضعي الزبادي اليوناني في قاع البول.",
+      "أضيفي الجرانولا فوقه ثم الفواكه الموسمية.",
+      "زيّني بالعسل والمكسرات وقدميه فورًا.",
+    ],
+    tools: [TOOLS.bowl, TOOLS.measuring],
+  },
+  "r-bread": {
+    nutrition: { protein: 16, carbs: 36, fat: 22, fiber: 6 },
+    prepTime: 5, difficulty: "سهل",
+    steps: [
+      "حمّصي شرائح الخبز قليلًا.",
+      "اهرسي الأفوكادو مع الملح والليمون.",
+      "وزّعي الأفوكادو على الخبز ثم شرائح الحلوم والطماطم.",
+    ],
+    tools: [TOOLS.knife, TOOLS.board, TOOLS.nonstick],
+  },
+  "r-chicken": {
+    nutrition: { protein: 42, carbs: 38, fat: 18, fiber: 5 },
+    prepTime: 15, difficulty: "متوسط",
+    videoUrl: "https://www.youtube.com/embed/g0sXuc0wO5o",
+    steps: [
+      "تبّلي صدور الدجاج بالأعشاب والثوم والليمون لمدة ١٥ دقيقة.",
+      "حمّري الدجاج على المشواية ٤ دقائق لكل جانب.",
+      "اطهي الأرز البسمتي مع رشة ملح وزيت زيتون.",
+      "حمّصي الخضار في الفرن مع زيت الزيتون لمدة ٢٠ دقيقة.",
+      "قدّمي الدجاج فوق الأرز مع الخضار والصلصة الجانبية.",
+    ],
+    tools: [TOOLS.grill, TOOLS.pot, TOOLS.ovenTray, TOOLS.knife],
+  },
+  "r-pasta": {
+    nutrition: { protein: 18, carbs: 62, fat: 24, fiber: 4 },
+    prepTime: 8, difficulty: "سهل",
+    videoUrl: "https://www.youtube.com/embed/Q6xpxDZUz4M",
+    steps: [
+      "اسلقي الباستا في ماء مملح حتى تنضج (al dente).",
+      "حمّري الفطر مع الثوم في زيت زيتون.",
+      "أضيفي الكريمة وحرّكي حتى تكثف الصلصة.",
+      "أضيفي الباستا والبارميزان وحرّكي قبل التقديم.",
+    ],
+    tools: [TOOLS.pot, TOOLS.nonstick, TOOLS.measuring],
+  },
+  "r-bowl": {
+    nutrition: { protein: 16, carbs: 48, fat: 18, fiber: 9 },
+    prepTime: 10, difficulty: "سهل",
+    steps: [
+      "اطهي الكينوا حسب التعليمات واتركيها لتبرد قليلًا.",
+      "حمّصي الحمص والخضار في الفرن مع زيت الزيتون.",
+      "رتّبي البول: أوراق خضراء، كينوا، حمص، خضار، فيتا.",
+      "أضيفي تتبيلة الطحينة وحبة البركة قبل التقديم.",
+    ],
+    tools: [TOOLS.bowl, TOOLS.ovenTray, TOOLS.pot],
+  },
+  "r-salmon": {
+    nutrition: { protein: 38, carbs: 22, fat: 26, fiber: 4 },
+    prepTime: 10, difficulty: "متوسط",
+    videoUrl: "https://www.youtube.com/embed/scnq9oCXLwM",
+    steps: [
+      "تبّلي السلمون بالملح والفلفل والليمون.",
+      "اشوي السلمون على نار متوسطة ٤ دقائق لكل جانب.",
+      "اسلقي البطاطس الصغيرة ثم حمّريها بالزبدة والأعشاب.",
+      "اشوي الأسباراجوس سريعًا وقدميه بجانب السلمون.",
+    ],
+    tools: [TOOLS.grill, TOOLS.nonstick, TOOLS.pot],
+  },
+  "r-risotto": {
+    nutrition: { protein: 18, carbs: 72, fat: 22, fiber: 3 },
+    prepTime: 10, difficulty: "متقدم",
+    videoUrl: "https://www.youtube.com/embed/q5dQVb3qQ4M",
+    steps: [
+      "حمّري الكراث والثوم في الزبدة.",
+      "أضيفي الأرز وحرّكي دقيقتين ثم اسكبي النبيذ.",
+      "أضيفي مرق الخضار تدريجيًا مع التحريك المستمر.",
+      "أضيفي الفطر والبارميزان في النهاية وقدميه ساخنًا.",
+    ],
+    tools: [TOOLS.pot, TOOLS.measuring, TOOLS.whisk],
+  },
+  "r-beef": {
+    nutrition: { protein: 48, carbs: 32, fat: 38, fiber: 4 },
+    prepTime: 15, difficulty: "متقدم",
+    videoUrl: "https://www.youtube.com/embed/AmC9SmCBUj4",
+    steps: [
+      "أخرجي الستيك من الثلاجة قبل ٣٠ دقيقة من الطهي.",
+      "تبّليه بالملح البحري والفلفل وادهنيه بالزيت.",
+      "اشوي الستيك على نار عالية ٣–٤ دقائق لكل جانب.",
+      "اتركيه يرتاح ٥ دقائق ثم قدميه مع الخضار وصلصة الفلفل.",
+    ],
+    tools: [TOOLS.grill, TOOLS.knife, TOOLS.board, TOOLS.ovenTray],
+  },
+};
+
+// IDs of ingredients considered essential (cannot be removed) per recipe.
+// Heuristic: the first 2 ingredients (main protein/carb base) are essential.
+const ESSENTIAL_INGREDIENT_IDS: Record<string, string[]> = {
+  "r-eggs":    ["i1", "i4"],          // بيض + زيت
+  "r-cereal":  ["i1", "i2"],          // جرانولا + زبادي
+  "r-bread":   ["i1", "i3"],          // خبز + أفوكادو
+  "r-chicken": ["i1", "i2"],          // دجاج + أرز
+  "r-pasta":   ["i1", "i3"],          // باستا + كريمة
+  "r-bowl":    ["i1", "i2"],          // كينوا + حمص
+  "r-salmon":  ["i1"],                // السلمون
+  "r-risotto": ["i1", "i2"],          // أرز أربوريو + فطر
+  "r-beef":    ["i1"],                // الستيك
 };
 
 import pChicken from "@/assets/p-grilled-chicken.jpg";
@@ -168,6 +328,12 @@ const RECIPES: Recipe[] = [
 ];
 
 const sections: Recipe["section"][] = ["إفطار", "غداء", "عشاء"];
+
+// Apply essential flags to ingredients based on ESSENTIAL_INGREDIENT_IDS.
+RECIPES.forEach((r) => {
+  const ess = ESSENTIAL_INGREDIENT_IDS[r.id] ?? [];
+  r.ingredients = r.ingredients.map((i) => ({ ...i, essential: ess.includes(i.id) }));
+});
 const filters = ["كل الوصفات", "سريعة", "عائلية", "للأطفال", "صحية", "نباتية"];
 const days = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
 
@@ -470,21 +636,25 @@ const Recipes = () => {
 };
 
 // ===== Modal =====
-const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) => {
+function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
   const { add } = useCart();
+  const content = RECIPE_CONTENT[recipe.id];
   const [servings, setServings] = useState(recipe.baseServings);
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [orderQty, setOrderQty] = useState(1);
+  const [tab, setTab] = useState<"overview" | "steps" | "tools">("overview");
+  const [showVideo, setShowVideo] = useState(false);
 
   const ingredientsCost = useMemo(
     () => recipe.ingredients.filter((i) => !excluded.has(i.id)).reduce((s, i) => s + i.cost, 0),
     [recipe, excluded]
   );
-  // Apply servings ratio (linear) to the active ingredient cost
   const totalPrice = Math.round(ingredientsCost * (servings / recipe.baseServings) * orderQty);
 
-  const toggle = (id: string) =>
-    setExcluded((p) => { const x = new Set(p); x.has(id) ? x.delete(id) : x.add(id); return x; });
+  const toggle = (ing: { id: string; essential?: boolean }) => {
+    if (ing.essential) return; // cannot remove essential
+    setExcluded((p) => { const x = new Set(p); x.has(ing.id) ? x.delete(ing.id) : x.add(ing.id); return x; });
+  };
 
   const handleAdd = () => {
     const asProduct: Product = {
@@ -500,6 +670,19 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
     onClose();
   };
 
+  const addTool = (t: ToolItem) => {
+    if (!t.productId || !t.price) return;
+    add({
+      id: t.productId,
+      name: t.name,
+      unit: "قطعة",
+      price: t.price,
+      image: t.image ?? recipe.image,
+      category: "ادوات المطبخ",
+      source: "kitchen",
+    });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-foreground/40 backdrop-blur-sm animate-float-up" />
@@ -507,7 +690,7 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
         className="relative mx-auto flex max-h-[92vh] w-full max-w-md flex-col overflow-hidden rounded-t-[2rem] bg-background shadow-float animate-float-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal header (sticky inside modal) */}
+        {/* Header */}
         <div className="flex items-center justify-between bg-background/90 p-3 backdrop-blur">
           <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5">
             <X className="h-4 w-4" />
@@ -518,87 +701,249 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
-          <img src={recipe.image} alt={recipe.name} className="aspect-[4/3] w-full object-cover" />
+          {/* Hero with video play button */}
+          <div className="relative">
+            {showVideo && content?.videoUrl ? (
+              <div className="aspect-[4/3] w-full bg-black">
+                <iframe
+                  src={`${content.videoUrl}?autoplay=1&rel=0`}
+                  title={recipe.name}
+                  className="h-full w-full"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <>
+                <img src={recipe.image} alt={recipe.name} className="aspect-[4/3] w-full object-cover" />
+                {content?.videoUrl && (
+                  <button
+                    onClick={() => setShowVideo(true)}
+                    className="absolute inset-0 flex items-center justify-center bg-black/20 transition hover:bg-black/30"
+                  >
+                    <div className="flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 shadow-pill">
+                      <PlayCircle className="h-5 w-5 text-foreground" />
+                      <span className="text-xs font-extrabold text-foreground">شاهد طريقة التحضير</span>
+                    </div>
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
           <div className="space-y-5 p-5">
+            {/* Title + meta */}
             <div>
               <h2 className="font-display text-2xl font-extrabold">{recipe.name}</h2>
-              <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground tabular-nums">
-                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {toLatin(recipe.cookTime)} دقيقة</span>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground tabular-nums">
+                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {toLatin(recipe.cookTime)}د طهي</span>
+                {content && <span className="flex items-center gap-1"><Timer className="h-3.5 w-3.5" /> {toLatin(content.prepTime)}د تحضير</span>}
                 <span className="flex items-center gap-1"><Flame className="h-3.5 w-3.5" /> {toLatin(recipe.calories)} سعرة</span>
+                {content && (
+                  <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-bold">{content.difficulty}</span>
+                )}
                 <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">{recipe.category}</span>
               </div>
             </div>
 
-            {/* Servings */}
-            <div className="glass-strong flex items-center justify-between rounded-2xl p-3 shadow-soft">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-bold">عدد الأفراد</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <button onClick={() => setServings((s) => Math.max(1, s - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
-                  <Minus className="h-3.5 w-3.5" />
+            {/* Tabs */}
+            <div className="glass-strong flex rounded-full p-1 shadow-soft">
+              {([
+                { k: "overview", l: "الوصفة" },
+                { k: "steps", l: "خطوات التحضير" },
+                { k: "tools", l: "الأواني" },
+              ] as const).map((t) => (
+                <button
+                  key={t.k}
+                  onClick={() => setTab(t.k)}
+                  className={`flex-1 rounded-full py-1.5 text-[11px] font-extrabold transition ${
+                    tab === t.k ? "bg-foreground text-background shadow-pill" : "text-muted-foreground"
+                  }`}
+                >
+                  {t.l}
                 </button>
-                <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(servings)}</span>
-                <button onClick={() => setServings((s) => Math.min(12, s + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <Plus className="h-3.5 w-3.5" />
-                </button>
-              </div>
+              ))}
             </div>
 
-            {/* Ingredients with deletion lowering price */}
-            <div>
-              <h3 className="mb-2 font-display text-base font-extrabold">المكونات</h3>
-              <p className="mb-3 text-[11px] text-muted-foreground">احذف ما هو متوفر لديك لينخفض السعر</p>
-              <div className="space-y-2">
-                {recipe.ingredients.map((ing) => {
-                  const off = excluded.has(ing.id);
-                  return (
-                    <button
-                      key={ing.id}
-                      onClick={() => toggle(ing.id)}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-right transition ${
-                        off ? "bg-foreground/5 opacity-50" : "glass"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                          off ? "border-muted-foreground" : "border-primary bg-primary text-primary-foreground"
-                        }`}>
-                          {!off && <Check className="h-3 w-3" strokeWidth={3} />}
-                        </span>
-                        <span className={`text-sm ${off ? "line-through" : ""}`}>{ing.name}</span>
-                      </div>
-                      <span className="text-xs font-bold text-primary tabular-nums">{off ? "—" : `${toLatin(ing.cost)} ج`}</span>
+            {tab === "overview" && (
+              <>
+                {/* Nutrition */}
+                {content && (
+                  <div>
+                    <h3 className="mb-2 font-display text-base font-extrabold">القيم الغذائية / حصة</h3>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[
+                        { l: "بروتين", v: content.nutrition.protein, c: "text-rose-600 dark:text-rose-400" },
+                        { l: "كارب", v: content.nutrition.carbs, c: "text-amber-600 dark:text-amber-400" },
+                        { l: "دهون", v: content.nutrition.fat, c: "text-violet-600 dark:text-violet-400" },
+                        { l: "ألياف", v: content.nutrition.fiber, c: "text-emerald-600 dark:text-emerald-400" },
+                      ].map((n) => (
+                        <div key={n.l} className="glass rounded-xl p-2.5 text-center shadow-soft">
+                          <p className={`font-display text-lg font-extrabold tabular-nums ${n.c}`}>{toLatin(n.v)}<span className="text-[9px] font-bold opacity-70">غ</span></p>
+                          <p className="text-[10px] font-bold text-muted-foreground">{n.l}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Servings */}
+                <div className="glass-strong flex items-center justify-between rounded-2xl p-3 shadow-soft">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-bold">عدد الأفراد</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setServings((s) => Math.max(1, s - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
+                      <Minus className="h-3.5 w-3.5" />
                     </button>
-                  );
-                })}
-              </div>
-            </div>
+                    <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(servings)}</span>
+                    <button onClick={() => setServings((s) => Math.min(12, s + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
 
-            {/* Quantity (-1+) — order same recipe more than once */}
-            <div className="glass-strong flex items-center justify-between rounded-2xl p-3 shadow-soft">
+                {/* Ingredients (essential locked) */}
+                <div>
+                  <h3 className="mb-2 font-display text-base font-extrabold">المكونات</h3>
+                  <p className="mb-3 text-[11px] text-muted-foreground">
+                    احذف ما هو متوفر لديك لينخفض السعر · المكونات الأساسية مقفلة
+                  </p>
+                  <div className="space-y-2">
+                    {recipe.ingredients.map((ing) => {
+                      const off = excluded.has(ing.id);
+                      const locked = !!ing.essential;
+                      return (
+                        <button
+                          key={ing.id}
+                          onClick={() => toggle(ing)}
+                          disabled={locked}
+                          className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-right transition ${
+                            locked
+                              ? "bg-primary-soft/40 cursor-not-allowed"
+                              : off
+                              ? "bg-foreground/5 opacity-50"
+                              : "glass"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            {locked ? (
+                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                <Lock className="h-3 w-3" strokeWidth={3} />
+                              </span>
+                            ) : (
+                              <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                                off ? "border-muted-foreground" : "border-primary bg-primary text-primary-foreground"
+                              }`}>
+                                {!off && <Check className="h-3 w-3" strokeWidth={3} />}
+                              </span>
+                            )}
+                            <span className={`text-sm ${off ? "line-through" : ""}`}>{ing.name}</span>
+                            {locked && (
+                              <span className="rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-extrabold text-primary-foreground">أساسي</span>
+                            )}
+                          </div>
+                          <span className="text-xs font-bold text-primary tabular-nums">
+                            {off ? "—" : `${toLatin(ing.cost)} ج`}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Order quantity */}
+                <div className="glass-strong flex items-center justify-between rounded-2xl p-3 shadow-soft">
+                  <div>
+                    <p className="text-sm font-bold">عدد الطلبات</p>
+                    <p className="text-[10px] text-muted-foreground">اطلب الوصفة أكثر من مرة لمزيد من الأفراد</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setOrderQty((q) => Math.max(1, q - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
+                      <Minus className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(orderQty)}</span>
+                    <button onClick={() => setOrderQty((q) => q + 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {tab === "steps" && content && (
               <div>
-                <p className="text-sm font-bold">عدد الطلبات</p>
-                <p className="text-[10px] text-muted-foreground">اطلب الوصفة أكثر من مرة لمزيد من الأفراد</p>
+                <h3 className="mb-3 flex items-center gap-2 font-display text-base font-extrabold">
+                  <ChefHat className="h-4 w-4 text-primary" /> خطوات التحضير
+                </h3>
+                <ol className="space-y-2.5">
+                  {content.steps.map((s, i) => (
+                    <li key={i} className="glass flex gap-3 rounded-xl p-3 shadow-soft">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary font-display text-sm font-extrabold text-primary-foreground tabular-nums">
+                        {toLatin(i + 1)}
+                      </span>
+                      <p className="text-sm leading-relaxed">{s}</p>
+                    </li>
+                  ))}
+                </ol>
+                {content.videoUrl && !showVideo && (
+                  <button
+                    onClick={() => setShowVideo(true)}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground py-3 text-sm font-extrabold text-background shadow-pill"
+                  >
+                    <PlayCircle className="h-4 w-4" /> شاهد الفيديو الكامل
+                  </button>
+                )}
               </div>
-              <div className="flex items-center gap-3">
-                <button onClick={() => setOrderQty((q) => Math.max(1, q - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
-                  <Minus className="h-3.5 w-3.5" />
-                </button>
-                <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(orderQty)}</span>
-                <button onClick={() => setOrderQty((q) => q + 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <Plus className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
+            )}
 
-            {/* Spacer for sticky CTA inside modal */}
+            {tab === "tools" && content && (
+              <div>
+                <h3 className="mb-1 flex items-center gap-2 font-display text-base font-extrabold">
+                  <Utensils className="h-4 w-4 text-primary" /> الأواني المطلوبة
+                </h3>
+                <p className="mb-3 text-[11px] text-muted-foreground">
+                  أضف ما ينقصك للسلة من قسم أدوات المطبخ، أو استخدم البديل المتوفر لديك.
+                </p>
+                <div className="space-y-2.5">
+                  {content.tools.map((t) => (
+                    <div key={t.id} className="glass-strong rounded-2xl p-3 shadow-soft">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <p className="font-display text-sm font-extrabold">{t.name}</p>
+                          {t.alternatives && t.alternatives.length > 0 && (
+                            <p className="mt-1 flex items-start gap-1 text-[11px] text-muted-foreground">
+                              <Repeat className="mt-0.5 h-3 w-3 shrink-0" />
+                              <span>بديل: {t.alternatives.join(" · ")}</span>
+                            </p>
+                          )}
+                        </div>
+                        {t.productId && t.price ? (
+                          <button
+                            onClick={() => addTool(t)}
+                            className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-extrabold text-primary-foreground shadow-pill active:scale-95"
+                          >
+                            <ShoppingBasket className="h-3 w-3" />
+                            <span className="tabular-nums">{toLatin(t.price)} ج</span>
+                          </button>
+                        ) : (
+                          <span className="shrink-0 rounded-full bg-foreground/5 px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
+                            غير متوفر
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="h-20" />
           </div>
         </div>
 
-        {/* Sticky CTA at bottom of modal */}
+        {/* Sticky CTA */}
         <div
           className="border-t border-border bg-background p-3"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
@@ -614,7 +959,7 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
       </div>
     </div>
   );
-};
+}
 
 // ===== Daily browser (horizontal meal tabs + marketing-rich cards) =====
 function DailyBrowser({
