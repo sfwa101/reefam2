@@ -155,6 +155,14 @@ const Cart = () => {
     if (a) setFromAddress(a.city, a.district);
   }, [addrId, addresses, setFromAddress]);
 
+  // If the active zone disallows COD, drop "cash" selections silently
+  useEffect(() => {
+    if (!zone.codAllowed) {
+      if (payment === "cash") setPayment("wallet");
+      if (secondaryPayment === "cash") setSecondaryPayment("instapay");
+    }
+  }, [zone.codAllowed, payment, secondaryPayment]);
+
   const subtotal = total;
   const discount = appliedPromo ? Math.round(subtotal * appliedPromo.pct) : 0;
   const FREE_DELIVERY_THRESHOLD = zone.freeDeliveryThreshold ?? Infinity;
@@ -688,7 +696,13 @@ const Cart = () => {
       {/* ============ ETA ============ */}
       <div className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
         <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary-soft"><Clock className="h-4 w-4 text-primary" /></div>
-        <div className="flex-1"><p className="text-xs font-bold">وقت التوصيل المتوقّع</p><p className="text-[10px] text-muted-foreground">خلال 60 - 90 دقيقة</p></div>
+        <div className="flex-1">
+          <p className="text-xs font-bold">وقت التوصيل لمنطقتك ({zone.shortName})</p>
+          <p className="text-[10px] text-muted-foreground">{zone.etaLabel}</p>
+        </div>
+        <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-extrabold text-muted-foreground">
+          نطاق {zone.id}
+        </span>
       </div>
 
       {/* ============ Summary ============ */}
