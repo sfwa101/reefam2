@@ -513,6 +513,25 @@ const Recipes = () => {
 
         {/* Marketing strip — value props (free delivery, fresh today, secure pay) */}
         {mode === "daily" && (
+          <>
+            {tag && (
+              <div className="flex items-center justify-between gap-2 rounded-2xl bg-amber-500/15 p-3 ring-1 ring-amber-500/30 animate-fade-in">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10.5px] font-extrabold text-amber-800 dark:text-amber-300">
+                    ✨ وصفات مقترحة لـ
+                  </p>
+                  <p className="truncate text-[12.5px] font-extrabold text-foreground">{tag}</p>
+                </div>
+                <button
+                  onClick={() =>
+                    navigate({ search: { tag: "" } as never, replace: true })
+                  }
+                  className="shrink-0 rounded-full bg-amber-600 px-3 py-1.5 text-[11px] font-extrabold text-white shadow-pill"
+                >
+                  عرض الكل
+                </button>
+              </div>
+            )}
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar">
             {[
               { icon: Truck, label: "توصيل مجاني فوق ٢٠٠ ج.م", c: "from-emerald-500/15 to-emerald-500/5", t: "text-emerald-700 dark:text-emerald-300" },
@@ -525,6 +544,7 @@ const Recipes = () => {
               </div>
             ))}
           </div>
+          </>
         )}
 
         {/* Weekly meal-plan builder (only in weekly mode) */}
