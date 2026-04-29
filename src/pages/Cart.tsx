@@ -802,7 +802,7 @@ const Cart = () => {
         const netToVendor = g.subtotal - commission;
         const vendorLines = g.lines
           .map((l, i) => {
-            const unit = l.meta?.unitPrice ?? l.product.price;
+            const unit = lines.find((x) => x.product.id === l.product.id)?.meta?.unitPrice ?? l.product.price;
             return `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(unit * l.qty)}`;
           })
           .join("\n");
