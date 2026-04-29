@@ -11,7 +11,12 @@ export type StoreThemeKey =
   | "subscriptions"
   | "wholesale"
   | "recipes"
-  | "homeTools";
+  | "homeTools"
+  | "village"
+  | "baskets"
+  | "restaurants"
+  | "meat"
+  | "sweets";
 
 export type StoreTheme = {
   /** primary brand color of the section */
@@ -96,5 +101,40 @@ export const storeThemes: Record<StoreThemeKey, StoreTheme> = {
     ink: "190 30% 18%",
     gradient: "linear-gradient(135deg, hsl(180 50% 90%), hsl(195 50% 80%))",
     label: "الأدوات المنزلية",
+  },
+  village: {
+    hue: "35 55% 38%",
+    soft: "40 65% 92%",
+    ink: "30 45% 18%",
+    gradient: "linear-gradient(135deg, hsl(40 65% 90%), hsl(30 55% 78%))",
+    label: "منتجات القرية",
+  },
+  baskets: {
+    hue: "40 75% 45%",
+    soft: "42 80% 93%",
+    ink: "32 45% 20%",
+    gradient: "linear-gradient(135deg, hsl(42 85% 88%), hsl(28 70% 75%))",
+    label: "سلال الريف",
+  },
+  restaurants: {
+    hue: "200 55% 30%",
+    soft: "200 50% 92%",
+    ink: "210 35% 16%",
+    gradient: "linear-gradient(135deg, hsl(200 55% 88%), hsl(190 45% 75%))",
+    label: "مطاعم مختارة",
+  },
+  meat: {
+    hue: "5 60% 38%",
+    soft: "10 65% 92%",
+    ink: "5 40% 18%",
+    gradient: "linear-gradient(135deg, hsl(10 65% 88%), hsl(0 55% 75%))",
+    label: "اللحوم والمجمدات",
+  },
+  sweets: {
+    hue: "330 65% 50%",
+    soft: "335 75% 94%",
+    ink: "325 40% 22%",
+    gradient: "linear-gradient(135deg, hsl(335 80% 92%), hsl(310 65% 80%))",
+    label: "الحلويات والتورتة",
   },
 };
