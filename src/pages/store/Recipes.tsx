@@ -909,9 +909,6 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
                   أضف ما ينقصك للسلة من قسم أدوات المطبخ، أو استخدم البديل المتوفر لديك.
                 </p>
                 <div className="space-y-2.5">
-                  {content.tools.map((t) => (
-                    {(() => null)()}
-                  ))}
                   {content.tools.map((t) => {
                     const stockProduct = t.productId ? getById(t.productId) : undefined;
                     const inStock = !!stockProduct;
