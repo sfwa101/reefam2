@@ -8,7 +8,8 @@ import {
   Lock, PlayCircle, ChefHat, Utensils, ShoppingBasket, Repeat,
 } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import type { Product } from "@/lib/products";
+import { type Product, getById } from "@/lib/products";
+import { toast } from "sonner";
 
 // ===== Recipe definitions (richer than products list — per section) =====
 type Recipe = {
@@ -671,16 +672,17 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
   };
 
   const addTool = (t: ToolItem) => {
-    if (!t.productId || !t.price) return;
-    add({
-      id: t.productId,
-      name: t.name,
-      unit: "قطعة",
-      price: t.price,
-      image: t.image ?? recipe.image,
-      category: "ادوات المطبخ",
-      source: "kitchen",
-    });
+    if (!t.productId) {
+      toast.error("هذه الأداة غير متوفرة حاليًا في المتجر");
+      return;
+    }
+    const product = getById(t.productId);
+    if (!product) {
+      toast.error(`${t.name} نفذ من المخزون — جرّب البديل`);
+      return;
+    }
+    add(product, 1);
+    toast.success(`تمت إضافة ${product.name} إلى السلة`);
   };
 
   return (
@@ -907,7 +909,11 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
                   أضف ما ينقصك للسلة من قسم أدوات المطبخ، أو استخدم البديل المتوفر لديك.
                 </p>
                 <div className="space-y-2.5">
-                  {content.tools.map((t) => (
+                  {content.tools.map((t) => {
+                    const stockProduct = t.productId ? getById(t.productId) : undefined;
+                    const inStock = !!stockProduct;
+                    const displayPrice = stockProduct?.price ?? t.price;
+                    return (
                     <div key={t.id} className="glass-strong rounded-2xl p-3 shadow-soft">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
@@ -919,14 +925,18 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
                             </p>
                           )}
                         </div>
-                        {t.productId && t.price ? (
+                        {inStock && displayPrice ? (
                           <button
                             onClick={() => addTool(t)}
                             className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-extrabold text-primary-foreground shadow-pill active:scale-95"
                           >
                             <ShoppingBasket className="h-3 w-3" />
-                            <span className="tabular-nums">{toLatin(t.price)} ج</span>
+                            <span className="tabular-nums">{toLatin(displayPrice)} ج</span>
                           </button>
+                        ) : t.productId ? (
+                          <span className="shrink-0 rounded-full bg-destructive/10 px-2.5 py-1 text-[10px] font-bold text-destructive">
+                            نفذ من المخزون
+                          </span>
                         ) : (
                           <span className="shrink-0 rounded-full bg-foreground/5 px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
                             غير متوفر
@@ -934,7 +944,8 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
                         )}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
