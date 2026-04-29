@@ -1,4 +1,5 @@
-import { Wallet as WalletIcon, Plus, ArrowDownRight, ArrowUpRight, Gift, CreditCard, Loader2, X, Banknote, Smartphone, Building2, TrendingUp, Users, Copy, Share2, Sparkles, ChevronLeft, BarChart3, PiggyBank, Target, Settings2, Minus } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowDownRight, ArrowUpRight, Gift, CreditCard, Loader2, X, Banknote, Smartphone, Building2, TrendingUp, Users, Copy, Share2, Sparkles, ChevronLeft, BarChart3, PiggyBank, Target, Settings2, Minus, Send, Lightbulb, ShieldCheck, Phone } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toLatin, fmtMoney } from "@/lib/format";
@@ -43,6 +44,38 @@ const formatDate = (iso: string) => {
   return toLatin(d.toLocaleDateString("en-GB"));
 };
 
+const buildInsight = (topName: string, topPct: number, topValue: number): { text: string; cta?: { to: string; label: string } } => {
+  if (topName.includes("لحوم") && topPct >= 30) {
+    const save = Math.round(topValue * 0.15);
+    return {
+      text: `أنت تنفق ${toLatin(topPct)}٪ من ميزانيتك على اللحوم. اشترك في سلة اللحوم العائلية ووفّر حوالي ${toLatin(save)} ج.م شهريًا.`,
+      cta: { to: "/store/baskets" as const, label: "تصفّح السلال" },
+    };
+  }
+  if (topName.includes("سوبر") && topPct >= 35) {
+    return {
+      text: `معظم إنفاقك على السوبر ماركت (${toLatin(topPct)}٪). جرّب اشتراك السلة الأسبوعية لتوفير الوقت والمال.`,
+      cta: { to: "/store/baskets-subs" as const, label: "اشتراك ذكي" },
+    };
+  }
+  if (topName.includes("مطاعم") && topPct >= 30) {
+    return {
+      text: `${toLatin(topPct)}٪ من مصاريفك على المطاعم. اطلب من مطبخ ريف بأقل من نصف السعر مع نفس الجودة.`,
+      cta: { to: "/store/kitchen" as const, label: "مطبخ ريف" },
+    };
+  }
+  if (topName.includes("جملة")) {
+    return {
+      text: `أنت تشتري بذكاء بالجملة! استمر — هذا يوفّر لك مع كل طلب.`,
+      cta: { to: "/store/wholesale" as const, label: "تصفّح الجملة" },
+    };
+  }
+  return {
+    text: `أعلى إنفاق لديك على "${topName}" بنسبة ${toLatin(topPct)}٪. راجع الأقسام البديلة لتنويع مشترياتك وكسب نقاط أكثر.`,
+    cta: { to: "/sections" as const, label: "كل الأقسام" },
+  };
+};
+
 const Wallet = () => {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [txs, setTxs] = useState<Tx[]>([]);
@@ -58,6 +91,8 @@ const Wallet = () => {
   const [jarTxs, setJarTxs] = useState<SavingsTx[]>([]);
   const [showJar, setShowJar] = useState(false);
   const [tier, setTier] = useState<TierDef | null>(null);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [trustLimit, setTrustLimit] = useState<number>(0);
 
   useEffect(() => {
     let mounted = true;
@@ -67,7 +102,7 @@ const Wallet = () => {
       if (!mounted) return;
       setUserId(user.id);
 
-      const [{ data: bal }, { data: tx }, { data: items }, { data: refRows }, { data: jarRow }, { data: jarTx }, { data: spent }] = await Promise.all([
+      const [{ data: bal }, { data: tx }, { data: items }, { data: refRows }, { data: jarRow }, { data: jarTx }, { data: spent }, { data: trust }] = await Promise.all([
         supabase.from("wallet_balances").select("balance,points,coupons,cashback").eq("user_id", user.id).maybeSingle(),
         supabase.from("wallet_transactions").select("id,label,amount,kind,created_at,source").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
         supabase.from("order_items").select("price,quantity,product_id, products(category, old_price, price)").in("order_id",
@@ -77,6 +112,7 @@ const Wallet = () => {
         supabase.from("savings_jar").select("balance,auto_save_enabled,round_to,goal,goal_label").eq("user_id", user.id).maybeSingle(),
         supabase.from("savings_transactions").select("id,amount,kind,label,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
         supabase.rpc("user_total_spent", { _user_id: user.id }),
+        supabase.rpc("user_trust_limit", { _user_id: user.id }),
       ]);
 
       if (!mounted) return;
@@ -86,6 +122,7 @@ const Wallet = () => {
       setJar((jarRow ?? { balance: 0, auto_save_enabled: false, round_to: 5, goal: null, goal_label: null }) as SavingsJar);
       setJarTxs((jarTx ?? []) as SavingsTx[]);
       setTier(tierProgress(Number(spent ?? 0)).tier);
+      setTrustLimit(Number(trust ?? 0));
 
       // detect previous successful commission to celebrate on entry
       const lastReward = (tx ?? []).find((t: any) => t.kind === "reward" && t.source === "referral");
@@ -214,10 +251,19 @@ const Wallet = () => {
             <button onClick={openTopup} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-xs font-extrabold text-foreground shadow-pill transition active:scale-95">
               <Plus className="h-3.5 w-3.5" /> شحن الرصيد
             </button>
-            <button onClick={() => toast.info("التحويل قريباً")} className="flex-1 rounded-xl bg-white/15 py-2.5 text-xs font-extrabold text-white backdrop-blur transition active:scale-95">
-              تحويل
+            <button onClick={() => setShowTransfer(true)} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/15 py-2.5 text-xs font-extrabold text-white backdrop-blur transition active:scale-95">
+              <Send className="h-3.5 w-3.5" /> تحويل
             </button>
           </div>
+
+          {trustLimit > 0 && (
+            <div className="mt-2.5 flex items-center gap-2 rounded-xl bg-white/10 p-2 backdrop-blur ring-1 ring-white/15">
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-white/90" />
+              <p className="flex-1 text-[10px] font-bold text-white/90">
+                رصيد ثقة متاح حتى <span className="font-extrabold tabular-nums">{toLatin(trustLimit)} ج.م</span> · يُستخدم تلقائيًا عند الحاجة
+              </p>
+            </div>
+          )}
         </div>
       </motion.section>
 
@@ -297,6 +343,33 @@ const Wallet = () => {
             </div>
           </div>
         )}
+
+        {categoryStats.length > 0 && (() => {
+          const top = categoryStats[0];
+          const total = categoryStats.reduce((s, x) => s + x.value, 0);
+          const topPct = Math.round((top.value / total) * 100);
+          const tip = buildInsight(top.name, topPct, top.value);
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-3 flex items-start gap-2 rounded-xl bg-gradient-to-l from-primary/10 to-accent/10 p-3 ring-1 ring-primary/15"
+            >
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                <Lightbulb className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[11px] font-bold leading-relaxed text-foreground">{tip.text}</p>
+                {tip.cta && (
+                  <Link to={tip.cta.to} className="mt-1.5 inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[10px] font-extrabold text-primary-foreground">
+                    {tip.cta.label} ←
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          );
+        })()}
       </motion.section>
 
       {/* الحصّالة الذكية */}
@@ -390,6 +463,13 @@ const Wallet = () => {
             jar={jar}
             txs={jarTxs}
             onUpdate={(j, t) => { setJar(j); setJarTxs(t); }}
+          />
+        )}
+        {showTransfer && (
+          <TransferDialog
+            onClose={() => setShowTransfer(false)}
+            balance={Number(balance?.balance ?? 0)}
+            onDone={(newBal) => setBalance((b) => b ? { ...b, balance: newBal } : b)}
           />
         )}
       </AnimatePresence>
@@ -886,6 +966,131 @@ const AffiliateDialog = ({ onClose, code, referrals, totalCommission }: { onClos
             </div>
           </div>
         )}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+/* ================= P2P TRANSFER ================= */
+const TransferDialog = ({ onClose, balance, onDone }: { onClose: () => void; balance: number; onDone: (newBal: number) => void }) => {
+  const [phone, setPhone] = useState("");
+  const [amount, setAmount] = useState<string>("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const amt = Number(amount || 0);
+  const valid = amt > 0 && amt <= balance && amt <= 5000 && phone.replace(/\D/g, "").length >= 10;
+
+  const submit = async () => {
+    if (!valid) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc("wallet_transfer", {
+      _recipient_phone: phone,
+      _amount: amt,
+      _note: note || undefined,
+    });
+    setBusy(false);
+    if (error) {
+      const msg = error.message || "";
+      if (msg.includes("insufficient")) toast.error("الرصيد غير كافٍ");
+      else if (msg.includes("recipient_not_found")) toast.error("لا يوجد مستخدم مسجل بهذا الرقم");
+      else if (msg.includes("self_transfer")) toast.error("لا يمكنك التحويل لنفسك");
+      else if (msg.includes("limit_exceeded")) toast.error("الحد الأقصى للتحويل 5000 ج.م");
+      else if (msg.includes("invalid_phone")) toast.error("رقم الهاتف غير صحيح");
+      else toast.error("تعذّر التحويل");
+      return;
+    }
+    if (data) {
+      fireMiniConfetti();
+      toast.success(`تم تحويل ${toLatin(amt)} ج.م بنجاح ✅`);
+      onDone(balance - amt);
+      onClose();
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ y: 60, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 60, opacity: 0 }}
+        transition={{ type: "spring", damping: 28, stiffness: 280 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md rounded-t-3xl bg-card p-5 shadow-float ring-1 ring-border/40 sm:rounded-3xl"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div>
+              <h2 className="font-display text-lg font-extrabold">تحويل رصيد</h2>
+              <p className="text-[11px] text-muted-foreground">إلى أي مستخدم في ريف المدينة</p>
+            </div>
+          </div>
+          <span className="rounded-lg bg-primary/10 px-2 py-1 text-[10px] font-extrabold text-primary">
+            متاح: {toLatin(Math.round(balance))} ج
+          </span>
+        </div>
+
+        <label className="mb-3 block">
+          <span className="mb-1 flex items-center gap-1 text-[11px] font-bold text-muted-foreground">
+            <Phone className="h-3 w-3" /> رقم هاتف المستلم
+          </span>
+          <input
+            type="tel" inputMode="tel" dir="ltr"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/[^\d+]/g, ""))}
+            placeholder="01xxxxxxxxx"
+            className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm font-bold tabular-nums outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </label>
+
+        <label className="mb-3 block">
+          <span className="mb-1 block text-[11px] font-bold text-muted-foreground">المبلغ (ج.م) · حد أقصى 5000</span>
+          <input
+            type="text" inputMode="numeric" dir="ltr"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value.replace(/\D/g, ""))}
+            placeholder="0"
+            className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-lg font-extrabold tabular-nums outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </label>
+
+        <div className="mb-3 grid grid-cols-4 gap-2">
+          {[50, 100, 200, 500].map((v) => (
+            <button key={v} onClick={() => setAmount(String(v))}
+              className="rounded-xl bg-foreground/5 py-2 text-xs font-extrabold transition active:scale-95">
+              {toLatin(v)}
+            </button>
+          ))}
+        </div>
+
+        <label className="mb-4 block">
+          <span className="mb-1 block text-[11px] font-bold text-muted-foreground">ملاحظة (اختياري)</span>
+          <input
+            type="text" value={note} onChange={(e) => setNote(e.target.value.slice(0, 40))}
+            placeholder="مثال: مصاريف الأسبوع"
+            className="w-full rounded-xl bg-foreground/5 px-3 py-2.5 text-sm font-bold outline-none"
+          />
+        </label>
+
+        <div className="mb-4 rounded-xl bg-amber-500/10 p-2.5 ring-1 ring-amber-500/20">
+          <p className="text-[10px] font-bold leading-relaxed text-amber-700 dark:text-amber-300">
+            ⚠️ التحويل فوري ولا يمكن إلغاؤه. تأكد من رقم المستلم.
+          </p>
+        </div>
+
+        <button
+          onClick={submit}
+          disabled={!valid || busy}
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-40"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          تحويل {amt > 0 ? `${toLatin(amt)} ج.م` : ""}
+        </button>
       </motion.div>
     </motion.div>
   );

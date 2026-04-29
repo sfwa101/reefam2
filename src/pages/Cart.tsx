@@ -431,6 +431,7 @@ const Cart = () => {
   const [payment, setPayment] = useState<string>("wallet");
   const [submitting, setSubmitting] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [trustLimit, setTrustLimit] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
   const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
   const [saveChange, setSaveChange] = useState<boolean>(true);
@@ -439,16 +440,18 @@ const Cart = () => {
   useEffect(() => {
     if (!user) { setAddresses([]); setAddrId(""); setWalletBalance(0); return; }
     (async () => {
-      const [{ data: addrData }, { data: balData }, { data: profileData }] = await Promise.all([
+      const [{ data: addrData }, { data: balData }, { data: profileData }, { data: trustData }] = await Promise.all([
         supabase.from("addresses").select("id,label,city,district,street,building,is_default").eq("user_id", user.id).order("is_default", { ascending: false }),
         supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        supabase.rpc("user_trust_limit", { _user_id: user.id }),
       ]);
       const list = (addrData as Addr[]) ?? [];
       setAddresses(list);
       const def = list.find((a) => a.is_default) ?? list[0];
       if (def) setAddrId(def.id);
       setWalletBalance(Number(balData?.balance ?? 0));
+      setTrustLimit(Number(trustData ?? 0));
       setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
     })();
   }, [user]);
@@ -585,11 +588,15 @@ const Cart = () => {
   /* Savings on this bill: discount + (free delivery saved) */
   const billSavings = discount + (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? zone.deliveryFee : 0);
 
-  /* Split payment: wallet pays partial, remainder in secondary method */
+  /* Split payment: wallet pays partial, remainder in secondary method
+     Trust credit (BNPL) extends spendable amount for verified high-tier users —
+     letting balance go negative up to trustLimit. */
   const isWalletPay = payment === "wallet";
-  const walletShortfall = isWalletPay ? Math.max(0, grand - walletBalance) : 0;
-  const walletApplied = isWalletPay ? Math.min(walletBalance, grand) : 0;
-  const isSplit = isWalletPay && walletShortfall > 0 && walletBalance > 0;
+  const effectiveWallet = walletBalance + trustLimit;
+  const walletShortfall = isWalletPay ? Math.max(0, grand - effectiveWallet) : 0;
+  const walletApplied = isWalletPay ? Math.min(effectiveWallet, grand) : 0;
+  const trustUsed = isWalletPay ? Math.max(0, walletApplied - walletBalance) : 0;
+  const isSplit = isWalletPay && walletShortfall > 0 && effectiveWallet > 0;
 
   /* Smart change-jar: round-up suggestion when paying cash (whole or split-cash) */
   const cashAmount = !isWalletPay ? grand : (isSplit && secondaryPayment === "cash" ? walletShortfall : 0);
@@ -792,6 +799,33 @@ const Cart = () => {
       }
 
       const orderNum = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
+
+      /* ============ Wallet debit (when paying via wallet, including BNPL) ============ */
+      if (isWalletPay && walletApplied > 0) {
+        try {
+          const { data: bal } = await supabase
+            .from("wallet_balances")
+            .select("balance")
+            .eq("user_id", user.id)
+            .maybeSingle();
+          const newBalance = Number(bal?.balance ?? 0) - walletApplied;
+          await supabase
+            .from("wallet_balances")
+            .update({ balance: newBalance })
+            .eq("user_id", user.id);
+          await supabase.from("wallet_transactions").insert({
+            user_id: user.id,
+            kind: "debit",
+            amount: walletApplied,
+            label: trustUsed > 0
+              ? `طلب ${orderNum} (شامل ${Math.round(trustUsed)} ج رصيد ثقة)`
+              : `طلب ${orderNum}`,
+            source: trustUsed > 0 ? "wallet_bnpl" : "wallet_pay",
+          });
+        } catch (e) {
+          console.warn("wallet debit skipped", e);
+        }
+      }
 
       // Auto-save change to savings jar (only if cash + user opted-in)
       if (showChangeJar && saveChange && changeRemainder > 0) {
@@ -1252,14 +1286,24 @@ const Cart = () => {
                 <div className="flex-1">
                   <p className="text-sm font-extrabold">{m.label}</p>
                   {isWallet && user ? (
-                    <p className="text-[10px] font-bold text-primary">
-                      متاح: {toLatin(Math.round(walletBalance))} ج.م
-                      {active && walletBalance >= grand && grand > 0 && (
-                        <span className="ms-1 text-foreground/60 font-extrabold">
-                          · المتبقي بعد العملية {toLatin(Math.round(walletAfter))} ج.م
-                        </span>
+                    <>
+                      <p className="text-[10px] font-bold text-primary">
+                        متاح: {toLatin(Math.round(walletBalance))} ج.م
+                        {active && walletBalance >= grand && grand > 0 && (
+                          <span className="ms-1 text-foreground/60 font-extrabold">
+                            · المتبقي بعد العملية {toLatin(Math.round(walletAfter))} ج.م
+                          </span>
+                        )}
+                      </p>
+                      {trustLimit > 0 && (
+                        <p className="mt-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                          🛡️ رصيد ثقة: +{toLatin(trustLimit)} ج.م
+                          {active && trustUsed > 0 && (
+                            <span className="ms-1 font-extrabold">· مستخدم {toLatin(Math.round(trustUsed))} ج (يُسدَّد لاحقًا)</span>
+                          )}
+                        </p>
                       )}
-                    </p>
+                    </>
                   ) : (
                     <p className="text-[10px] text-muted-foreground">{m.sub}</p>
                   )}
