@@ -57,9 +57,12 @@ const SinglePageStore = ({
     }));
   }, [categories, products, query]);
 
-  // Scroll-spy
+  // Scroll-spy — throttled with requestAnimationFrame so we run at most once
+  // per frame even when the user flings the page on a low-end phone.
   useEffect(() => {
-    const onScroll = () => {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
       const trigger = HEADER_OFFSET + BAR_HEIGHT + TRIGGER_BUFFER;
       let current = categories[0]?.id ?? "";
       for (const c of categories) {
@@ -69,10 +72,15 @@ const SinglePageStore = ({
         if (top - trigger <= 0) current = c.id;
         else break;
       }
-      setActive(current);
+      setActive((prev) => (prev === current ? prev : current));
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    update();
     return () => window.removeEventListener("scroll", onScroll);
   }, [categories]);
 
@@ -108,14 +116,16 @@ const SinglePageStore = ({
 
       {intro}
 
-      {/* Sticky category chip bar — pinned right below the global header */}
-      <div className="fixed inset-x-0 z-30" style={{ top: `${HEADER_OFFSET}px` }}>
+      {/* Sticky category chip bar — pinned right below the global header.
+          Solid background (no backdrop-filter) keeps scroll smooth on low-end devices. */}
+      <div
+        className="fixed inset-x-0 z-30"
+        style={{ top: `${HEADER_OFFSET}px`, contain: "layout paint" }}
+      >
         <div
           className="mx-auto max-w-md px-4 py-2"
           style={{
-            background: `hsl(var(--card) / 0.96)`,
-            backdropFilter: "saturate(180%) blur(24px)",
-            WebkitBackdropFilter: "saturate(180%) blur(24px)",
+            background: "hsl(var(--card))",
             borderBottom: "1px solid hsl(var(--border) / 0.5)",
           }}
         >
@@ -127,7 +137,7 @@ const SinglePageStore = ({
                   key={c.id}
                   data-cat={c.id}
                   onClick={() => jumpTo(c.id)}
-                  className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition ease-apple ${
+                  className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition ${
                     isActive ? "text-primary-foreground shadow-pill" : "bg-foreground/5 text-foreground"
                   }`}
                   style={isActive ? { background: `hsl(${theme.hue})` } : undefined}
@@ -150,9 +160,13 @@ const SinglePageStore = ({
             key={g.id}
             ref={(el) => { sectionRefs.current[g.id] = el; }}
             data-cat-id={g.id}
-            // Provide enough bottom anchor space so user can scroll the LAST
-            // section to the trigger line and have it become "active".
-            style={{ scrollMarginTop: HEADER_OFFSET + BAR_HEIGHT + 8 }}
+            // `content-visibility: auto` lets the browser skip rendering
+            // off-screen sections — massive saving on long product lists.
+            style={{
+              scrollMarginTop: HEADER_OFFSET + BAR_HEIGHT + 8,
+              contentVisibility: "auto",
+              containIntrinsicSize: "1px 1200px",
+            }}
           >
             <h2 className="mb-3 px-1 font-display text-xl font-extrabold text-foreground">
               {g.name} <span className="text-xs text-muted-foreground">· {g.items.length}</span>

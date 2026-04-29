@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Wallet as WalletIcon } from "lucide-react";
 import reefLogo from "@/assets/reef-logo.png";
-import { useCart } from "@/context/CartContext";
+import { useCartCount, useCartTotal } from "@/context/CartContext";
 import { fmtMoney } from "@/lib/format";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,8 @@ interface TopBarProps {
 }
 
 const TopBar = ({ title = "ريف المدينة", subtitle = "عبق الريف" }: TopBarProps) => {
-  const { count, total } = useCart();
+  const count = useCartCount();
+  const total = useCartTotal();
   const { user } = useAuth();
   const [balance, setBalance] = useState<number | null>(null);
 
