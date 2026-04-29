@@ -57,9 +57,12 @@ const SinglePageStore = ({
     }));
   }, [categories, products, query]);
 
-  // Scroll-spy
+  // Scroll-spy — throttled with requestAnimationFrame so we run at most once
+  // per frame even when the user flings the page on a low-end phone.
   useEffect(() => {
-    const onScroll = () => {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
       const trigger = HEADER_OFFSET + BAR_HEIGHT + TRIGGER_BUFFER;
       let current = categories[0]?.id ?? "";
       for (const c of categories) {
@@ -69,10 +72,15 @@ const SinglePageStore = ({
         if (top - trigger <= 0) current = c.id;
         else break;
       }
-      setActive(current);
+      setActive((prev) => (prev === current ? prev : current));
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    update();
     return () => window.removeEventListener("scroll", onScroll);
   }, [categories]);
 
