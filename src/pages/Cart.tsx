@@ -428,6 +428,39 @@ const Cart = () => {
     () => computeSweetsRules(sweetsBuckets.C.subtotal, grand),
     [sweetsBuckets.C.subtotal, grand],
   );
+
+  /* Per-line booking choices roll up into cart-level totals */
+  const bookingLinesMeta = useMemo(() => {
+    return lines
+      .filter(
+        (l) =>
+          isSweetsProduct(l.product.source) &&
+          fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
+      )
+      .map((l) => {
+        const unit = l.meta?.unitPrice ?? l.product.price;
+        const sub = unit * l.qty;
+        const lineRequired = sub >= DEPOSIT_THRESHOLD;
+        const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
+        return {
+          id: l.product.id,
+          subtotal: sub,
+          payDeposit: wantsDeposit,
+          shipMode: (l.meta?.shipMode ?? "split") as "split" | "wait",
+        };
+      });
+  }, [lines]);
+
+  /* Aggregated deposit charged now across ALL Type C lines */
+  const aggregateDeposit = useMemo(
+    () =>
+      bookingLinesMeta.reduce(
+        (s, b) => s + (b.payDeposit ? Math.round(b.subtotal * 0.5) : b.subtotal),
+        0,
+      ),
+    [bookingLinesMeta],
+  );
+  const anyWaitForAll = bookingLinesMeta.some((b) => b.shipMode === "wait");
   const hasInstantSweets = sweetsBuckets.A.lines.length > 0;
   const hasFreshSweets = sweetsBuckets.B.lines.length > 0;
   const hasBooking = sweetsBuckets.C.lines.length > 0;
@@ -436,18 +469,14 @@ const Cart = () => {
       (l) => !isSweetsProduct(l.product.source),
     ));
 
-  /* Deposit toggle (when not mandatory the user can opt in). */
-  const [payDeposit, setPayDeposit] = useState<boolean>(false);
-  // Force-on when threshold hit
-  useEffect(() => {
-    if (sweetsRules.depositRequired) setPayDeposit(true);
-  }, [sweetsRules.depositRequired]);
+  /* Whether ANY booking line opted into deposit (drives copy in summary) */
+  const payDeposit = bookingLinesMeta.some((b) => b.payDeposit);
 
-  /* Final amount the customer pays NOW (deposit) vs. on delivery */
-  const payNowAmount = payDeposit && sweetsRules.hasBooking
-    ? sweetsRules.depositAmount + Math.max(0, grand - sweetsRules.bookingSubtotal)
+  /* Final amount the customer pays NOW vs. on delivery (line-level aware) */
+  const payNowAmount = sweetsRules.hasBooking
+    ? aggregateDeposit + Math.max(0, grand - sweetsRules.bookingSubtotal)
     : grand;
-  const payOnDelivery = grand - payNowAmount;
+  const payOnDelivery = Math.max(0, grand - payNowAmount);
 
   /* Auto-disable COD when any Type C booking exists */
   useEffect(() => {
