@@ -741,6 +741,8 @@ const Cart = () => {
       return;
     }
     setSubmitting(true);
+    // Small UX pause so the loading state is perceptible before opening WA
+    const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
       const noteParts = [
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
