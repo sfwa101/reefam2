@@ -617,7 +617,7 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
 };
 
 // ===== Daily browser (horizontal meal tabs + marketing-rich cards) =====
-const DailyBrowser = ({
+function DailyBrowser({
   activeMeal, setActiveMeal, now, filter, setFilter, filtered, onOpen,
 }: {
   activeMeal: Recipe["section"];
@@ -627,7 +627,7 @@ const DailyBrowser = ({
   setFilter: (s: string) => void;
   filtered: Recipe[];
   onOpen: (r: Recipe) => void;
-}) => {
+}) {
   const { add } = useCart();
   const list = filtered.filter((r) => r.section === activeMeal);
   const openNow = isMealOpenNow(activeMeal, now);
@@ -802,6 +802,6 @@ const DailyBrowser = ({
       </div>
     </div>
   );
-};
+}
 
 export default Recipes;
