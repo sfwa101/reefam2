@@ -36,6 +36,7 @@ import pNotebook from "@/assets/p-notebook.jpg";
 import pPens from "@/assets/p-pens.jpg";
 import pCleaner from "@/assets/p-cleaner.jpg";
 import pUtensils from "@/assets/p-utensils.jpg";
+import { subscriptionMeals } from "./subscriptionMeals";
 
 export type ProductVariant = {
   id: string;
