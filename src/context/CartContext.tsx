@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import type { Product } from "@/lib/products";
 import { trackBuyAgain } from "@/lib/buyAgain";
 
@@ -8,34 +17,19 @@ import { trackBuyAgain } from "@/lib/buyAgain";
  * that other sections can extend it (e.g. kitchen scheduled meals).
  */
 export type CartLineMeta = {
-  /** ISO date (YYYY-MM-DD) chosen for pickup/delivery */
   bookingDate?: string;
-  /** Slot id from sweetsFulfillment.bookingTimeSlots */
   bookingSlot?: string;
-  /** Free-form note kept on the line (e.g. "اكتب اسم العميل على التورتة") */
   bookingNote?: string;
-  /** Selected variant id (e.g. small/medium/large) */
   variantId?: string;
-  /** Selected add-on ids */
   addonIds?: string[];
-  /** Final unit price after variant + addons (overrides product.price for totals if set) */
   unitPrice?: number;
-  /** Pay 50% deposit now for this booking line (Type C only) */
   payDeposit?: boolean;
-  /**
-   * Shipment preference for booking lines:
-   *  - "split" → instant items now, booking later (default)
-   *  - "wait"  → hold all items and deliver together on booking date
-   */
   shipMode?: "split" | "wait";
 };
 
 type CartLine = { product: Product; qty: number; meta?: CartLineMeta };
 
-type CartCtx = {
-  lines: CartLine[];
-  count: number;
-  total: number;
+type CartActions = {
   add: (p: Product, qty?: number, meta?: CartLineMeta) => void;
   remove: (id: string) => void;
   setQty: (id: string, qty: number) => void;
@@ -43,11 +37,40 @@ type CartCtx = {
   clear: () => void;
 };
 
-const Ctx = createContext<CartCtx | null>(null);
+type CartCtxValue = {
+  /** Subscribe to the whole lines array. Triggers on any cart change. */
+  subscribe: (cb: () => void) => () => void;
+  getSnapshot: () => CartLine[];
+  /** Stable ref of actions. */
+  actions: CartActions;
+};
+
+const Ctx = createContext<CartCtxValue | null>(null);
 const STORAGE_KEY = "reef-cart-v1";
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [lines, setLines] = useState<CartLine[]>([]);
+  // Store lines in a ref so updates do not trigger provider re-renders.
+  // Components subscribe via useSyncExternalStore with a selector, so each
+  // component only re-renders when its slice of state actually changes.
+  const linesRef = useRef<CartLine[]>([]);
+  const listenersRef = useRef<Set<() => void>>(new Set());
+
+  const emit = useCallback(() => {
+    listenersRef.current.forEach((l) => l());
+  }, []);
+
+  const setLines = useCallback(
+    (updater: (prev: CartLine[]) => CartLine[]) => {
+      linesRef.current = updater(linesRef.current);
+      emit();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(linesRef.current));
+      } catch {
+        /* ignore quota errors */
+      }
+    },
+    [emit],
+  );
 
   // Hydrate from localStorage on mount (client-only — SSR-safe)
   useEffect(() => {
@@ -56,94 +79,138 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        setLines(parsed.filter((l) => l && l.product && typeof l.qty === "number"));
+        linesRef.current = parsed.filter(
+          (l) => l && l.product && typeof l.qty === "number",
+        );
+        emit();
       }
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [emit]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
-    } catch {
-      /* ignore quota errors */
-    }
-  }, [lines]);
+  const actions = useMemo<CartActions>(
+    () => ({
+      add: (p, qty = 1, meta) => {
+        trackBuyAgain(p.id);
+        setLines((prev) => {
+          const i = prev.findIndex((l) => l.product.id === p.id);
+          if (i >= 0) {
+            const next = prev.slice();
+            next[i] = {
+              ...next[i],
+              qty: next[i].qty + qty,
+              meta: meta ? { ...next[i].meta, ...meta } : next[i].meta,
+            };
+            return next;
+          }
+          return [...prev, { product: p, qty, meta }];
+        });
+      },
+      remove: (id) =>
+        setLines((prev) => prev.filter((l) => l.product.id !== id)),
+      setQty: (id, qty) =>
+        setLines((prev) =>
+          prev
+            .map((l) => (l.product.id === id ? { ...l, qty } : l))
+            .filter((l) => l.qty > 0),
+        ),
+      updateMeta: (id, meta) =>
+        setLines((prev) =>
+          prev.map((l) =>
+            l.product.id === id ? { ...l, meta: { ...l.meta, ...meta } } : l,
+          ),
+        ),
+      clear: () => setLines(() => []),
+    }),
+    [setLines],
+  );
 
-  const add = useCallback((p: Product, qty = 1, meta?: CartLineMeta) => {
-    trackBuyAgain(p.id);
-    setLines((prev) => {
-      const i = prev.findIndex((l) => l.product.id === p.id);
-      if (i >= 0) {
-        const next = [...prev];
-        next[i] = {
-          ...next[i],
-          qty: next[i].qty + qty,
-          // Latest booking meta wins so the user can update their slot
-          meta: meta ? { ...next[i].meta, ...meta } : next[i].meta,
+  const value = useMemo<CartCtxValue>(
+    () => ({
+      subscribe: (cb) => {
+        listenersRef.current.add(cb);
+        return () => {
+          listenersRef.current.delete(cb);
         };
-        return next;
-      }
-      return [...prev, { product: p, qty, meta }];
-    });
-  }, []);
-
-  const remove = useCallback((id: string) => {
-    setLines((prev) => prev.filter((l) => l.product.id !== id));
-  }, []);
-
-  const setQty = useCallback((id: string, qty: number) => {
-    setLines((prev) =>
-      prev
-        .map((l) => (l.product.id === id ? { ...l, qty } : l))
-        .filter((l) => l.qty > 0)
-    );
-  }, []);
-
-  const updateMeta = useCallback((id: string, meta: CartLineMeta) => {
-    setLines((prev) =>
-      prev.map((l) =>
-        l.product.id === id ? { ...l, meta: { ...l.meta, ...meta } } : l,
-      ),
-    );
-  }, []);
-
-  const clear = useCallback(() => setLines([]), []);
-
-  const value = useMemo<CartCtx>(() => {
-    const count = lines.reduce((s, l) => s + l.qty, 0);
-    const total = lines.reduce(
-      (s, l) => s + l.qty * (l.meta?.unitPrice ?? l.product.price),
-      0,
-    );
-    return { lines, count, total, add, remove, setQty, updateMeta, clear };
-  }, [lines, add, remove, setQty, updateMeta, clear]);
+      },
+      getSnapshot: () => linesRef.current,
+      actions,
+    }),
+    [actions],
+  );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
-export const useCart = () => {
+const useCtx = () => {
   const v = useContext(Ctx);
-  if (!v) throw new Error("useCart must be used within CartProvider");
+  if (!v) throw new Error("Cart hooks must be used within CartProvider");
   return v;
 };
 
-/**
- * Performance selector: returns ONLY the qty for a given product id.
- * Memoized at the consumer so a card re-renders only when its own qty changes.
- * The cart actions (`add`, `setQty`) are stable refs from the provider so
- * pulling them in as well is safe and does not cause extra re-renders.
- */
-export const useCartLineQty = (productId: string): number => {
-  const v = useContext(Ctx);
-  if (!v) throw new Error("useCartLineQty must be used within CartProvider");
-  return v.lines.find((l) => l.product.id === productId)?.qty ?? 0;
-};
+const EMPTY_LINES: CartLine[] = [];
+const serverSnapshot = () => EMPTY_LINES;
 
-export const useCartActions = () => {
-  const v = useContext(Ctx);
-  if (!v) throw new Error("useCartActions must be used within CartProvider");
-  // These are stable useCallback refs.
-  return { add: v.add, setQty: v.setQty, remove: v.remove, updateMeta: v.updateMeta, clear: v.clear };
+/**
+ * Subscribe to a derived slice of cart state.
+ * The component only re-renders when the selected value actually changes
+ * (Object.is comparison).
+ */
+function useCartSelector<T>(selector: (lines: CartLine[]) => T): T {
+  const { subscribe, getSnapshot } = useCtx();
+  // Cache the last selection so identical objects (e.g. find() returning
+  // the same line ref) don't cause spurious updates between snapshots.
+  const lastRef = useRef<{ lines: CartLine[]; value: T } | null>(null);
+  const getSelected = () => {
+    const lines = getSnapshot();
+    if (lastRef.current && lastRef.current.lines === lines) {
+      return lastRef.current.value;
+    }
+    const value = selector(lines);
+    if (lastRef.current && Object.is(lastRef.current.value, value)) {
+      // Keep stable reference so React bails out
+      lastRef.current = { lines, value: lastRef.current.value };
+      return lastRef.current.value;
+    }
+    lastRef.current = { lines, value };
+    return value;
+  };
+  return useSyncExternalStore(subscribe, getSelected, serverSnapshot as () => T);
+}
+
+/** Full lines array. Use sparingly — re-renders on every cart change. */
+export const useCartLines = () => useCartSelector((lines) => lines);
+
+export const useCartCount = () =>
+  useCartSelector((lines) => lines.reduce((s, l) => s + l.qty, 0));
+
+export const useCartTotal = () =>
+  useCartSelector((lines) =>
+    lines.reduce(
+      (s, l) => s + l.qty * (l.meta?.unitPrice ?? l.product.price),
+      0,
+    ),
+  );
+
+/** Per-product qty selector — ideal for ProductCard. */
+export const useCartLineQty = (productId: string) =>
+  useCartSelector(
+    (lines) => lines.find((l) => l.product.id === productId)?.qty ?? 0,
+  );
+
+/** Stable cart actions. Never causes a re-render. */
+export const useCartActions = (): CartActions => useCtx().actions;
+
+/**
+ * Backwards-compat hook: returns the same shape as the original useCart().
+ * Components that read `lines`, `count`, `total` will re-render on cart changes
+ * (same as before). Prefer the granular selectors above for hot paths.
+ */
+export const useCart = () => {
+  const lines = useCartLines();
+  const count = useCartCount();
+  const total = useCartTotal();
+  const actions = useCartActions();
+  return { lines, count, total, ...actions };
 };
