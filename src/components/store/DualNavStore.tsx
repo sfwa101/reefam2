@@ -150,62 +150,67 @@ const DualNavStore = ({
 
       {intro}
 
-      {/* Sticky DUAL nav — main rail + sub rail (offset slightly below header) */}
+      {/* Sticky DUAL nav — premium glassmorphism, detached from header */}
       <div className="fixed inset-x-0 z-30" style={{ top: `${HEADER_OFFSET + HEADER_GAP}px` }}>
-        <div className="mx-auto max-w-md">
-          {/* Main rail */}
+        <div className="mx-auto max-w-md px-2">
           <div
-            className="rounded-t-[20px] px-3 pt-2 pb-1.5"
+            className="overflow-hidden rounded-[22px] ring-1 ring-border/40"
             style={{
-              background: `hsl(var(--card) / 0.96)`,
-              backdropFilter: "saturate(180%) blur(24px)",
-              WebkitBackdropFilter: "saturate(180%) blur(24px)",
-              boxShadow: "0 4px 14px -10px rgba(0,0,0,0.18)",
+              boxShadow:
+                "0 12px 40px -18px rgba(0,0,0,0.22), 0 2px 8px -4px rgba(0,0,0,0.08)",
             }}
           >
-            <div ref={mainBarRef} className="-mx-3 flex gap-1.5 overflow-x-auto px-3 no-scrollbar">
-              {supermarketTaxonomy.map((g) => {
-                const isActive = g.id === activeGroup.id;
-                const enabled = grouped.some((x) => x.group.id === g.id);
-                return (
-                  <button
-                    key={g.id}
-                    data-main={g.id}
-                    onClick={() => enabled && jumpToGroup(g.id)}
-                    disabled={!enabled}
-                    type="button"
-                    className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11.5px] font-extrabold transition-colors duration-150 active:scale-[0.97] touch-manipulation ${
-                      enabled ? "" : "opacity-35"
-                    } ${isActive ? "shadow-pill" : "bg-foreground/5 text-foreground/80"}`}
-                    style={
-                      isActive
-                        ? {
-                            background: `hsl(${g.color.tint})`,
-                            color: `hsl(${g.color.hue})`,
-                            boxShadow: `0 6px 18px -10px hsl(${g.color.hue} / 0.55)`,
-                          }
-                        : undefined
-                    }
-                  >
-                    <span aria-hidden className="text-[13px] leading-none">{g.emoji}</span>
-                    <span>{g.name}</span>
-                  </button>
-                );
-              })}
+            {/* Main rail */}
+            <div
+              className="px-3 pt-2.5 pb-2"
+              style={{
+                background: `hsl(var(--card) / 0.78)`,
+                backdropFilter: "saturate(190%) blur(28px)",
+                WebkitBackdropFilter: "saturate(190%) blur(28px)",
+              }}
+            >
+              <div ref={mainBarRef} className="-mx-3 flex gap-1.5 overflow-x-auto px-3 no-scrollbar">
+                {supermarketTaxonomy.map((g) => {
+                  const isActive = g.id === activeGroup.id;
+                  const enabled = grouped.some((x) => x.group.id === g.id);
+                  return (
+                    <button
+                      key={g.id}
+                      data-main={g.id}
+                      onClick={() => enabled && jumpToGroup(g.id)}
+                      disabled={!enabled}
+                      type="button"
+                      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-[11.5px] font-extrabold transition-colors duration-150 active:scale-[0.97] touch-manipulation ${
+                        enabled ? "" : "opacity-35"
+                      } ${isActive ? "shadow-pill" : "bg-foreground/5 text-foreground/80"}`}
+                      style={
+                        isActive
+                          ? {
+                              background: `hsl(${g.color.tint})`,
+                              color: `hsl(${g.color.hue})`,
+                              boxShadow: `0 6px 18px -10px hsl(${g.color.hue} / 0.55)`,
+                            }
+                          : undefined
+                      }
+                    >
+                      <span aria-hidden className="text-[13px] leading-none">{g.emoji}</span>
+                      <span>{g.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Sub rail */}
-          <div
-            className="rounded-b-[20px] px-3 py-1.5"
-            style={{
-              background: `hsl(var(--background) / 0.95)`,
-              backdropFilter: "saturate(180%) blur(20px)",
-              WebkitBackdropFilter: "saturate(180%) blur(20px)",
-              boxShadow: "0 8px 18px -14px rgba(0,0,0,0.22)",
-              borderBottom: `1px solid hsl(${activeGroup.color.ring} / 0.45)`,
-            }}
-          >
+            {/* Sub rail */}
+            <div
+              className="px-3 py-2"
+              style={{
+                background: `hsl(var(--background) / 0.72)`,
+                backdropFilter: "saturate(180%) blur(22px)",
+                WebkitBackdropFilter: "saturate(180%) blur(22px)",
+                borderTop: `1px solid hsl(${activeGroup.color.ring} / 0.25)`,
+              }}
+            >
             <div ref={subBarRef} className="-mx-3 flex gap-3 overflow-x-auto px-3 no-scrollbar">
               {visibleSubs.length === 0 ? (
                 <span className="py-1.5 text-[11px] text-muted-foreground">لا توجد منتجات</span>
