@@ -25,7 +25,9 @@ import {
   bookingTimeSlots,
   formatBookingShort,
   DEPOSIT_THRESHOLD,
+  buildBookingDays,
 } from "@/lib/sweetsFulfillment";
+import type { CartLineMeta } from "@/context/CartContext";
 
 const WA_NUMBER = "201080068689";
 const GIFT_BONUS = 200; // gift threshold = free-delivery + this
@@ -57,14 +59,30 @@ const NumberFlow = ({ value, className = "" }: { value: number; className?: stri
 
 /* -------- Swipeable cart line -------- */
 const CartLineItem = ({
-  l, setQty, remove,
+  l, setQty, remove, updateMeta,
 }: {
-  l: { product: Product; qty: number };
+  l: { product: Product; qty: number; meta?: CartLineMeta };
   setQty: (id: string, q: number) => void;
   remove: (id: string) => void;
+  updateMeta: (id: string, meta: CartLineMeta) => void;
 }) => {
   const x = useMotionValue(0);
   const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.6, 0]);
+  const unitPrice = l.meta?.unitPrice ?? l.product.price;
+
+  // Booking edit panel state — only relevant for Type C lines
+  const isBooking = isSweetsProduct(l.product.source) &&
+    fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C";
+  const [editOpen, setEditOpen] = useState(false);
+  const days = useMemo(() => buildBookingDays(7), []);
+  const currentDateIdx = Math.max(
+    0,
+    days.findIndex((d) => d.toISOString().slice(0, 10) === l.meta?.bookingDate),
+  );
+  const lineSubtotal = unitPrice * l.qty;
+  const depositRequired = isBooking && lineSubtotal >= DEPOSIT_THRESHOLD;
+  const payDeposit = isBooking && (depositRequired || (l.meta?.payDeposit ?? true));
+  const shipMode = (l.meta?.shipMode ?? "split") as "split" | "wait";
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
@@ -89,8 +107,9 @@ const CartLineItem = ({
             animate(x, 0, { type: "spring", damping: 28, stiffness: 320 });
           }
         }}
-        className="relative flex gap-3 rounded-2xl bg-card p-3 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.12)] ring-1 ring-border/30"
+        className="relative flex flex-col gap-3 rounded-2xl bg-card p-3 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.12)] ring-1 ring-border/30"
       >
+       <div className="flex gap-3">
         <img src={l.product.image} alt="" className="h-20 w-20 shrink-0 rounded-xl object-cover" />
         <div className="flex flex-1 flex-col">
           <div className="flex items-start justify-between gap-2">
@@ -104,9 +123,30 @@ const CartLineItem = ({
             </button>
           </div>
           <p className="text-[10px] text-muted-foreground">{l.product.unit}</p>
+          {/* Selected variant + addons */}
+          {(l.meta?.variantId || l.meta?.addonIds?.length) && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {l.meta?.variantId && (() => {
+                const v = l.product.variants?.find((x) => x.id === l.meta?.variantId);
+                return v ? (
+                  <span className="rounded-md bg-violet-500/10 px-1.5 py-0.5 text-[9px] font-extrabold text-violet-700 dark:text-violet-300">
+                    {v.label}
+                  </span>
+                ) : null;
+              })()}
+              {l.meta?.addonIds?.map((id) => {
+                const a = l.product.addons?.find((x) => x.id === id);
+                return a ? (
+                  <span key={id} className="rounded-md bg-foreground/5 px-1.5 py-0.5 text-[9px] font-extrabold text-foreground/80">
+                    + {a.label}
+                  </span>
+                ) : null;
+              })}
+            </div>
+          )}
           <div className="mt-auto flex items-center justify-between pt-2">
             <span className="font-display text-base font-extrabold text-primary">
-              <NumberFlow value={l.product.price * l.qty} /> <span className="text-[10px] font-bold text-muted-foreground">ج.م</span>
+              <NumberFlow value={unitPrice * l.qty} /> <span className="text-[10px] font-bold text-muted-foreground">ج.م</span>
             </span>
             <div className="flex items-center gap-1 rounded-[12px] bg-foreground/5 p-0.5">
               <button
@@ -127,6 +167,163 @@ const CartLineItem = ({
             </div>
           </div>
         </div>
+       </div>
+
+       {/* Type C booking summary + edit panel */}
+       {isBooking && (
+         <div className="rounded-[14px] bg-violet-500/8 ring-1 ring-violet-500/20">
+           <button
+             type="button"
+             onClick={() => setEditOpen((v) => !v)}
+             className="flex w-full items-center justify-between gap-2 px-3 py-2 text-right"
+           >
+             <div className="flex min-w-0 items-center gap-2">
+               <CalendarDays className="h-3.5 w-3.5 shrink-0 text-violet-600" />
+               <div className="min-w-0">
+                 <p className="truncate text-[11px] font-extrabold text-violet-700 dark:text-violet-300">
+                   {l.meta?.bookingDate
+                     ? formatBookingShort(new Date(l.meta.bookingDate))
+                     : "اختر موعد الاستلام"}
+                   {" · "}
+                   {bookingTimeSlots.find((s) => s.id === l.meta?.bookingSlot)?.label ?? "—"}
+                 </p>
+                 <p className="text-[9.5px] font-bold text-foreground/70">
+                   {payDeposit
+                     ? `عربون ${fmtMoney(Math.round(lineSubtotal * 0.5))} الآن · ${shipMode === "wait" ? "استلام كامل" : "استلام مُجزّأ"}`
+                     : `دفع كامل مقدماً · ${shipMode === "wait" ? "استلام كامل" : "استلام مُجزّأ"}`}
+                 </p>
+               </div>
+             </div>
+             <span className="rounded-md bg-violet-600 px-2 py-1 text-[9.5px] font-extrabold text-white">
+               {editOpen ? "إغلاق" : "تعديل"}
+             </span>
+           </button>
+
+           <AnimatePresence initial={false}>
+             {editOpen && (
+               <motion.div
+                 initial={{ height: 0, opacity: 0 }}
+                 animate={{ height: "auto", opacity: 1 }}
+                 exit={{ height: 0, opacity: 0 }}
+                 className="overflow-hidden border-t border-violet-500/15 px-3 py-3"
+               >
+                 {/* Date row */}
+                 <p className="mb-1.5 text-[10px] font-extrabold text-foreground/80">تاريخ الاستلام</p>
+                 <div className="-mx-3 mb-3 overflow-x-auto px-3">
+                   <div className="flex gap-1.5 pb-1">
+                     {days.map((d, i) => {
+                       const active = i === currentDateIdx;
+                       return (
+                         <button
+                           key={i}
+                           type="button"
+                           onClick={() =>
+                             updateMeta(l.product.id, {
+                               bookingDate: d.toISOString().slice(0, 10),
+                             })
+                           }
+                           className={`flex w-[58px] shrink-0 flex-col items-center rounded-[10px] border px-1 py-1.5 text-[9.5px] font-extrabold transition ${
+                             active
+                               ? "border-violet-500 bg-violet-500 text-white"
+                               : "border-border bg-background"
+                           }`}
+                         >
+                           <span className="opacity-80">
+                             {d.toLocaleDateString("ar-EG", { weekday: "short" })}
+                           </span>
+                           <span className="font-display text-[13px] tabular-nums">
+                             {toLatin(d.getDate())}
+                           </span>
+                         </button>
+                       );
+                     })}
+                   </div>
+                 </div>
+                 {/* Slot row */}
+                 <p className="mb-1.5 text-[10px] font-extrabold text-foreground/80">وقت الاستلام</p>
+                 <div className="mb-3 grid grid-cols-2 gap-1.5">
+                   {bookingTimeSlots.map((s) => {
+                     const active = s.id === l.meta?.bookingSlot;
+                     return (
+                       <button
+                         key={s.id}
+                         type="button"
+                         onClick={() => updateMeta(l.product.id, { bookingSlot: s.id })}
+                         className={`rounded-[10px] border px-2 py-1.5 text-[10px] font-extrabold transition ${
+                           active
+                             ? "border-violet-500 bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300"
+                             : "border-border bg-background text-foreground"
+                         }`}
+                       >
+                         {s.label}
+                       </button>
+                     );
+                   })}
+                 </div>
+                 {/* Ship mode */}
+                 <p className="mb-1.5 text-[10px] font-extrabold text-foreground/80">طريقة الوصول</p>
+                 <div className="mb-3 grid grid-cols-2 gap-1.5">
+                   {([
+                     { id: "split", label: "على دفعتين" },
+                     { id: "wait", label: "كل الطلب معاً" },
+                   ] as const).map((m) => {
+                     const active = shipMode === m.id;
+                     return (
+                       <button
+                         key={m.id}
+                         type="button"
+                         onClick={() => updateMeta(l.product.id, { shipMode: m.id })}
+                         className={`rounded-[10px] border px-2 py-1.5 text-[10px] font-extrabold transition ${
+                           active
+                             ? "border-violet-500 bg-violet-500 text-white"
+                             : "border-border bg-background text-foreground"
+                         }`}
+                       >
+                         {m.label}
+                       </button>
+                     );
+                   })}
+                 </div>
+                 {/* Payment plan */}
+                 <p className="mb-1.5 text-[10px] font-extrabold text-foreground/80">
+                   خطة الدفع
+                   {depositRequired && (
+                     <span className="ms-1 rounded-md bg-amber-500/20 px-1 py-0.5 text-[8.5px] text-amber-800 dark:text-amber-300">
+                       عربون إجباري
+                     </span>
+                   )}
+                 </p>
+                 <div className="grid grid-cols-2 gap-1.5">
+                   {([
+                     { id: true, label: `عربون 50٪ · ${toLatin(Math.round(lineSubtotal * 0.5))} ج` },
+                     { id: false, label: `كامل المبلغ · ${toLatin(lineSubtotal)} ج` },
+                   ] as const).map((opt) => {
+                     const active = payDeposit === opt.id;
+                     const disabled = depositRequired && opt.id === false;
+                     return (
+                       <button
+                         key={String(opt.id)}
+                         type="button"
+                         disabled={disabled}
+                         onClick={() =>
+                           !disabled && updateMeta(l.product.id, { payDeposit: opt.id })
+                         }
+                         className={`rounded-[10px] border px-2 py-1.5 text-[10px] font-extrabold tabular-nums transition ${
+                           active
+                             ? "border-violet-500 bg-violet-500 text-white"
+                             : "border-border bg-background text-foreground"
+                         } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+                       >
+                         {opt.label}
+                       </button>
+                     );
+                   })}
+                 </div>
+               </motion.div>
+             )}
+           </AnimatePresence>
+         </div>
+       )}
       </motion.div>
     </div>
   );
