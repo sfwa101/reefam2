@@ -111,7 +111,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo<CartCtx>(() => {
     const count = lines.reduce((s, l) => s + l.qty, 0);
-    const total = lines.reduce((s, l) => s + l.qty * l.product.price, 0);
+    const total = lines.reduce(
+      (s, l) => s + l.qty * (l.meta?.unitPrice ?? l.product.price),
+      0,
+    );
     return { lines, count, total, add, remove, setQty, updateMeta, clear };
   }, [lines, add, remove, setQty, updateMeta, clear]);
 
