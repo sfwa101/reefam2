@@ -20,7 +20,166 @@ type Recipe = {
   baseServings: number;
   cookTime: number;
   calories: number;
-  ingredients: { id: string; name: string; cost: number }[];
+  ingredients: { id: string; name: string; cost: number; essential?: boolean }[];
+};
+
+// ===== Per-recipe content: nutrition, steps, video, kitchen tools =====
+type Nutrition = { protein: number; carbs: number; fat: number; fiber: number };
+type ToolItem = {
+  id: string;
+  name: string;
+  /** Product id in Kitchen-Tools store, if available for purchase */
+  productId?: string;
+  /** Suggested retail price (EGP) when available */
+  price?: number;
+  /** Image url (optional) */
+  image?: string;
+  /** Cheaper / acceptable alternatives (text only) */
+  alternatives?: string[];
+};
+type RecipeContent = {
+  nutrition: Nutrition;
+  prepTime: number;     // minutes (separate from cookTime)
+  difficulty: "سهل" | "متوسط" | "متقدم";
+  videoUrl?: string;    // mp4 / youtube embed
+  steps: string[];
+  tools: ToolItem[];
+};
+
+// Default tool catalog — products that exist (or could exist) in "ادوات المطبخ"
+const TOOLS = {
+  pan:       { id: "t-pan",       name: "مقلاة تيفال ٢٤سم",       productId: "kt-pan-24",     price: 380, alternatives: ["أي مقلاة قاعها سميك"] },
+  nonstick:  { id: "t-nonstick",  name: "مقلاة جرانيت غير لاصقة", productId: "kt-pan-granite",price: 520, alternatives: ["مقلاة تيفال عادية"] },
+  pot:       { id: "t-pot",       name: "حلة استانلس ٤ لتر",       productId: "kt-pot-4l",     price: 620, alternatives: ["أي حلة بقاع سميك"] },
+  ovenTray:  { id: "t-tray",      name: "صينية فرن مينا",          productId: "kt-tray-bake", price: 280, alternatives: ["صينية ألومنيوم"] },
+  grill:     { id: "t-grill",     name: "مشواية حديد مضلعة",       productId: "kt-grill-pan", price: 540, alternatives: ["شواية كهربائية"] },
+  blender:   { id: "t-blender",   name: "خلاط كهربائي ٧٠٠وات",     productId: "kt-blender",   price: 850, alternatives: ["محضر طعام يدوي"] },
+  bowl:      { id: "t-bowl",      name: "بول تقديم سيراميك",       productId: "kt-bowl-cer",  price: 140, alternatives: ["أي بول عميق"] },
+  knife:     { id: "t-knife",     name: "سكين شيف ٢٠سم",           productId: "kt-knife-chef",price: 320, alternatives: ["أي سكين حاد"] },
+  board:     { id: "t-board",     name: "لوح تقطيع خشبي",          productId: "kt-board",     price: 180, alternatives: ["لوح بلاستيك"] },
+  whisk:     { id: "t-whisk",     name: "مضرب يدوي",               productId: "kt-whisk",     price: 90,  alternatives: ["شوكة كبيرة"] },
+  measuring: { id: "t-measure",   name: "أكواب وملاعق قياس",        productId: "kt-measure",   price: 110, alternatives: ["تقدير يدوي"] },
+} satisfies Record<string, ToolItem>;
+
+const RECIPE_CONTENT: Record<string, RecipeContent> = {
+  "r-eggs": {
+    nutrition: { protein: 22, carbs: 6, fat: 24, fiber: 2 },
+    prepTime: 5, difficulty: "سهل",
+    videoUrl: "https://www.youtube.com/embed/PUP7U5vTMM0",
+    steps: [
+      "اخفقي البيض مع الملح والفلفل في بول.",
+      "سخّني المقلاة على نار متوسطة وأضيفي زيت الزيتون.",
+      "اسكبي البيض ثم وزّعي الخضار والجبنة فوقه.",
+      "اطوي الأومليت بلطف بعد ٣ دقائق وقدميه ساخنًا.",
+    ],
+    tools: [TOOLS.nonstick, TOOLS.whisk, TOOLS.bowl],
+  },
+  "r-cereal": {
+    nutrition: { protein: 14, carbs: 58, fat: 9, fiber: 7 },
+    prepTime: 5, difficulty: "سهل",
+    steps: [
+      "ضعي الزبادي اليوناني في قاع البول.",
+      "أضيفي الجرانولا فوقه ثم الفواكه الموسمية.",
+      "زيّني بالعسل والمكسرات وقدميه فورًا.",
+    ],
+    tools: [TOOLS.bowl, TOOLS.measuring],
+  },
+  "r-bread": {
+    nutrition: { protein: 16, carbs: 36, fat: 22, fiber: 6 },
+    prepTime: 5, difficulty: "سهل",
+    steps: [
+      "حمّصي شرائح الخبز قليلًا.",
+      "اهرسي الأفوكادو مع الملح والليمون.",
+      "وزّعي الأفوكادو على الخبز ثم شرائح الحلوم والطماطم.",
+    ],
+    tools: [TOOLS.knife, TOOLS.board, TOOLS.nonstick],
+  },
+  "r-chicken": {
+    nutrition: { protein: 42, carbs: 38, fat: 18, fiber: 5 },
+    prepTime: 15, difficulty: "متوسط",
+    videoUrl: "https://www.youtube.com/embed/g0sXuc0wO5o",
+    steps: [
+      "تبّلي صدور الدجاج بالأعشاب والثوم والليمون لمدة ١٥ دقيقة.",
+      "حمّري الدجاج على المشواية ٤ دقائق لكل جانب.",
+      "اطهي الأرز البسمتي مع رشة ملح وزيت زيتون.",
+      "حمّصي الخضار في الفرن مع زيت الزيتون لمدة ٢٠ دقيقة.",
+      "قدّمي الدجاج فوق الأرز مع الخضار والصلصة الجانبية.",
+    ],
+    tools: [TOOLS.grill, TOOLS.pot, TOOLS.ovenTray, TOOLS.knife],
+  },
+  "r-pasta": {
+    nutrition: { protein: 18, carbs: 62, fat: 24, fiber: 4 },
+    prepTime: 8, difficulty: "سهل",
+    videoUrl: "https://www.youtube.com/embed/Q6xpxDZUz4M",
+    steps: [
+      "اسلقي الباستا في ماء مملح حتى تنضج (al dente).",
+      "حمّري الفطر مع الثوم في زيت زيتون.",
+      "أضيفي الكريمة وحرّكي حتى تكثف الصلصة.",
+      "أضيفي الباستا والبارميزان وحرّكي قبل التقديم.",
+    ],
+    tools: [TOOLS.pot, TOOLS.nonstick, TOOLS.measuring],
+  },
+  "r-bowl": {
+    nutrition: { protein: 16, carbs: 48, fat: 18, fiber: 9 },
+    prepTime: 10, difficulty: "سهل",
+    steps: [
+      "اطهي الكينوا حسب التعليمات واتركيها لتبرد قليلًا.",
+      "حمّصي الحمص والخضار في الفرن مع زيت الزيتون.",
+      "رتّبي البول: أوراق خضراء، كينوا، حمص، خضار، فيتا.",
+      "أضيفي تتبيلة الطحينة وحبة البركة قبل التقديم.",
+    ],
+    tools: [TOOLS.bowl, TOOLS.ovenTray, TOOLS.pot],
+  },
+  "r-salmon": {
+    nutrition: { protein: 38, carbs: 22, fat: 26, fiber: 4 },
+    prepTime: 10, difficulty: "متوسط",
+    videoUrl: "https://www.youtube.com/embed/scnq9oCXLwM",
+    steps: [
+      "تبّلي السلمون بالملح والفلفل والليمون.",
+      "اشوي السلمون على نار متوسطة ٤ دقائق لكل جانب.",
+      "اسلقي البطاطس الصغيرة ثم حمّريها بالزبدة والأعشاب.",
+      "اشوي الأسباراجوس سريعًا وقدميه بجانب السلمون.",
+    ],
+    tools: [TOOLS.grill, TOOLS.nonstick, TOOLS.pot],
+  },
+  "r-risotto": {
+    nutrition: { protein: 18, carbs: 72, fat: 22, fiber: 3 },
+    prepTime: 10, difficulty: "متقدم",
+    videoUrl: "https://www.youtube.com/embed/q5dQVb3qQ4M",
+    steps: [
+      "حمّري الكراث والثوم في الزبدة.",
+      "أضيفي الأرز وحرّكي دقيقتين ثم اسكبي النبيذ.",
+      "أضيفي مرق الخضار تدريجيًا مع التحريك المستمر.",
+      "أضيفي الفطر والبارميزان في النهاية وقدميه ساخنًا.",
+    ],
+    tools: [TOOLS.pot, TOOLS.measuring, TOOLS.whisk],
+  },
+  "r-beef": {
+    nutrition: { protein: 48, carbs: 32, fat: 38, fiber: 4 },
+    prepTime: 15, difficulty: "متقدم",
+    videoUrl: "https://www.youtube.com/embed/AmC9SmCBUj4",
+    steps: [
+      "أخرجي الستيك من الثلاجة قبل ٣٠ دقيقة من الطهي.",
+      "تبّليه بالملح البحري والفلفل وادهنيه بالزيت.",
+      "اشوي الستيك على نار عالية ٣–٤ دقائق لكل جانب.",
+      "اتركيه يرتاح ٥ دقائق ثم قدميه مع الخضار وصلصة الفلفل.",
+    ],
+    tools: [TOOLS.grill, TOOLS.knife, TOOLS.board, TOOLS.ovenTray],
+  },
+};
+
+// IDs of ingredients considered essential (cannot be removed) per recipe.
+// Heuristic: the first 2 ingredients (main protein/carb base) are essential.
+const ESSENTIAL_INGREDIENT_IDS: Record<string, string[]> = {
+  "r-eggs":    ["i1", "i4"],          // بيض + زيت
+  "r-cereal":  ["i1", "i2"],          // جرانولا + زبادي
+  "r-bread":   ["i1", "i3"],          // خبز + أفوكادو
+  "r-chicken": ["i1", "i2"],          // دجاج + أرز
+  "r-pasta":   ["i1", "i3"],          // باستا + كريمة
+  "r-bowl":    ["i1", "i2"],          // كينوا + حمص
+  "r-salmon":  ["i1"],                // السلمون
+  "r-risotto": ["i1", "i2"],          // أرز أربوريو + فطر
+  "r-beef":    ["i1"],                // الستيك
 };
 
 import pChicken from "@/assets/p-grilled-chicken.jpg";
