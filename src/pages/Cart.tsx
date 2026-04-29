@@ -21,7 +21,6 @@ import {
 import {
   computeSweetsRules,
   fulfillmentTypeFor,
-  fulfillmentMeta,
   isSweetsProduct,
   bookingTimeSlots,
   formatBookingShort,
