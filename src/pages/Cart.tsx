@@ -440,16 +440,18 @@ const Cart = () => {
   useEffect(() => {
     if (!user) { setAddresses([]); setAddrId(""); setWalletBalance(0); return; }
     (async () => {
-      const [{ data: addrData }, { data: balData }, { data: profileData }] = await Promise.all([
+      const [{ data: addrData }, { data: balData }, { data: profileData }, { data: trustData }] = await Promise.all([
         supabase.from("addresses").select("id,label,city,district,street,building,is_default").eq("user_id", user.id).order("is_default", { ascending: false }),
         supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        supabase.rpc("user_trust_limit", { _user_id: user.id }),
       ]);
       const list = (addrData as Addr[]) ?? [];
       setAddresses(list);
       const def = list.find((a) => a.is_default) ?? list[0];
       if (def) setAddrId(def.id);
       setWalletBalance(Number(balData?.balance ?? 0));
+      setTrustLimit(Number(trustData ?? 0));
       setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
     })();
   }, [user]);
