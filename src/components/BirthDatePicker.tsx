@@ -67,9 +67,9 @@ const BirthDatePicker = ({ value, onChange, minDate, maxDate, className }: Props
             selected={draft}
             onSelect={setDraft}
             defaultMonth={draft ?? new Date(safeMax.getFullYear() - 25, 0, 1)}
-            captionLayout="dropdown-buttons"
-            fromYear={safeMin.getFullYear()}
-            toYear={safeMax.getFullYear()}
+            captionLayout="dropdown"
+            startMonth={safeMin}
+            endMonth={safeMax}
             disabled={(d) => d < safeMin || d > safeMax}
             initialFocus
             className={cn("p-3 pointer-events-auto")}
