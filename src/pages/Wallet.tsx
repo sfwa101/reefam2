@@ -173,7 +173,14 @@ const Wallet = () => {
               </div>
               <span className="text-[11px] font-bold tracking-wider text-white/85">REEF · WALLET</span>
             </div>
-            <CreditCard className="h-5 w-5 text-white/60" />
+            <div className="flex items-center gap-2">
+              {tier && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-extrabold text-white backdrop-blur">
+                  {tier.label} · {toLatin(tier.multiplier)}x
+                </span>
+              )}
+              <CreditCard className="h-5 w-5 text-white/60" />
+            </div>
           </div>
 
           <p className="mt-4 text-[11px] font-bold text-white/70">الرصيد المتاح</p>
