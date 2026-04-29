@@ -8,7 +8,9 @@ export type ColorTheme =
   | "blush"
   | "lavender"
   | "mint"
-  | "peach";
+  | "peach"
+  | "plum"
+  | "navy";
 export type Mode = "light" | "dark" | "system";
 
 type ThemeCtx = {
@@ -22,16 +24,28 @@ type ThemeCtx = {
 const Ctx = createContext<ThemeCtx | null>(null);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // SSR-safe defaults; hydrate from localStorage on mount
+  // SSR-safe defaults; hydrate from localStorage on mount.
+  // STRICT: First app launch is ALWAYS light + sage — never auto-pick system dark.
   const [mode, setModeState] = useState<Mode>("light");
   const [colorTheme, setColorThemeState] = useState<ColorTheme>("sage");
   const [systemMode, setSystemMode] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const storedMode = (localStorage.getItem("reef-mode") as Mode | null) || "light";
-    const storedColor = (localStorage.getItem("reef-color") as ColorTheme | null) || "sage";
-    setModeState(storedMode);
-    setColorThemeState(storedColor);
+    const storedMode = localStorage.getItem("reef-mode") as Mode | null;
+    const storedColor = localStorage.getItem("reef-color") as ColorTheme | null;
+    // First launch → persist light/sage explicitly so we never re-evaluate system pref.
+    if (!storedMode) {
+      localStorage.setItem("reef-mode", "light");
+      setModeState("light");
+    } else {
+      setModeState(storedMode);
+    }
+    if (!storedColor) {
+      localStorage.setItem("reef-color", "sage");
+      setColorThemeState("sage");
+    } else {
+      setColorThemeState(storedColor);
+    }
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     setSystemMode(mq.matches ? "dark" : "light");
