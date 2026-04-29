@@ -40,11 +40,16 @@ export default function Products() {
   useEffect(() => {
     Promise.all([
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (supabase as any).from("products").select("id,name,description,price,compare_at_price,stock,image_url,status,unit,category_id").order("created_at", { ascending: false }),
+      (supabase as any).from("products").select("id,name,description,price,compare_at_price,stock,image,image_url,is_active,unit,category_id").order("created_at", { ascending: false }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (supabase as any).from("categories").select("id,name,icon").order("sort_order"),
     ]).then(([p, c]: any[]) => {
-      setProducts(p.data ?? []);
+      const rows = (p.data ?? []).map((r: any) => ({
+        ...r,
+        image_url: r.image_url ?? r.image ?? null,
+        status: !r.is_active ? "archived" : (r.stock ?? 0) <= 0 ? "out_of_stock" : "active",
+      }));
+      setProducts(rows);
       setCategories(c.data ?? []);
     });
   }, []);
