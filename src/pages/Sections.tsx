@@ -1,19 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import {
-  ChefHat,
-  Sprout,
-  Apple,
-  Milk,
-  Beef,
-  Sparkles,
-  UtensilsCrossed,
-  Cake,
-  Package,
-  ShoppingBag,
-  Ticket,
-  GraduationCap,
-  Pill,
-  Gift,
   Wheat,
   Boxes,
   Cookie,
@@ -21,11 +8,13 @@ import {
   CupSoda,
   Baby,
   PartyPopper,
-  Wrench,
   SprayCan,
   Crown,
-  ShoppingBasket,
+  Sparkles,
   ChevronLeft,
+  Ticket,
+  Package,
+  ArrowLeft,
   type LucideIcon,
 } from "lucide-react";
 
@@ -41,40 +30,32 @@ import tileBaskets from "@/assets/tile-baskets.jpg";
 import tileRecipes from "@/assets/tile-recipes.jpg";
 import tileWholesale from "@/assets/tile-wholesale.jpg";
 import tileSubscription from "@/assets/tile-subscription.jpg";
+import tilePharmacy from "@/assets/tile-pharmacy.jpg";
+import tileLibrary from "@/assets/tile-library.jpg";
+import tileHome from "@/assets/tile-home.jpg";
+import tileGifts from "@/assets/tile-gifts.jpg";
 
 /* ------------------------------------------------------------------ */
-/* Premium adaptive palette — soft, low-saturation, high-brightness    */
-/* tints that re-introduce identity per section without shouting.      */
+/* Adaptive accent palette (kept for chips + smart-shopping cards)     */
 /* ------------------------------------------------------------------ */
 
-type Accent = {
-  /** soft surface background (light mode) */
-  surface: string;
-  /** icon + accent ink color */
-  ink: string;
-  /** colored shadow tint */
-  shadow: string;
-};
+type Accent = { surface: string; ink: string; shadow: string };
 
-const accents: Record<string, Accent> = {
-  sage:  { surface: "140 38% 94%", ink: "150 45% 30%", shadow: "150 45% 30%" },
-  olive: { surface: "70 35% 92%",  ink: "85 38% 28%",  shadow: "85 38% 28%" },
+const accents = {
+  sand:  { surface: "40 45% 93%",  ink: "32 38% 30%", shadow: "32 35% 30%" },
+  steel: { surface: "215 22% 92%", ink: "215 28% 28%", shadow: "215 25% 28%" },
+  honey: { surface: "45 65% 90%",  ink: "35 65% 36%",  shadow: "35 60% 36%" },
   amber: { surface: "38 65% 92%",  ink: "30 60% 36%",  shadow: "30 55% 36%" },
-  terra: { surface: "18 55% 93%",  ink: "14 55% 36%",  shadow: "14 50% 36%" },
+  ocean: { surface: "200 42% 92%", ink: "205 50% 30%", shadow: "205 45% 30%" },
   rose:  { surface: "350 50% 94%", ink: "345 45% 40%", shadow: "345 45% 40%" },
   plum:  { surface: "295 32% 93%", ink: "290 35% 36%", shadow: "290 35% 36%" },
-  ocean: { surface: "200 42% 92%", ink: "205 50% 30%", shadow: "205 45% 30%" },
   mint:  { surface: "162 38% 92%", ink: "168 42% 28%", shadow: "168 40% 28%" },
-  sand:  { surface: "40 45% 93%",  ink: "32 38% 30%",  shadow: "32 35% 30%" },
-  steel: { surface: "215 22% 92%", ink: "215 28% 28%", shadow: "215 25% 28%" },
-  brick: { surface: "8 48% 93%",   ink: "5 50% 36%",   shadow: "5 50% 36%" },
-  honey: { surface: "45 65% 90%",  ink: "35 65% 36%",  shadow: "35 60% 36%" },
-};
+} as const satisfies Record<string, Accent>;
 
 type AccentKey = keyof typeof accents;
 
 /* ------------------------------------------------------------------ */
-/* Hero (large) cards — image-driven, span 2 cols                      */
+/* Image-driven cards                                                  */
 /* ------------------------------------------------------------------ */
 
 type HeroCard = {
@@ -83,14 +64,11 @@ type HeroCard = {
   desc: string;
   to: string;
   image: string;
-  /** gradient overlay tint (HSL string) */
   overlay: string;
   badge?: string;
-  /** "wide" = full row, "tall" = 1 col span 2 rows, "half" = 1 col 1 row */
-  size: "wide" | "tall" | "half";
 };
 
-const heroPrimary: HeroCard[] = [
+const heroPrimary: (HeroCard & { size: "wide" | "tall" | "half" })[] = [
   {
     id: "village",
     title: "منتجات القرية",
@@ -131,21 +109,7 @@ const heroPrimary: HeroCard[] = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/* Medium image cards — 2 per row                                      */
-/* ------------------------------------------------------------------ */
-
-type MidCard = {
-  id: string;
-  title: string;
-  desc: string;
-  to: string;
-  image: string;
-  overlay: string;
-  badge?: string;
-};
-
-const heroSecondary: MidCard[] = [
+const heroSecondary: HeroCard[] = [
   { id: "dairy",       title: "الألبان",        desc: "من المزرعة مباشرة",     to: "/store/dairy",       image: tileDairy,       overlay: "32 45% 16%" },
   { id: "meat",        title: "اللحوم",         desc: "طازجة وموثوقة",          to: "/store/meat",        image: tileMeat,        overlay: "5 50% 12%" },
   { id: "restaurants", title: "مطاعم مختارة",   desc: "أفضل مطاعم المدينة",     to: "/store/restaurants", image: tileRestaurants, overlay: "200 45% 12%" },
@@ -154,30 +118,54 @@ const heroSecondary: MidCard[] = [
   { id: "recipes",     title: "وصفات الشيف",    desc: "أطباق بخطوات سهلة",      to: "/store/recipes",     image: tileRecipes,     overlay: "15 45% 16%" },
 ];
 
-/* ------------------------------------------------------------------ */
-/* Service cards — small tinted cards (NO images)                      */
-/* ------------------------------------------------------------------ */
-
-type ServiceCard = {
-  id: string;
-  title: string;
-  desc: string;
-  to: string;
-  icon: LucideIcon;
-  accent: AccentKey;
-};
-
-const services: ServiceCard[] = [
-  { id: "library",       title: "مكتبة الطلبة", desc: "قرطاسية وطباعة",   to: "/store/library",      icon: GraduationCap, accent: "ocean" },
-  { id: "pharmacy",      title: "الصيدلية",      desc: "صحتك أولاً",        to: "/store/pharmacy",     icon: Pill,          accent: "mint" },
-  { id: "gifts",         title: "الهدايا",        desc: "تغليف لكل مناسبة",  to: "/sub/gifts",          icon: Gift,          accent: "rose" },
-  { id: "home",          title: "أدوات المنزل",  desc: "كل ما يحتاجه البيت",to: "/store/home",         icon: Wrench,        accent: "steel" },
-  { id: "subscriptions", title: "الاشتراكات",    desc: "وفّر شهرياً",        to: "/store/subscription", icon: Ticket,        accent: "plum" },
-  { id: "wholesale",     title: "ريف الجملة",    desc: "وفّر بالكمية",       to: "/store/wholesale",    icon: Package,       accent: "amber" },
+/* Specialty stores — promoted from "services" to image hero cards */
+const specialty: HeroCard[] = [
+  { id: "pharmacy", title: "صيدلية ريف",      desc: "صحتك أولاً · فيتامينات وأدوية", to: "/store/pharmacy",  image: tilePharmacy, overlay: "168 40% 14%" },
+  { id: "library",  title: "مكتبة الطلبة",    desc: "قرطاسية وطباعة وأدوات مدرسية",   to: "/store/library",   image: tileLibrary,  overlay: "205 45% 14%" },
+  { id: "home",     title: "أدوات المنزل",    desc: "كل ما يحتاجه بيتك",              to: "/store/home",      image: tileHome,     overlay: "215 25% 14%", badge: "جديد" },
+  { id: "gifts",    title: "الهدايا والتغليف",desc: "تغليف فاخر لكل مناسبة",          to: "/sub/gifts",       image: tileGifts,    overlay: "345 40% 18%" },
 ];
 
 /* ------------------------------------------------------------------ */
-/* Pantry sub-categories — horizontal rail under Supermarket           */
+/* Smart shopping (subscriptions + wholesale)                          */
+/* ------------------------------------------------------------------ */
+
+type SmartCard = {
+  id: string;
+  title: string;
+  pitch: string;
+  saving: string;
+  to: string;
+  image: string;
+  gradient: string;
+  icon: LucideIcon;
+};
+
+const smartShopping: SmartCard[] = [
+  {
+    id: "subs",
+    title: "الاشتراكات الأسبوعية",
+    pitch: "اضمن حصتك أسبوعياً · توصيل تلقائي",
+    saving: "وفّر حتى 15%",
+    to: "/store/subscription",
+    image: tileSubscription,
+    gradient: "linear-gradient(135deg, hsl(150 50% 28%) 0%, hsl(165 45% 22%) 100%)",
+    icon: Ticket,
+  },
+  {
+    id: "wholesale",
+    title: "ريف الجملة",
+    pitch: "اشترِ بالكمية للبيت أو المشروع",
+    saving: "وفّر حتى 30%",
+    to: "/store/wholesale",
+    image: tileWholesale,
+    gradient: "linear-gradient(135deg, hsl(28 65% 32%) 0%, hsl(18 60% 24%) 100%)",
+    icon: Package,
+  },
+];
+
+/* ------------------------------------------------------------------ */
+/* Sub-rails                                                            */
 /* ------------------------------------------------------------------ */
 
 type PantryChip = { id: string; title: string; to: string; icon: LucideIcon; accent: AccentKey };
@@ -199,14 +187,54 @@ const personalRail: PantryChip[] = [
 ];
 
 /* ------------------------------------------------------------------ */
+/* Lazy image with shimmer skeleton                                    */
+/* ------------------------------------------------------------------ */
+
+const LazyImg = ({
+  src,
+  alt = "",
+  className = "",
+}: {
+  src: string;
+  alt?: string;
+  className?: string;
+}) => {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && (
+        <div
+          aria-hidden
+          className="absolute inset-0 animate-shimmer"
+          style={{
+            background:
+              "linear-gradient(110deg, hsl(var(--muted)) 8%, hsl(var(--muted-foreground) / 0.08) 18%, hsl(var(--muted)) 33%)",
+            backgroundSize: "200% 100%",
+          }}
+        />
+      )}
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        width={1024}
+        height={768}
+        onLoad={() => setLoaded(true)}
+        className={`${className} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}
+      />
+    </>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 
 const Sections = () => {
   const navigate = useNavigate();
-
   const go = (to: string) => navigate({ to: to as never });
 
-  // Hero card renderer (image background + gradient overlay)
-  const HeroTile = ({ card, className }: { card: HeroCard | MidCard; className: string }) => (
+  // Image hero card
+  const HeroTile = ({ card, className }: { card: HeroCard; className: string }) => (
     <button
       onClick={() => go(card.to)}
       className={`group relative overflow-hidden rounded-[26px] text-right ring-1 ring-black/5 transition-all duration-300 ease-apple hover:-translate-y-1 active:scale-[0.98] ${className}`}
@@ -216,15 +244,10 @@ const Sections = () => {
       }}
       aria-label={card.title}
     >
-      <img
+      <LazyImg
         src={card.image}
-        alt=""
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-        loading="lazy"
-        width={1024}
-        height={768}
       />
-      {/* gradient overlay for legibility + section identity */}
       <span
         aria-hidden
         className="absolute inset-0"
@@ -232,13 +255,11 @@ const Sections = () => {
           background: `linear-gradient(180deg, hsl(${card.overlay} / 0.05) 0%, hsl(${card.overlay} / 0.45) 55%, hsl(${card.overlay} / 0.88) 100%)`,
         }}
       />
-      {/* badge */}
       {card.badge && (
         <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-foreground shadow-sm backdrop-blur">
           {card.badge}
         </span>
       )}
-      {/* content */}
       <div className="relative flex h-full w-full flex-col justify-end p-4">
         <h3 className="font-display text-[19px] font-extrabold leading-tight text-white drop-shadow-sm">
           {card.title}
@@ -247,47 +268,54 @@ const Sections = () => {
           {card.desc}
         </p>
       </div>
-      {/* hover sheen */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ background: "linear-gradient(180deg, rgba(255,255,255,.08), transparent 40%)" }}
-      />
     </button>
   );
 
-  // Service tile (no image, tinted surface)
-  const ServiceTile = ({ s }: { s: ServiceCard }) => {
-    const a = accents[s.accent];
-    return (
-      <button
-        onClick={() => go(s.to)}
-        className="group relative flex items-center gap-3 overflow-hidden rounded-[20px] p-3.5 text-right ring-1 ring-border/50 transition-all duration-200 ease-apple hover:-translate-y-0.5 active:scale-[0.97]"
+  // Smart-shopping card (gradient + image, value-led)
+  const SmartTile = ({ s }: { s: SmartCard }) => (
+    <button
+      onClick={() => go(s.to)}
+      className="group relative h-[150px] overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-all duration-300 ease-apple hover:-translate-y-1 active:scale-[0.98]"
+      style={{
+        boxShadow:
+          "0 1px 2px rgba(0,0,0,.04), 0 10px 26px -12px rgba(0,0,0,.22), 0 28px 60px -28px rgba(0,0,0,.28)",
+      }}
+      aria-label={s.title}
+    >
+      <LazyImg
+        src={s.image}
+        className="absolute inset-0 h-full w-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-110"
+      />
+      <span aria-hidden className="absolute inset-0" style={{ background: s.gradient, opacity: 0.85 }} />
+      {/* shimmer light */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-1 opacity-30"
         style={{
-          background: `linear-gradient(180deg, hsl(${a.surface}) 0%, hsl(${a.surface} / 0.5) 100%)`,
-          boxShadow: `0 1px 2px hsl(${a.shadow} / 0.06), 0 10px 24px -14px hsl(${a.shadow} / 0.22)`,
+          background:
+            "radial-gradient(60% 50% at 80% 0%, rgba(255,255,255,.45) 0%, transparent 60%)",
         }}
-        aria-label={s.title}
-      >
-        <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/70 ring-1 ring-inset transition-transform duration-300 group-hover:scale-110 dark:bg-white/10"
-          style={{ boxShadow: `inset 0 0 0 1px hsl(${a.ink} / 0.1)` }}
-        >
-          <s.icon className="h-5 w-5" strokeWidth={2.1} style={{ color: `hsl(${a.ink})` }} />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate font-display text-[13.5px] font-extrabold leading-tight" style={{ color: `hsl(${a.ink})` }}>
+      />
+      <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-extrabold text-foreground shadow-sm">
+        💸 {s.saving}
+      </span>
+      <div className="relative flex h-full w-full flex-col justify-between p-4">
+        <s.icon className="h-6 w-6 text-white/95" strokeWidth={2.2} />
+        <div>
+          <h3 className="font-display text-[18px] font-extrabold leading-tight text-white drop-shadow-sm">
             {s.title}
           </h3>
-          <p className="mt-0.5 truncate text-[11px] font-medium leading-tight text-foreground/65">
-            {s.desc}
+          <p className="mt-1 text-[11.5px] font-medium leading-snug text-white/85 line-clamp-2">
+            {s.pitch}
           </p>
+          <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-white/95">
+            ابدأ التوفير <ArrowLeft className="h-3 w-3" />
+          </span>
         </div>
-      </button>
-    );
-  };
+      </div>
+    </button>
+  );
 
-  // Horizontal rail chip
   const RailChip = ({ c }: { c: PantryChip }) => {
     const a = accents[c.accent];
     return (
@@ -322,16 +350,13 @@ const Sections = () => {
       {/* ═════ Bento Grid: Primary Heroes ═════ */}
       <section className="animate-float-up">
         <div className="grid grid-cols-2 gap-3">
-          {/* Village — full row, taller */}
           <HeroTile card={heroPrimary[0]} className="col-span-2 h-[210px]" />
-          {/* Supermarket — tall (1 col, 2 rows of 110px = 232px) */}
           <HeroTile card={heroPrimary[1]} className="row-span-2 h-[232px]" />
-          {/* Kitchen + Produce — half tiles */}
           <HeroTile card={heroPrimary[2]} className="h-[110px]" />
           <HeroTile card={heroPrimary[3]} className="h-[110px]" />
         </div>
 
-        {/* Pantry rail belongs to Supermarket — placed inline beneath heroes */}
+        {/* Pantry rail */}
         <div className="mt-4">
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="text-[11px] font-bold text-muted-foreground">
@@ -354,7 +379,7 @@ const Sections = () => {
         </div>
       </section>
 
-      {/* ═════ Bento Grid: Secondary Image Cards ═════ */}
+      {/* ═════ Curated Experiences ═════ */}
       <section className="animate-float-up" style={{ animationDelay: "120ms" }}>
         <div className="mb-3 flex items-end justify-between px-1">
           <div>
@@ -373,27 +398,27 @@ const Sections = () => {
         </div>
       </section>
 
-      {/* ═════ Service Cards (small tinted) ═════ */}
-      <section className="animate-float-up" style={{ animationDelay: "200ms" }}>
+      {/* ═════ Specialty Stores (was "services") ═════ */}
+      <section className="animate-float-up" style={{ animationDelay: "180ms" }}>
         <div className="mb-3 flex items-end justify-between px-1">
           <div>
             <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
-              الخدمات
+              متاجر متخصصة
             </h2>
             <p className="mt-0.5 text-[11.5px] font-medium text-muted-foreground">
-              حلول مكمّلة لحياتك اليومية
+              أقسام كبرى لكل احتياج
             </p>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {services.map((s) => (
-            <ServiceTile key={s.id} s={s} />
+          {specialty.map((c) => (
+            <HeroTile key={c.id} card={c} className="h-[150px]" />
           ))}
         </div>
       </section>
 
       {/* ═════ Personal Care rail ═════ */}
-      <section className="animate-float-up" style={{ animationDelay: "260ms" }}>
+      <section className="animate-float-up" style={{ animationDelay: "240ms" }}>
         <div className="mb-2 flex items-end justify-between px-1">
           <h2 className="font-display text-[15px] font-extrabold leading-tight text-foreground">
             العناية الشخصية والمنزلية
@@ -405,6 +430,25 @@ const Sections = () => {
               <RailChip key={c.id} c={c} />
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═════ Smart Shopping (subscriptions + wholesale) ═════ */}
+      <section className="animate-float-up" style={{ animationDelay: "300ms" }}>
+        <div className="mb-3 flex items-end justify-between px-1">
+          <div>
+            <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
+              طرق تسوّق ذكية
+            </h2>
+            <p className="mt-0.5 text-[11.5px] font-medium text-muted-foreground">
+              توفير مستمر وراحة بال
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {smartShopping.map((s) => (
+            <SmartTile key={s.id} s={s} />
+          ))}
         </div>
       </section>
 
