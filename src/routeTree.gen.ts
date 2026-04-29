@@ -14,9 +14,17 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AdminSupportRouteImport } from './routes/admin.support'
+import { Route as AdminStoresRouteImport } from './routes/admin.stores'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
+import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
+import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -27,6 +35,9 @@ import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
 import { Route as AppAccountIndexRouteImport } from './routes/_app/account.index'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
+import { Route as AdminMarketingReferralsRouteImport } from './routes/admin.marketing.referrals'
+import { Route as AdminMarketingPromosRouteImport } from './routes/admin.marketing.promos'
+import { Route as AdminMarketingNotificationsRouteImport } from './routes/admin.marketing.notifications'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
@@ -83,6 +94,31 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminSupportRoute = AdminSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStoresRoute = AdminStoresRouteImport.update({
+  id: '/stores',
+  path: '/stores',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSavingsRoute = AdminSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReviewsRoute = AdminReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -93,9 +129,24 @@ const AdminMoreRoute = AdminMoreRouteImport.update({
   path: '/more',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminInventoryRoute = AdminInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 const AppWalletRoute = AppWalletRouteImport.update({
@@ -148,6 +199,22 @@ const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   path: '/orders/$orderId',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMarketingReferralsRoute = AdminMarketingReferralsRouteImport.update({
+  id: '/marketing/referrals',
+  path: '/marketing/referrals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingPromosRoute = AdminMarketingPromosRouteImport.update({
+  id: '/marketing/promos',
+  path: '/marketing/promos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingNotificationsRoute =
+  AdminMarketingNotificationsRouteImport.update({
+    id: '/marketing/notifications',
+    path: '/marketing/notifications',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminCustomersCustomerIdRoute =
   AdminCustomersCustomerIdRouteImport.update({
     id: '/$customerId',
@@ -316,9 +383,17 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/savings': typeof AdminSavingsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/stores': typeof AdminStoresRoute
+  '/admin/support': typeof AdminSupportRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
@@ -351,6 +426,9 @@ export interface FileRoutesByFullPath {
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/admin/marketing/notifications': typeof AdminMarketingNotificationsRoute
+  '/admin/marketing/promos': typeof AdminMarketingPromosRoute
+  '/admin/marketing/referrals': typeof AdminMarketingReferralsRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/account/': typeof AppAccountIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
@@ -363,9 +441,17 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/savings': typeof AdminSavingsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/stores': typeof AdminStoresRoute
+  '/admin/support': typeof AdminSupportRoute
   '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
@@ -399,6 +485,9 @@ export interface FileRoutesByTo {
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/admin/marketing/notifications': typeof AdminMarketingNotificationsRoute
+  '/admin/marketing/promos': typeof AdminMarketingPromosRoute
+  '/admin/marketing/referrals': typeof AdminMarketingReferralsRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/account': typeof AppAccountIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
@@ -415,9 +504,17 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/inventory': typeof AdminInventoryRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/savings': typeof AdminSavingsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/stores': typeof AdminStoresRoute
+  '/admin/support': typeof AdminSupportRoute
   '/_app/': typeof AppIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_app/account/addresses': typeof AppAccountAddressesRoute
@@ -451,6 +548,9 @@ export interface FileRoutesById {
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
+  '/admin/marketing/notifications': typeof AdminMarketingNotificationsRoute
+  '/admin/marketing/promos': typeof AdminMarketingPromosRoute
+  '/admin/marketing/referrals': typeof AdminMarketingReferralsRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/_app/account/': typeof AppAccountIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
@@ -468,9 +568,17 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/analytics'
+    | '/admin/audit-log'
     | '/admin/customers'
+    | '/admin/inventory'
     | '/admin/more'
     | '/admin/products'
+    | '/admin/reviews'
+    | '/admin/savings'
+    | '/admin/settings'
+    | '/admin/stores'
+    | '/admin/support'
     | '/admin/'
     | '/account/addresses'
     | '/account/favorites'
@@ -503,6 +611,9 @@ export interface FileRouteTypes {
     | '/store/wholesale'
     | '/sub/$slug'
     | '/admin/customers/$customerId'
+    | '/admin/marketing/notifications'
+    | '/admin/marketing/promos'
+    | '/admin/marketing/referrals'
     | '/admin/orders/$orderId'
     | '/account/'
     | '/admin/orders/'
@@ -515,9 +626,17 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/analytics'
+    | '/admin/audit-log'
     | '/admin/customers'
+    | '/admin/inventory'
     | '/admin/more'
     | '/admin/products'
+    | '/admin/reviews'
+    | '/admin/savings'
+    | '/admin/settings'
+    | '/admin/stores'
+    | '/admin/support'
     | '/'
     | '/admin'
     | '/account/addresses'
@@ -551,6 +670,9 @@ export interface FileRouteTypes {
     | '/store/wholesale'
     | '/sub/$slug'
     | '/admin/customers/$customerId'
+    | '/admin/marketing/notifications'
+    | '/admin/marketing/promos'
+    | '/admin/marketing/referrals'
     | '/admin/orders/$orderId'
     | '/account'
     | '/admin/orders'
@@ -566,9 +688,17 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/admin/analytics'
+    | '/admin/audit-log'
     | '/admin/customers'
+    | '/admin/inventory'
     | '/admin/more'
     | '/admin/products'
+    | '/admin/reviews'
+    | '/admin/savings'
+    | '/admin/settings'
+    | '/admin/stores'
+    | '/admin/support'
     | '/_app/'
     | '/admin/'
     | '/_app/account/addresses'
@@ -602,6 +732,9 @@ export interface FileRouteTypes {
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
     | '/admin/customers/$customerId'
+    | '/admin/marketing/notifications'
+    | '/admin/marketing/promos'
+    | '/admin/marketing/referrals'
     | '/admin/orders/$orderId'
     | '/_app/account/'
     | '/admin/orders/'
@@ -650,6 +783,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/support': {
+      id: '/admin/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminSupportRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/stores': {
+      id: '/admin/stores'
+      path: '/stores'
+      fullPath: '/admin/stores'
+      preLoaderRoute: typeof AdminStoresRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/savings': {
+      id: '/admin/savings'
+      path: '/savings'
+      fullPath: '/admin/savings'
+      preLoaderRoute: typeof AdminSavingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/reviews': {
+      id: '/admin/reviews'
+      path: '/reviews'
+      fullPath: '/admin/reviews'
+      preLoaderRoute: typeof AdminReviewsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/products': {
       id: '/admin/products'
       path: '/products'
@@ -664,11 +832,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMoreRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/inventory': {
+      id: '/admin/inventory'
+      path: '/inventory'
+      fullPath: '/admin/inventory'
+      preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/customers'
       fullPath: '/admin/customers'
       preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit-log': {
+      id: '/admin/audit-log'
+      path: '/audit-log'
+      fullPath: '/admin/audit-log'
+      preLoaderRoute: typeof AdminAuditLogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_app/wallet': {
@@ -739,6 +928,27 @@ declare module '@tanstack/react-router' {
       path: '/orders/$orderId'
       fullPath: '/admin/orders/$orderId'
       preLoaderRoute: typeof AdminOrdersOrderIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/referrals': {
+      id: '/admin/marketing/referrals'
+      path: '/marketing/referrals'
+      fullPath: '/admin/marketing/referrals'
+      preLoaderRoute: typeof AdminMarketingReferralsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/promos': {
+      id: '/admin/marketing/promos'
+      path: '/marketing/promos'
+      fullPath: '/admin/marketing/promos'
+      preLoaderRoute: typeof AdminMarketingPromosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/notifications': {
+      id: '/admin/marketing/notifications'
+      path: '/marketing/notifications'
+      fullPath: '/admin/marketing/notifications'
+      preLoaderRoute: typeof AdminMarketingNotificationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/customers/$customerId': {
@@ -1070,19 +1280,41 @@ const AdminCustomersRouteWithChildren = AdminCustomersRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
+  AdminInventoryRoute: typeof AdminInventoryRoute
   AdminMoreRoute: typeof AdminMoreRoute
   AdminProductsRoute: typeof AdminProductsRoute
+  AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminSavingsRoute: typeof AdminSavingsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminStoresRoute: typeof AdminStoresRoute
+  AdminSupportRoute: typeof AdminSupportRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminMarketingNotificationsRoute: typeof AdminMarketingNotificationsRoute
+  AdminMarketingPromosRoute: typeof AdminMarketingPromosRoute
+  AdminMarketingReferralsRoute: typeof AdminMarketingReferralsRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAuditLogRoute: AdminAuditLogRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
+  AdminInventoryRoute: AdminInventoryRoute,
   AdminMoreRoute: AdminMoreRoute,
   AdminProductsRoute: AdminProductsRoute,
+  AdminReviewsRoute: AdminReviewsRoute,
+  AdminSavingsRoute: AdminSavingsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminStoresRoute: AdminStoresRoute,
+  AdminSupportRoute: AdminSupportRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminMarketingNotificationsRoute: AdminMarketingNotificationsRoute,
+  AdminMarketingPromosRoute: AdminMarketingPromosRoute,
+  AdminMarketingReferralsRoute: AdminMarketingReferralsRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
 }
