@@ -171,8 +171,34 @@ const sections: Recipe["section"][] = ["إفطار", "غداء", "عشاء"];
 const filters = ["كل الوصفات", "سريعة", "عائلية", "للأطفال", "صحية", "نباتية"];
 const days = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
 
+// Time-based availability windows for each meal section.
+// Used for: default tab, "متاح الآن" badge, urgency countdown, and disabled state.
+const MEAL_WINDOWS: Record<Recipe["section"], { startH: number; endH: number; icon: typeof Sun; label: string }> = {
+  "إفطار": { startH: 6,  endH: 11, icon: Sun,    label: "٦ ص – ١١ ص" },
+  "غداء":  { startH: 12, endH: 17, icon: Sunset, label: "١٢ ظ – ٥ م" },
+  "عشاء":  { startH: 18, endH: 23, icon: Moon,   label: "٦ م – ١١ م" },
+};
+
+const getMealForHour = (h: number): Recipe["section"] => {
+  if (h >= 6 && h < 12) return "إفطار";
+  if (h >= 12 && h < 18) return "غداء";
+  return "عشاء";
+};
+
+const isMealOpenNow = (s: Recipe["section"], d: Date) => {
+  const w = MEAL_WINDOWS[s];
+  const h = d.getHours();
+  return h >= w.startH && h < w.endH;
+};
+
+const minutesUntilClose = (s: Recipe["section"], d: Date) => {
+  const w = MEAL_WINDOWS[s];
+  if (!isMealOpenNow(s, d)) return 0;
+  return (w.endH - d.getHours()) * 60 - d.getMinutes();
+};
+
 const Recipes = () => {
-  const { add, items } = useCart();
+  const { add } = useCart();
   const [filter, setFilter] = useState(filters[0]);
   const [open, setOpen] = useState<Recipe | null>(null);
 
