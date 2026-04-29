@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Wallet as WalletIcon, Zap, Share2, ChevronLeft } from "lucide-react";
+import { Wallet as WalletIcon, Share2, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "@/context/LocationContext";
 import { toLatin } from "@/lib/format";
 
 type Props = {
@@ -14,8 +13,6 @@ type Props = {
  * reason to show them. Designed to sit just above the main promo hero.
  */
 const SmartBanners = ({ walletBalance, hasReferralCode }: Props) => {
-  const { zone } = useLocation();
-
   const banners: {
     key: string;
     show: boolean;
