@@ -672,16 +672,17 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
   };
 
   const addTool = (t: ToolItem) => {
-    if (!t.productId || !t.price) return;
-    add({
-      id: t.productId,
-      name: t.name,
-      unit: "قطعة",
-      price: t.price,
-      image: t.image ?? recipe.image,
-      category: "ادوات المطبخ",
-      source: "kitchen",
-    });
+    if (!t.productId) {
+      toast.error("هذه الأداة غير متوفرة حاليًا في المتجر");
+      return;
+    }
+    const product = getById(t.productId);
+    if (!product) {
+      toast.error(`${t.name} نفذ من المخزون — جرّب البديل`);
+      return;
+    }
+    add(product, 1);
+    toast.success(`تمت إضافة ${product.name} إلى السلة`);
   };
 
   return (
