@@ -963,104 +963,62 @@ const Cart = () => {
           </div>
         )}
 
-        {/* Split-shipment notice for sweets bookings */}
-        {hasBooking && hasNonBookingItems && !anyWaitForAll && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500/10 via-violet-400/5 to-fuchsia-500/10 p-3 ring-1 ring-violet-500/25"
-          >
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-violet-600 text-white">
-                <CalendarDays className="h-3.5 w-3.5" />
-              </div>
-              <p className="text-[12px] font-extrabold text-foreground">
-                طلبك يصل على دفعتين 📦
-              </p>
+        {/* ============ Fulfillment-aware grouped vendor cards ============
+         * Replaces the prominent split-shipment alert with subtle section
+         * headers above the relevant vendor groups. The customer "reads"
+         * the story visually without long warning text.
+         */}
+        {showFulfillmentSections && (
+          <div className="flex items-center gap-2 px-1">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              <Zap className="h-3 w-3" strokeWidth={2.6} />
             </div>
-            <ul className="space-y-1.5 text-[11px] font-bold text-foreground/85">
-              {(hasInstantSweets || lines.some((l) => !isSweetsProduct(l.product.source))) && (
-                <li className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                  <span>المنتجات الفورية تصلك خلال {zone.etaLabel}</span>
-                </li>
-              )}
-              {hasFreshSweets && (
-                <li className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                  <span>حلويات «يُحضّر طازجاً» تصلك خلال 4 ساعات</span>
-                </li>
-              )}
-              {hasBooking && (
-                <li className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600" />
-                  <span>
-                    حجوزات الأسر المنتجة في موعدها المحدّد
-                    {sweetsBuckets.C.lines[0]?.meta?.date
-                      ? ` (${formatBookingShort(new Date(sweetsBuckets.C.lines[0].meta.date!))})`
-                      : ""}
-                  </span>
-                </li>
-              )}
-            </ul>
-          </motion.div>
+            <h3 className="font-display text-[13px] font-extrabold text-foreground">
+              يصلك فوراً
+              <span className="ms-1.5 text-[10px] font-bold text-muted-foreground">
+                خلال {zone.etaLabel}
+              </span>
+            </h3>
+          </div>
         )}
 
-        {vendorGroups.map((g) => {
-          const v = g.vendor;
-          const hue = vendorBrandHue(v);
-          const Icon = v.kind === "restaurant" ? Utensils : v.kind === "kitchen" ? ChefHat : Store;
-          return (
-            <div
-              key={g.key}
-              className="overflow-hidden rounded-2xl bg-card/60 ring-1 ring-border/40"
-              style={{ borderTop: `3px solid hsl(${hue})` }}
-            >
-              {/* Vendor header */}
-              <div className="flex items-center justify-between gap-2 px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="flex h-7 w-7 items-center justify-center rounded-[10px] text-white"
-                    style={{ background: `hsl(${hue})` }}
-                  >
-                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
-                  </div>
-                  <div className="leading-tight">
-                    <p className="text-[12px] font-extrabold">{vendorLabel(v)}</p>
-                    <p className="text-[9.5px] text-muted-foreground">
-                      {toLatin(g.lines.length)} منتج · إجمالي {fmtMoney(g.subtotal)}
-                    </p>
-                  </div>
-                </div>
-                {v.kind === "restaurant" && payment === "wallet" && g.cashback > 0 && (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold text-white shadow-pill"
-                    style={{ background: `hsl(${hue})` }}
-                  >
-                    <WalletIcon className="h-2.5 w-2.5" />
-                    +{toLatin(g.cashback)} ج.م
-                  </span>
-                )}
+        {(showFulfillmentSections ? instantGroups : vendorGroups).map((g) => (
+          <VendorGroupCard
+            key={g.key}
+            g={g}
+            payment={payment}
+            setQty={setQty}
+            remove={remove}
+            updateMeta={updateMeta}
+            showScheduledHint={!showFulfillmentSections && groupIsMixedScheduled(g)}
+          />
+        ))}
+
+        {showFulfillmentSections && (
+          <>
+            <div className="mt-2 flex items-center gap-2 px-1">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-300">
+                <CalendarDays className="h-3 w-3" strokeWidth={2.6} />
               </div>
-              <div className="space-y-2 px-2 pb-2">
-                <AnimatePresence initial={false}>
-                  {g.lines.map((l) => (
-                    <motion.div
-                      key={l.product.id}
-                      layout
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
-                      transition={{ type: "spring", damping: 26, stiffness: 280 }}
-                    >
-                      <CartLineItem l={l} setQty={setQty} remove={remove} updateMeta={updateMeta} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+              <h3 className="font-display text-[13px] font-extrabold text-foreground">
+                حجوزات مجدولة
+                <span className="ms-1.5 text-[10px] font-bold text-muted-foreground">
+                  حسب الموعد
+                </span>
+              </h3>
             </div>
-          );
-        })}
+            {scheduledGroups.map((g) => (
+              <VendorGroupCard
+                key={g.key}
+                g={g}
+                payment={payment}
+                setQty={setQty}
+                remove={remove}
+                updateMeta={updateMeta}
+              />
+            ))}
+          </>
+        )}
         <p className="px-1 text-center text-[10px] text-muted-foreground">
           💡 اسحب المنتج لليسار للحذف السريع
         </p>
