@@ -1,3 +1,4 @@
+import { memo, useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import {
@@ -123,7 +124,7 @@ const personalRail: PantryChip[] = [
 const TILE_SHADOW =
   "0 1px 2px rgba(15,23,42,.04), 0 6px 18px -10px rgba(15,23,42,.18), 0 22px 40px -28px rgba(15,23,42,.22)";
 
-const HeroTile = ({
+const HeroTile = memo(({
   card,
   className,
   onPick,
@@ -136,8 +137,8 @@ const HeroTile = ({
   return (
     <button
       onClick={() => onPick(card.to)}
-      className={`group relative overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97] ${className}`}
-      style={{ boxShadow: TILE_SHADOW, contain: "layout paint", willChange: "transform" }}
+      className={`relative overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97] ${className}`}
+      style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
       aria-label={card.title}
     >
       <MeshBg motif={card.motif} />
@@ -153,7 +154,7 @@ const HeroTile = ({
 
       {card.badge && (
         <span
-          className="absolute right-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-white/60 backdrop-blur-md"
+          className="absolute right-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-white/60"
           style={{ color: ink, boxShadow: "0 4px 10px -6px rgba(15,23,42,.2)" }}
         >
           {card.badge}
@@ -163,7 +164,7 @@ const HeroTile = ({
       {/* Glass title chip — bottom */}
       <div className="absolute inset-x-3 bottom-3">
         <div
-          className="rounded-2xl bg-white/55 px-3.5 py-2.5 ring-1 ring-white/70 backdrop-blur-xl"
+          className="rounded-2xl bg-white/60 px-3.5 py-2.5 ring-1 ring-white/70 backdrop-blur-md"
           style={{ boxShadow: "0 8px 22px -14px rgba(15,23,42,.25)" }}
         >
           <h3
@@ -182,9 +183,10 @@ const HeroTile = ({
       </div>
     </button>
   );
-};
+});
+HeroTile.displayName = "HeroTile";
 
-const SmartTile = ({
+const SmartTile = memo(({
   s,
   onPick,
 }: {
@@ -196,7 +198,7 @@ const SmartTile = ({
     <button
       onClick={() => onPick(s.to)}
       className="relative h-[160px] overflow-hidden rounded-[22px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97]"
-      style={{ boxShadow: TILE_SHADOW, contain: "layout paint", willChange: "transform" }}
+      style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
       aria-label={s.title}
     >
       <MeshBg motif={s.motif} />
@@ -210,7 +212,7 @@ const SmartTile = ({
       </div>
 
       <span
-        className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-white/60 backdrop-blur-md"
+        className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-white/60"
         style={{ color: ink, boxShadow: "0 4px 10px -6px rgba(15,23,42,.2)" }}
       >
         💸 {s.saving}
@@ -218,7 +220,7 @@ const SmartTile = ({
 
       <div className="absolute inset-x-3 bottom-3">
         <div
-          className="rounded-2xl bg-white/55 px-3.5 py-2.5 ring-1 ring-white/70 backdrop-blur-xl"
+          className="rounded-2xl bg-white/60 px-3.5 py-2.5 ring-1 ring-white/70 backdrop-blur-md"
           style={{ boxShadow: "0 8px 22px -14px rgba(15,23,42,.25)" }}
         >
           <h3
@@ -243,9 +245,17 @@ const SmartTile = ({
       </div>
     </button>
   );
+});
+SmartTile.displayName = "SmartTile";
+
+/* `cv` = content-visibility: auto — lets the browser skip painting/layout for
+   sections that aren't on screen yet. Big perf win on long pages. */
+const cv = {
+  contentVisibility: "auto" as const,
+  containIntrinsicSize: "1px 360px",
 };
 
-const RailChip = ({
+const RailChip = memo(({
   c,
   onPick,
 }: {
@@ -265,13 +275,54 @@ const RailChip = ({
       </span>
     </button>
   );
-};
+});
+RailChip.displayName = "RailChip";
+
+/* ------------------------------------------------------------------ */
+/* Skeleton — mirrors the bento layout exactly so first paint is stable */
+/* ------------------------------------------------------------------ */
+
+const Sk = ({ className = "" }: { className?: string }) => (
+  <div
+    className={`animate-pulse rounded-[24px] bg-foreground/[0.06] ring-1 ring-black/5 ${className}`}
+  />
+);
+
+const SectionsSkeleton = () => (
+  <div className="space-y-7 pb-6" aria-hidden>
+    <header className="px-1 pt-1">
+      <div className="h-7 w-24 animate-pulse rounded-md bg-foreground/[0.08]" />
+      <div className="mt-2 h-3.5 w-56 animate-pulse rounded-md bg-foreground/[0.06]" />
+    </header>
+    <div className="grid grid-cols-2 gap-3">
+      <Sk className="col-span-2 h-[210px]" />
+      <Sk className="row-span-2 h-[232px]" />
+      <Sk className="h-[110px]" />
+      <Sk className="h-[110px]" />
+    </div>
+    <div className="grid grid-cols-2 gap-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Sk key={i} className="h-[150px]" />
+      ))}
+    </div>
+  </div>
+);
 
 /* ------------------------------------------------------------------ */
 
 const Sections = () => {
   const navigate = useNavigate();
   const go = (to: string) => navigate({ to: to as never });
+
+  /* Show skeleton for one frame so first paint is instant + stable.
+     Lower sections use `content-visibility: auto` to skip off-screen layout. */
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  if (!ready) return <SectionsSkeleton />;
 
   return (
     <div className="space-y-7 pb-6">
@@ -318,7 +369,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Curated Experiences ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-3 px-1">
           <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
             تجارب مختارة
@@ -335,7 +386,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Specialty Stores ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-3 px-1">
           <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
             متاجر متخصصة
@@ -352,7 +403,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Personal Care rail ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-2 px-1">
           <h2 className="font-display text-[15px] font-extrabold leading-tight text-foreground">
             العناية الشخصية والمنزلية
@@ -368,7 +419,7 @@ const Sections = () => {
       </section>
 
       {/* ═════ Smart Shopping ═════ */}
-      <section>
+      <section style={cv}>
         <div className="mb-3 px-1">
           <h2 className="font-display text-[17px] font-extrabold leading-tight text-foreground">
             طرق تسوّق ذكية
