@@ -1,4 +1,5 @@
-import { Wallet as WalletIcon, Plus, ArrowDownRight, ArrowUpRight, Gift, CreditCard, Loader2, X, Banknote, Smartphone, Building2, TrendingUp, Users, Copy, Share2, Sparkles, ChevronLeft, BarChart3, PiggyBank, Target, Settings2, Minus } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowDownRight, ArrowUpRight, Gift, CreditCard, Loader2, X, Banknote, Smartphone, Building2, TrendingUp, Users, Copy, Share2, Sparkles, ChevronLeft, BarChart3, PiggyBank, Target, Settings2, Minus, Send, Lightbulb, ShieldCheck, Phone } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toLatin, fmtMoney } from "@/lib/format";
