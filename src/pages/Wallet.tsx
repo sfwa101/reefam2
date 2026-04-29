@@ -59,6 +59,8 @@ const Wallet = () => {
   const [jarTxs, setJarTxs] = useState<SavingsTx[]>([]);
   const [showJar, setShowJar] = useState(false);
   const [tier, setTier] = useState<TierDef | null>(null);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [trustLimit, setTrustLimit] = useState<number>(0);
 
   useEffect(() => {
     let mounted = true;
