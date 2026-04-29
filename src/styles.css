@@ -112,6 +112,28 @@
 
   /* Motion */
   --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Admin / iOS18 dashboard tokens */
+  --surface: 0 0% 100%;
+  --surface-muted: 220 20% 95.5%;
+  --foreground-secondary: 240 6% 36%;
+  --foreground-tertiary: 240 6% 56%;
+  --info: 211 100% 50%;
+  --success: 145 63% 42%;
+  --warning: 35 100% 50%;
+  --purple: 280 60% 56%;
+  --pink: 335 80% 60%;
+  --teal: 175 70% 41%;
+  --indigo: 235 78% 60%;
+  --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+  --shadow-elegant: 0 20px 50px -12px hsl(var(--primary) / 0.25);
+}
+
+.dark {
+  --surface: 150 10% 12%;
+  --surface-muted: 150 8% 16%;
+  --foreground-secondary: 130 12% 78%;
+  --foreground-tertiary: 140 10% 60%;
 }
 
 /* Dark theme */
