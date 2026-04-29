@@ -1,13 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
-import { z } from "zod";
 import Page from "@/pages/store/Recipes";
 
-const recipesSearchSchema = z.object({
-  tag: fallback(z.string(), "").default(""),
-});
+type RecipesSearch = { tag: string };
 
 export const Route = createFileRoute("/_app/store/recipes")({
-  validateSearch: zodValidator(recipesSearchSchema),
+  validateSearch: (search: Record<string, unknown>): RecipesSearch => ({
+    tag: typeof search.tag === "string" ? search.tag : "",
+  }),
   component: Page,
 });
