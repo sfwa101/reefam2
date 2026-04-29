@@ -668,6 +668,20 @@
     font-feature-settings: "ss01", "cv11";
     background-image: var(--gradient-aurora);
     background-attachment: fixed;
+    transition: background-color 0.3s var(--ease-apple), color 0.3s var(--ease-apple);
+  }
+
+  /* Smooth theme switch — fade colors/borders/shadows on every surface
+     so swapping themes never causes a harsh flash. */
+  html, body, html * {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: var(--ease-apple);
+  }
+  /* Skip the global transition for transforms/opacity to avoid breaking
+     interactive animations (modals, motion springs, etc.). */
+  html *:where(.no-theme-transition, .no-theme-transition *) {
+    transition: none !important;
   }
 
   /* Force Western (Latin) digits everywhere — even inside Arabic flow */
@@ -716,6 +730,12 @@
     backdrop-filter: saturate(180%) blur(24px);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
     border-bottom: 1px solid hsl(var(--border) / 0.7);
+  }
+
+  /* Elevated theme-tinted card surface — used by hero cards (Wallet, top sections). */
+  .card-elevated {
+    background: var(--gradient-wallet);
+    color: hsl(var(--card-elevated-foreground, 0 0% 100%));
   }
 }
 
