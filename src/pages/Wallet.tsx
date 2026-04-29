@@ -311,6 +311,33 @@ const Wallet = () => {
             </div>
           </div>
         )}
+
+        {categoryStats.length > 0 && (() => {
+          const top = categoryStats[0];
+          const total = categoryStats.reduce((s, x) => s + x.value, 0);
+          const topPct = Math.round((top.value / total) * 100);
+          const tip = buildInsight(top.name, topPct, top.value);
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-3 flex items-start gap-2 rounded-xl bg-gradient-to-l from-primary/10 to-accent/10 p-3 ring-1 ring-primary/15"
+            >
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                <Lightbulb className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[11px] font-bold leading-relaxed text-foreground">{tip.text}</p>
+                {tip.cta && (
+                  <Link to={tip.cta.to} className="mt-1.5 inline-flex items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[10px] font-extrabold text-primary-foreground">
+                    {tip.cta.label} ←
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          );
+        })()}
       </motion.section>
 
       {/* الحصّالة الذكية */}
