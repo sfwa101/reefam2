@@ -260,16 +260,37 @@ const fmt = (n: number) => `${toLatin(n.toLocaleString("en-US"))} ج.م`;
 
 /* ───────────── Page ───────────── */
 
+type SortId = "relevance" | "price-asc" | "price-desc" | "rating" | "discount";
+type FulfillmentFilter = "all" | "instant" | "preorder";
+
+const SORTS: { id: SortId; label: string }[] = [
+  { id: "relevance", label: "الأنسب" },
+  { id: "price-asc", label: "السعر: الأقل أولًا" },
+  { id: "price-desc", label: "السعر: الأعلى أولًا" },
+  { id: "rating", label: "الأعلى تقييمًا" },
+  { id: "discount", label: "الأكثر خصمًا" },
+];
+
 const HomeStore = () => {
   const theme = storeThemes.homeTools;
   const [cat, setCat] = useState<CatId>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortId>("relevance");
+  const [fulFilter, setFulFilter] = useState<FulfillmentFilter>("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const priceMaxAvail = useMemo(
+    () => Math.max(...CATALOG.map((p) => p.price)),
+    [],
+  );
+  const [priceMax, setPriceMax] = useState(priceMaxAvail);
 
   const filtered = useMemo(() => {
     const term = q.trim();
-    return CATALOG.filter((p) => {
+    let list = CATALOG.filter((p) => {
       if (cat !== "all" && p.category !== cat) return false;
+      if (fulFilter !== "all" && p.fulfillment !== fulFilter) return false;
+      if (p.price > priceMax) return false;
       if (!term) return true;
       return (
         p.name.includes(term) ||
@@ -277,7 +298,28 @@ const HomeStore = () => {
         p.tagline.includes(term)
       );
     });
-  }, [cat, q]);
+    switch (sort) {
+      case "price-asc":
+        list = [...list].sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        list = [...list].sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        list = [...list].sort((a, b) => b.rating - a.rating);
+        break;
+      case "discount":
+        list = [...list].sort((a, b) => {
+          const da = a.oldPrice ? (a.oldPrice - a.price) / a.oldPrice : 0;
+          const db = b.oldPrice ? (b.oldPrice - b.price) / b.oldPrice : 0;
+          return db - da;
+        });
+        break;
+      default:
+        break;
+    }
+    return list;
+  }, [cat, q, sort, fulFilter, priceMax]);
 
   const bestSellers = useMemo(
     () => CATALOG.filter((p) => BESTSELLER_IDS.includes(p.id)),
@@ -285,6 +327,8 @@ const HomeStore = () => {
   );
 
   const opened = openId ? CATALOG.find((p) => p.id === openId) ?? null : null;
+  const filtersActive =
+    fulFilter !== "all" || priceMax < priceMaxAvail || sort !== "relevance";
 
   return (
     <div
