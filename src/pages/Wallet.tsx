@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { fireConfetti, fireMiniConfetti } from "@/lib/confetti";
+import { tierProgress, type TierDef } from "@/lib/tiers";
 
 type WalletBalance = { balance: number; points: number; coupons: number; cashback: number };
 type Tx = { id: string; label: string; amount: number; kind: string; created_at: string; source?: string | null };
@@ -56,6 +57,7 @@ const Wallet = () => {
   const [jar, setJar] = useState<SavingsJar | null>(null);
   const [jarTxs, setJarTxs] = useState<SavingsTx[]>([]);
   const [showJar, setShowJar] = useState(false);
+  const [tier, setTier] = useState<TierDef | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -65,7 +67,7 @@ const Wallet = () => {
       if (!mounted) return;
       setUserId(user.id);
 
-      const [{ data: bal }, { data: tx }, { data: items }, { data: refRows }, { data: jarRow }, { data: jarTx }] = await Promise.all([
+      const [{ data: bal }, { data: tx }, { data: items }, { data: refRows }, { data: jarRow }, { data: jarTx }, { data: spent }] = await Promise.all([
         supabase.from("wallet_balances").select("balance,points,coupons,cashback").eq("user_id", user.id).maybeSingle(),
         supabase.from("wallet_transactions").select("id,label,amount,kind,created_at,source").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
         supabase.from("order_items").select("price,quantity,product_id, products(category, old_price, price)").in("order_id",
@@ -74,6 +76,7 @@ const Wallet = () => {
         supabase.from("referrals").select("id,status,commission,first_order_at,created_at").eq("referrer_id", user.id).order("created_at", { ascending: false }),
         supabase.from("savings_jar").select("balance,auto_save_enabled,round_to,goal,goal_label").eq("user_id", user.id).maybeSingle(),
         supabase.from("savings_transactions").select("id,amount,kind,label,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
+        supabase.rpc("user_total_spent", { _user_id: user.id }),
       ]);
 
       if (!mounted) return;
@@ -82,6 +85,7 @@ const Wallet = () => {
       setReferrals((refRows ?? []) as ReferralRow[]);
       setJar((jarRow ?? { balance: 0, auto_save_enabled: false, round_to: 5, goal: null, goal_label: null }) as SavingsJar);
       setJarTxs((jarTx ?? []) as SavingsTx[]);
+      setTier(tierProgress(Number(spent ?? 0)).tier);
 
       // detect previous successful commission to celebrate on entry
       const lastReward = (tx ?? []).find((t: any) => t.kind === "reward" && t.source === "referral");
@@ -169,7 +173,14 @@ const Wallet = () => {
               </div>
               <span className="text-[11px] font-bold tracking-wider text-white/85">REEF · WALLET</span>
             </div>
-            <CreditCard className="h-5 w-5 text-white/60" />
+            <div className="flex items-center gap-2">
+              {tier && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-extrabold text-white backdrop-blur">
+                  {tier.label} · {toLatin(tier.multiplier)}x
+                </span>
+              )}
+              <CreditCard className="h-5 w-5 text-white/60" />
+            </div>
           </div>
 
           <p className="mt-4 text-[11px] font-bold text-white/70">الرصيد المتاح</p>

@@ -43,7 +43,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import DateWheelPicker from "@/components/DateWheelPicker";
+import BirthDatePicker from "@/components/BirthDatePicker";
 import { cn } from "@/lib/utils";
 
 type Gender = "male" | "female" | "unspecified";
@@ -442,14 +442,11 @@ const Profile = () => {
                 <div className="mb-2 flex items-center gap-2 text-[11px] font-extrabold text-muted-foreground">
                   <CalendarDays className="h-3.5 w-3.5 text-primary" /> تاريخ الميلاد
                 </div>
-                <div className="mb-2 text-center text-sm font-extrabold text-foreground">
-                  {formatBirthDate(form.birthDate)}
-                </div>
-                <DateWheelPicker
+                <BirthDatePicker
                   value={form.birthDate}
                   onChange={(iso) => { setForm((c) => ({ ...c, birthDate: iso })); setSaveState("idle"); }}
                 />
-                <p className="mt-2 text-[11px] leading-6 text-muted-foreground">مرّر للأعلى/الأسفل لاختيار السنة، الشهر، واليوم.</p>
+                <p className="mt-2 text-[11px] leading-6 text-muted-foreground">اضغط لاختيار التاريخ من التقويم.</p>
               </div>
             </div>
           </Section>
