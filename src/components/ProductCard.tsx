@@ -154,6 +154,11 @@ const ProductCard = ({ product, variant = "grid", volumeBadge }: ProductCardProp
         >
           <Heart className={`h-3.5 w-3.5 ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
         </span>
+        {volumeBadge && (
+          <span className="absolute bottom-2 right-2 rounded-full bg-foreground/90 px-2 py-0.5 text-[9.5px] font-extrabold text-background shadow-pill tabular-nums">
+            اشترِ {toLatin(volumeBadge.buy)} ووفر {toLatin(volumeBadge.save)} ج.م
+          </span>
+        )}
         </button>
       ) : (
         <Link
@@ -202,6 +207,11 @@ const ProductCard = ({ product, variant = "grid", volumeBadge }: ProductCardProp
           >
             <Heart className={`h-3.5 w-3.5 ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
           </button>
+          {volumeBadge && (
+            <span className="absolute bottom-2 right-2 rounded-full bg-foreground/90 px-2 py-0.5 text-[9.5px] font-extrabold text-background shadow-pill tabular-nums">
+              اشترِ {toLatin(volumeBadge.buy)} ووفر {toLatin(volumeBadge.save)} ج.م
+            </span>
+          )}
         </Link>
       )}
 
