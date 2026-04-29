@@ -155,12 +155,12 @@ const Wallet = () => {
         initial={{ opacity: 0, y: 14, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative overflow-hidden rounded-[1.75rem] p-5 shadow-tile"
-        style={{ background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)) 45%, hsl(45 80% 55%) 110%)" }}
+        className="relative overflow-hidden rounded-[1.75rem] p-5 shadow-float ring-1 ring-white/5"
+        style={{ background: "linear-gradient(135deg, hsl(220 25% 10%) 0%, hsl(150 30% 14%) 55%, hsl(45 35% 18%) 120%)" }}
       >
-        <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/15 blur-3xl" />
-        <div className="absolute -bottom-12 -left-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 70% 70%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+        <div className="absolute -top-20 -right-16 h-56 w-56 rounded-full bg-[hsl(150_60%_45%)]/20 blur-3xl" />
+        <div className="absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-[hsl(45_90%_55%)]/15 blur-3xl" />
+        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 70% 70%, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
 
         <div className="relative">
           <div className="flex items-center justify-between">
