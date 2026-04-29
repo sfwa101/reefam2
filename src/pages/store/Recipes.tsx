@@ -679,8 +679,8 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
       price: t.price,
       image: t.image ?? recipe.image,
       category: "ادوات المطبخ",
-      source: "kitchen-tools",
-    } as Product);
+      source: "kitchen",
+    });
   };
 
   return (
