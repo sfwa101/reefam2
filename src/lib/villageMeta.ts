@@ -33,11 +33,13 @@ export type VillageMeta = {
   trust: TrustBadge[];
   /** traceability line under the product name */
   source: string;
-  /** nutrition facts (collapsible accordion) */
+  /** nutrition facts */
   nutrition?: { protein?: string; carbs?: string; fat?: string; calories?: string; notes?: string };
   /** limited batch — when set, shows scarcity & pre-order CTA */
   batch?: {
     remaining: number;
+    /** total batch size — used to compute the scarcity progress bar */
+    total?: number;
     /** day of week the next batch ships, e.g. "الجمعة" */
     nextBatchDay?: string;
     /** label for CTA, default: "احجز حصتك الآن" */
@@ -45,6 +47,10 @@ export type VillageMeta = {
   };
   /** eligible for the weekly subscription "Make it a Routine" */
   routine?: { discountPct: number; defaultFrequency: "weekly" | "biweekly" };
+  /** narrative paragraph for the "Origin Story" section on product page */
+  story?: string;
+  /** storage / shelf-life badges (e.g. ❄️ يحفظ مبرداً) */
+  storage?: { icon: string; label: string }[];
 };
 
 export const VILLAGE_META: Record<string, VillageMeta> = {
