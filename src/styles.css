@@ -724,12 +724,28 @@
     pointer-events: none;
   }
 
-  /* Edge-to-edge solid header (no rounded glass) */
+  /* Edge-to-edge solid header (legacy — kept for back-compat) */
   .header-solid {
     background: hsl(var(--card) / 0.98);
     backdrop-filter: saturate(180%) blur(24px);
     -webkit-backdrop-filter: saturate(180%) blur(24px);
     border-bottom: 1px solid hsl(var(--border) / 0.7);
+  }
+
+  /* Slim glass header — Apple-style; shrinks on scroll via [data-shrunk] */
+  .header-slim {
+    background: hsl(var(--card) / 0.65);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid hsl(var(--border) / 0);
+    transition: background 320ms var(--ease-apple),
+                border-color 320ms var(--ease-apple),
+                box-shadow 320ms var(--ease-apple);
+  }
+  .header-slim[data-shrunk="true"] {
+    background: hsl(var(--card) / 0.85);
+    border-bottom-color: hsl(var(--border) / 0.6);
+    box-shadow: 0 4px 20px -10px hsl(var(--foreground) / 0.12);
   }
 
   /* Elevated theme-tinted card surface — used by hero cards (Wallet, top sections). */
