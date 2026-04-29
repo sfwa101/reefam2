@@ -95,11 +95,17 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
           </span>
         </div>
       )}
-      <Link
-        to="/product/$productId"
-        params={{ productId: product.id }}
-        className="relative block aspect-square overflow-hidden bg-secondary/40"
-      >
+      {opensSheet ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setSheetOpen(true);
+          }}
+          className="relative block aspect-square w-full overflow-hidden bg-secondary/40 text-right"
+          aria-label={product.name}
+        >
         <img
           src={product.image}
           alt={product.name}
@@ -124,26 +130,87 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
             خصم {toLatin(Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100))}٪
           </span>
         )}
-        <button
+        <span
           onClick={handleFav}
+          role="button"
           aria-label="مفضلة"
-          className={`absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-md transition ease-apple ${
+          className={`absolute bottom-2 left-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition ease-apple ${
             fav ? "bg-destructive/90 text-white" : "bg-background/70 text-foreground"
           }`}
         >
           <Heart className={`h-3.5 w-3.5 ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
+        </span>
         </button>
-      </Link>
+      ) : (
+        <Link
+          to="/product/$productId"
+          params={{ productId: product.id }}
+          className="relative block aspect-square overflow-hidden bg-secondary/40"
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 ease-apple group-hover:scale-105"
+          />
+          {badge && (
+            <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.cls}`}>
+              {badge.label}
+            </span>
+          )}
+          {fMeta && (
+            <span
+              className={`absolute ${badge ? "right-2 top-8" : "right-2 top-2"} inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold shadow-pill ${fMeta.badgeBg} ${fMeta.badgeText}`}
+            >
+              <span className="text-[10px] leading-none">{fMeta.emoji}</span>
+              {fMeta.badge}
+            </span>
+          )}
+          {product.oldPrice && (
+            <span className="absolute left-2 top-2 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground tabular-nums">
+              خصم {toLatin(Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100))}٪
+            </span>
+          )}
+          <button
+            onClick={handleFav}
+            aria-label="مفضلة"
+            className={`absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-full backdrop-blur-md transition ease-apple ${
+              fav ? "bg-destructive/90 text-white" : "bg-background/70 text-foreground"
+            }`}
+          >
+            <Heart className={`h-3.5 w-3.5 ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
+          </button>
+        </Link>
+      )}
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <Link to="/product/$productId" params={{ productId: product.id }} className="block">
-          <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
-            {product.name}
-          </h3>
-          {product.brand && (
-            <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">{product.brand}</p>
-          )}
-        </Link>
+        {opensSheet ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setSheetOpen(true);
+            }}
+            className="block text-right"
+          >
+            <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
+              {product.name}
+            </h3>
+            {product.brand && (
+              <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">{product.brand}</p>
+            )}
+          </button>
+        ) : (
+          <Link to="/product/$productId" params={{ productId: product.id }} className="block">
+            <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
+              {product.name}
+            </h3>
+            {product.brand && (
+              <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">{product.brand}</p>
+            )}
+          </Link>
+        )}
         <p className="text-[10px] text-muted-foreground">{product.unit}</p>
 
         <div className="mt-auto flex items-center justify-between pt-1">
@@ -198,11 +265,11 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
           </div>
         </div>
       </div>
-      {requiresBooking && (
-        <SweetsBookingSheet
+      {opensSheet && (
+        <SweetsProductSheet
           product={product}
-          open={bookingOpen}
-          onClose={() => setBookingOpen(false)}
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
         />
       )}
     </article>
