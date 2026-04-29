@@ -892,25 +892,6 @@
    Admin / ERP iOS18 utilities
 ============================================ */
 @layer utilities {
-  .bg-surface { background-color: hsl(var(--surface)); }
-  .bg-surface-muted { background-color: hsl(var(--surface-muted)); }
-  .text-foreground-secondary { color: hsl(var(--foreground-secondary)); }
-  .text-foreground-tertiary { color: hsl(var(--foreground-tertiary)); }
-  .text-info { color: hsl(var(--info)); }
-  .text-success { color: hsl(var(--success)); }
-  .text-warning { color: hsl(var(--warning)); }
-  .bg-info\/10 { background-color: hsl(var(--info) / 0.1); }
-  .bg-info\/12 { background-color: hsl(var(--info) / 0.12); }
-  .bg-info\/15 { background-color: hsl(var(--info) / 0.15); }
-  .bg-success\/10 { background-color: hsl(var(--success) / 0.1); }
-  .bg-success\/12 { background-color: hsl(var(--success) / 0.12); }
-  .bg-success\/15 { background-color: hsl(var(--success) / 0.15); }
-  .bg-warning\/10 { background-color: hsl(var(--warning) / 0.1); }
-  .bg-warning\/12 { background-color: hsl(var(--warning) / 0.12); }
-  .bg-warning\/15 { background-color: hsl(var(--warning) / 0.15); }
-  .bg-info { background-color: hsl(var(--info)); }
-  .bg-success { background-color: hsl(var(--success)); }
-  .bg-warning { background-color: hsl(var(--warning)); }
   .bg-gradient-primary { background-image: var(--gradient-primary); }
   .glass-strong { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: hsl(var(--surface) / 0.85); }
   .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: hsl(var(--surface) / 0.7); }
