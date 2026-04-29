@@ -1,35 +1,289 @@
-import SinglePageStore, { type StoreCategory } from "@/components/SinglePageStore";
+import { useEffect, useMemo, useRef, useState } from "react";
+import BackHeader from "@/components/BackHeader";
+import ProductCard from "@/components/ProductCard";
 import { products } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
+import { Search } from "lucide-react";
 
-const cats: StoreCategory[] = [
-  { id: "all",     name: "الكل",        match: (p) => p.source === "meat" },
-  { id: "red",     name: "لحوم حمراء",  match: (p) => p.source === "meat" && p.subCategory === "لحوم حمراء" },
-  { id: "poultry", name: "دواجن",       match: (p) => p.source === "meat" && p.subCategory === "دواجن" },
-  { id: "minced",  name: "مفرومات",     match: (p) => p.source === "meat" && p.subCategory === "مفرومات" },
-  { id: "fish",    name: "أسماك",       match: (p) => p.source === "meat" && p.subCategory === "أسماك" },
-  { id: "sea",     name: "بحريات",      match: (p) => p.source === "meat" && p.subCategory === "بحريات" },
-  { id: "frozen",  name: "مجمدات",      match: (p) => p.source === "meat" && p.subCategory === "مجمدات" },
+/**
+ * Dual-tier sticky navigation:
+ *   - Tier 1 (main): wide buttons for top-level groups
+ *   - Tier 2 (sub):  horizontal scroller of subCategories of the active group
+ * Both tiers stay pinned under the global header. Tier 2 morphs based on
+ * Tier 1 selection. ScrollSpy keeps both in sync as the user scrolls.
+ */
+
+type SubKey = string;
+type MainGroup = {
+  id: string;
+  name: string;
+  /** which product.subCategory values fall into this group */
+  subs: { id: SubKey; label: string }[];
+};
+
+const groups: MainGroup[] = [
+  {
+    id: "red",
+    name: "لحوم حمراء",
+    subs: [
+      { id: "all-red", label: "الكل" },
+      { id: "بتلو",    label: "بتلو" },
+      { id: "ضأن",     label: "ضأن" },
+      { id: "كندوز",   label: "كندوز" },
+      { id: "مفروم",   label: "مفروم" },
+    ],
+  },
+  {
+    id: "poultry",
+    name: "دواجن",
+    subs: [
+      { id: "all-poultry", label: "الكل" },
+      { id: "بلدي",         label: "بلدي" },
+      { id: "صدور",         label: "صدور" },
+      { id: "أوراك",         label: "أوراك" },
+      { id: "بط وأرانب",      label: "بط وأرانب" },
+    ],
+  },
+  {
+    id: "fish",
+    name: "أسماك وبحريات",
+    subs: [
+      { id: "all-fish", label: "الكل" },
+      { id: "بحري",      label: "بحري" },
+      { id: "مزارع",     label: "مزارع" },
+      { id: "فيليه",     label: "فيليه" },
+      { id: "بحريات",    label: "بحريات" },
+    ],
+  },
+  {
+    id: "frozen",
+    name: "مجمدات",
+    subs: [
+      { id: "all-frozen", label: "الكل" },
+      { id: "خضار",         label: "خضار مجمدة" },
+      { id: "وجبات",        label: "وجبات سريعة" },
+    ],
+  },
 ];
+
+/** Map each product to its main group based on subCategory */
+const groupOf = (sub?: string): string => {
+  if (!sub) return "red";
+  if (sub === "لحوم حمراء" || sub === "مفرومات") return "red";
+  if (sub === "دواجن") return "poultry";
+  if (sub === "أسماك" || sub === "بحريات") return "fish";
+  if (sub === "مجمدات") return "frozen";
+  return "red";
+};
+
+const HEADER_OFFSET = 56;
+const TIER1 = 52;
+const TIER2 = 44;
+const TRIGGER = 14;
 
 const Meat = () => {
   const theme = storeThemes.meat;
-  return (
-    <SinglePageStore
-      themeKey="meat"
-      title="اللحوم والمجمدات"
-      subtitle="طازجة بأعلى معايير الجودة والسلامة"
-      searchPlaceholder="ابحث في اللحوم والمجمدات…"
-      products={products}
-      categories={cats}
-      hero={
-        <section className="rounded-[1.75rem] p-5 shadow-tile" style={{ background: theme.gradient }}>
-          <span className="text-[10px] font-bold text-foreground/80">قطّع كما تحب</span>
-          <h2 className="font-display text-2xl font-extrabold text-foreground">طازج اليوم</h2>
-          <p className="mt-1 text-xs text-foreground/70">يصلك مبرّداً بعربات مجهّزة</p>
-        </section>
+  const meatProducts = useMemo(
+    () => products.filter((p) => p.source === "meat"),
+    [],
+  );
+
+  const [activeMain, setActiveMain] = useState(groups[0].id);
+  const [activeSub, setActiveSub] = useState(groups[0].subs[0].id);
+  const [query, setQuery] = useState("");
+
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const tier2Ref = useRef<HTMLDivElement>(null);
+
+  const currentGroup = groups.find((g) => g.id === activeMain) ?? groups[0];
+
+  // Reset active sub when group changes
+  useEffect(() => {
+    setActiveSub(currentGroup.subs[0].id);
+  }, [activeMain, currentGroup.subs]);
+
+  const filteredForGroup = useMemo(() => {
+    const q = query.trim();
+    return meatProducts
+      .filter((p) => groupOf(p.subCategory) === activeMain)
+      .filter((p) => !q || p.name.includes(q));
+  }, [meatProducts, activeMain, query]);
+
+  // Subgroup -> filter predicate. Most subs are textual hints over name/subCategory.
+  const matchSub = (subId: string, p: (typeof meatProducts)[number]) => {
+    if (subId.startsWith("all-")) return true;
+    return (p.name + " " + (p.subCategory ?? "")).includes(subId);
+  };
+
+  const subSections = currentGroup.subs.map((s) => ({
+    ...s,
+    items: filteredForGroup.filter((p) => matchSub(s.id, p)),
+  }));
+
+  // ScrollSpy for sub sections
+  useEffect(() => {
+    const onScroll = () => {
+      const triggerY = HEADER_OFFSET + TIER1 + TIER2 + TRIGGER;
+      let current = currentGroup.subs[0].id;
+      for (const s of currentGroup.subs) {
+        const el = sectionRefs.current[s.id];
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top - triggerY <= 0) current = s.id;
+        else break;
       }
-    />
+      setActiveSub(current);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [currentGroup]);
+
+  // Auto-center active sub chip
+  useEffect(() => {
+    tier2Ref.current
+      ?.querySelector<HTMLButtonElement>(`[data-sub="${activeSub}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [activeSub]);
+
+  const jumpToSub = (id: string) => {
+    const el = sectionRefs.current[id];
+    if (!el) return;
+    const top =
+      el.getBoundingClientRect().top + window.scrollY -
+      (HEADER_OFFSET + TIER1 + TIER2 + 8);
+    window.scrollTo({ top, behavior: "smooth" });
+  };
+
+  return (
+    <div>
+      <BackHeader
+        title="اللحوم والمجمدات"
+        subtitle="طازجة بأعلى معايير الجودة والسلامة"
+        accent="متجر"
+        themeKey="meat"
+      />
+
+      {/* Hero */}
+      <section
+        className="rounded-[1.75rem] p-5 shadow-tile"
+        style={{ background: theme.gradient }}
+      >
+        <span className="text-[10px] font-bold text-foreground/80">قطّع كما تحب</span>
+        <h2 className="font-display text-2xl font-extrabold text-foreground">
+          طازج اليوم
+        </h2>
+        <p className="mt-1 text-xs text-foreground/70">
+          يصلك مبرّداً بعربات مجهّزة
+        </p>
+      </section>
+
+      {/* Search */}
+      <div className="glass mb-3 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 shadow-soft">
+        <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="ابحث في اللحوم والمجمدات…"
+          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        />
+      </div>
+
+      {/* Dual-tier sticky nav */}
+      <div className="fixed inset-x-0 z-30" style={{ top: `${HEADER_OFFSET}px` }}>
+        <div
+          className="mx-auto max-w-md"
+          style={{
+            background: `hsl(var(--card) / 0.96)`,
+            backdropFilter: "saturate(180%) blur(24px)",
+            WebkitBackdropFilter: "saturate(180%) blur(24px)",
+            borderBottom: "1px solid hsl(var(--border) / 0.5)",
+          }}
+        >
+          {/* Tier 1 — main groups */}
+          <div className="grid grid-cols-4 gap-1 px-2 py-2">
+            {groups.map((g) => {
+              const active = g.id === activeMain;
+              return (
+                <button
+                  key={g.id}
+                  onClick={() => {
+                    setActiveMain(g.id);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className={`rounded-xl px-2 py-2 text-[11px] font-extrabold transition ease-apple ${
+                    active
+                      ? "text-white shadow-pill"
+                      : "bg-foreground/5 text-foreground"
+                  }`}
+                  style={active ? { background: `hsl(${theme.hue})` } : undefined}
+                >
+                  {g.name}
+                </button>
+              );
+            })}
+          </div>
+          {/* Tier 2 — subcategories */}
+          <div
+            ref={tier2Ref}
+            className="flex gap-2 overflow-x-auto border-t border-border/40 px-3 py-2 no-scrollbar"
+          >
+            {currentGroup.subs.map((s) => {
+              const active = s.id === activeSub;
+              return (
+                <button
+                  key={s.id}
+                  data-sub={s.id}
+                  onClick={() => jumpToSub(s.id)}
+                  className={`shrink-0 rounded-full px-3.5 py-1 text-[11px] font-bold transition ease-apple ${
+                    active
+                      ? "bg-foreground text-background shadow-pill"
+                      : "bg-foreground/5 text-foreground"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Spacer for the dual sticky bars */}
+      <div style={{ height: TIER1 + TIER2 + 8 }} />
+
+      {/* Sections per sub */}
+      <div className="space-y-8">
+        {subSections.map((s) => (
+          <section
+            key={s.id}
+            ref={(el) => {
+              sectionRefs.current[s.id] = el;
+            }}
+            data-sub-section={s.id}
+            style={{ scrollMarginTop: HEADER_OFFSET + TIER1 + TIER2 + 8 }}
+          >
+            <h2 className="mb-3 px-1 font-display text-xl font-extrabold text-foreground">
+              {s.label}{" "}
+              <span className="text-xs text-muted-foreground">· {s.items.length}</span>
+            </h2>
+            {s.items.length === 0 ? (
+              <p className="rounded-2xl bg-foreground/5 p-6 text-center text-xs text-muted-foreground">
+                لا توجد منتجات في هذا القسم بعد
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {s.items.map((p) => (
+                  <ProductCard key={`${s.id}-${p.id}`} product={p} />
+                ))}
+              </div>
+            )}
+          </section>
+        ))}
+        <div style={{ height: "60vh" }} />
+      </div>
+    </div>
   );
 };
+
 export default Meat;
