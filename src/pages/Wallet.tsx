@@ -53,6 +53,9 @@ const Wallet = () => {
   const [totalSavings, setTotalSavings] = useState(0);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referrals, setReferrals] = useState<ReferralRow[]>([]);
+  const [jar, setJar] = useState<SavingsJar | null>(null);
+  const [jarTxs, setJarTxs] = useState<SavingsTx[]>([]);
+  const [showJar, setShowJar] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -62,19 +65,30 @@ const Wallet = () => {
       if (!mounted) return;
       setUserId(user.id);
 
-      const [{ data: bal }, { data: tx }, { data: items }, { data: refRows }] = await Promise.all([
+      const [{ data: bal }, { data: tx }, { data: items }, { data: refRows }, { data: jarRow }, { data: jarTx }] = await Promise.all([
         supabase.from("wallet_balances").select("balance,points,coupons,cashback").eq("user_id", user.id).maybeSingle(),
         supabase.from("wallet_transactions").select("id,label,amount,kind,created_at,source").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
         supabase.from("order_items").select("price,quantity,product_id, products(category, old_price, price)").in("order_id",
           (await supabase.from("orders").select("id").eq("user_id", user.id)).data?.map((o: any) => o.id) ?? []
         ),
         supabase.from("referrals").select("id,status,commission,first_order_at,created_at").eq("referrer_id", user.id).order("created_at", { ascending: false }),
+        supabase.from("savings_jar").select("balance,auto_save_enabled,round_to,goal,goal_label").eq("user_id", user.id).maybeSingle(),
+        supabase.from("savings_transactions").select("id,amount,kind,label,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
       ]);
 
       if (!mounted) return;
       setBalance(bal ?? { balance: 0, points: 0, coupons: 0, cashback: 0 });
       setTxs((tx ?? []) as Tx[]);
       setReferrals((refRows ?? []) as ReferralRow[]);
+      setJar((jarRow ?? { balance: 0, auto_save_enabled: false, round_to: 5, goal: null, goal_label: null }) as SavingsJar);
+      setJarTxs((jarTx ?? []) as SavingsTx[]);
+
+      // detect previous successful commission to celebrate on entry
+      const lastReward = (tx ?? []).find((t: any) => t.kind === "reward" && t.source === "referral");
+      if (lastReward) {
+        const ageH = (Date.now() - new Date(lastReward.created_at).getTime()) / 36e5;
+        if (ageH < 0.1) setTimeout(fireConfetti, 400);
+      }
 
       // analytics
       const byCat: Record<string, number> = {};
