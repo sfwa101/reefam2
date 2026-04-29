@@ -20,7 +20,7 @@ const AppShell = () => {
   const hideCartPanel = pathname === "/cart" || pathname === "/auth";
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen [overflow-x:clip]">
       <TopBar />
       <div className="mx-auto flex w-full max-w-[1400px] gap-5 px-4 pt-[72px] lg:gap-6 lg:px-6 lg:pt-[88px]">
         <SectionsPanel />
