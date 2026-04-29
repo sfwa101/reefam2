@@ -8,7 +8,8 @@ import {
   Lock, PlayCircle, ChefHat, Utensils, ShoppingBasket, Repeat,
 } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import type { Product } from "@/lib/products";
+import { type Product, getById } from "@/lib/products";
+import { toast } from "sonner";
 
 // ===== Recipe definitions (richer than products list — per section) =====
 type Recipe = {
