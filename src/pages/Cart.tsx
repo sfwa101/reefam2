@@ -464,23 +464,75 @@ const Cart = () => {
         </div>
       </motion.div>
 
-      {/* ============ Cart Lines (swipe) ============ */}
-      <div className="space-y-2.5">
-        <AnimatePresence initial={false}>
-          {lines.map((l) => (
-            <motion.div
-              key={l.product.id}
-              layout
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
-              transition={{ type: "spring", damping: 26, stiffness: 280 }}
+      {/* ============ Multi-vendor Cart Lines ============ */}
+      <div className="space-y-4">
+        {isMultiVendor && (
+          <div className="flex items-start gap-2 rounded-2xl bg-accent/10 p-2.5 ring-1 ring-accent/20">
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent-foreground" />
+            <p className="text-[11px] font-bold text-foreground">
+              طلبك يحتوي على <span className="text-accent-foreground">{toLatin(vendorGroups.length)} موردين</span> — كل قسم سيصل من مصدره الخاص.
+            </p>
+          </div>
+        )}
+
+        {vendorGroups.map((g) => {
+          const v = g.vendor;
+          const hue = vendorBrandHue(v);
+          const Icon = v.kind === "restaurant" ? Utensils : v.kind === "kitchen" ? ChefHat : Store;
+          return (
+            <div
+              key={g.key}
+              className="overflow-hidden rounded-2xl bg-card/60 ring-1 ring-border/40"
+              style={{ borderTop: `3px solid hsl(${hue})` }}
             >
-              <CartLineItem l={l} setQty={setQty} remove={remove} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        <p className="px-1 text-center text-[10px] text-muted-foreground">💡 اسحب المنتج لليسار للحذف السريع</p>
+              {/* Vendor header */}
+              <div className="flex items-center justify-between gap-2 px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="flex h-7 w-7 items-center justify-center rounded-[10px] text-white"
+                    style={{ background: `hsl(${hue})` }}
+                  >
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+                  </div>
+                  <div className="leading-tight">
+                    <p className="text-[12px] font-extrabold">{vendorLabel(v)}</p>
+                    <p className="text-[9.5px] text-muted-foreground">
+                      {toLatin(g.lines.length)} منتج · إجمالي {fmtMoney(g.subtotal)}
+                    </p>
+                  </div>
+                </div>
+                {v.kind === "restaurant" && payment === "wallet" && g.cashback > 0 && (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold text-white shadow-pill"
+                    style={{ background: `hsl(${hue})` }}
+                  >
+                    <WalletIcon className="h-2.5 w-2.5" />
+                    +{toLatin(g.cashback)} ج.م
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2 px-2 pb-2">
+                <AnimatePresence initial={false}>
+                  {g.lines.map((l) => (
+                    <motion.div
+                      key={l.product.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
+                      transition={{ type: "spring", damping: 26, stiffness: 280 }}
+                    >
+                      <CartLineItem l={l} setQty={setQty} remove={remove} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          );
+        })}
+        <p className="px-1 text-center text-[10px] text-muted-foreground">
+          💡 اسحب المنتج لليسار للحذف السريع
+        </p>
       </div>
 
       {/* ============ Cross-sell ============ */}
