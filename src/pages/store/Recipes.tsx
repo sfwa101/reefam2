@@ -2,6 +2,7 @@ import BackHeader from "@/components/BackHeader";
 import BottomCTA from "@/components/BottomCTA";
 import { useCart } from "@/context/CartContext";
 import { useMemo, useState, useEffect } from "react";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import {
   Clock, Users, Flame, X, Minus, Plus, Check, Calendar, Sparkles,
   Sun, Sunset, Moon, Flame as FlameIcon, TrendingUp, Timer, Zap, BadgePercent, Truck,
@@ -369,6 +370,9 @@ function minutesUntilClose(s: Recipe["section"], d: Date) {
 
 const Recipes = () => {
   const { add } = useCart();
+  const search = useSearch({ from: "/_app/store/recipes" }) as { tag?: string };
+  const navigate = useNavigate({ from: "/_app/store/recipes" });
+  const tag = (search.tag ?? "").trim();
   const [filter, setFilter] = useState(filters[0]);
   const [open, setOpen] = useState<Recipe | null>(null);
 
@@ -394,9 +398,23 @@ const Recipes = () => {
   const [planServings, setPlanServings] = useState(2);
 
   const filtered = useMemo(() => {
-    if (filter === "كل الوصفات") return RECIPES;
-    return RECIPES.filter((r) => r.category.includes(filter.replace("ة", "").replace("ال", "")) || filter.includes(r.category));
-  }, [filter]);
+    let list = RECIPES;
+    if (tag) {
+      const t = tag;
+      list = list.filter(
+        (r) =>
+          r.name.includes(t) ||
+          r.ingredients.some((i) => i.name.includes(t)),
+      );
+      if (list.length === 0) list = RECIPES;
+    }
+    if (filter === "كل الوصفات") return list;
+    return list.filter(
+      (r) =>
+        r.category.includes(filter.replace("ة", "").replace("ال", "")) ||
+        filter.includes(r.category),
+    );
+  }, [filter, tag]);
 
   const planSet = (day: string, section: Recipe["section"], recipeId: string) =>
     setPlan((p) => ({ ...p, [day]: { ...p[day], [section]: p[day]?.[section] === recipeId ? undefined : recipeId } }));
@@ -495,6 +513,25 @@ const Recipes = () => {
 
         {/* Marketing strip — value props (free delivery, fresh today, secure pay) */}
         {mode === "daily" && (
+          <>
+            {tag && (
+              <div className="flex items-center justify-between gap-2 rounded-2xl bg-amber-500/15 p-3 ring-1 ring-amber-500/30 animate-fade-in">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10.5px] font-extrabold text-amber-800 dark:text-amber-300">
+                    ✨ وصفات مقترحة لـ
+                  </p>
+                  <p className="truncate text-[12.5px] font-extrabold text-foreground">{tag}</p>
+                </div>
+                <button
+                  onClick={() =>
+                    navigate({ search: { tag: "" } as never, replace: true })
+                  }
+                  className="shrink-0 rounded-full bg-amber-600 px-3 py-1.5 text-[11px] font-extrabold text-white shadow-pill"
+                >
+                  عرض الكل
+                </button>
+              </div>
+            )}
           <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar">
             {[
               { icon: Truck, label: "توصيل مجاني فوق ٢٠٠ ج.م", c: "from-emerald-500/15 to-emerald-500/5", t: "text-emerald-700 dark:text-emerald-300" },
@@ -507,6 +544,7 @@ const Recipes = () => {
               </div>
             ))}
           </div>
+          </>
         )}
 
         {/* Weekly meal-plan builder (only in weekly mode) */}
