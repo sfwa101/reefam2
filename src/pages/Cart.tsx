@@ -431,6 +431,7 @@ const Cart = () => {
   const [payment, setPayment] = useState<string>("wallet");
   const [submitting, setSubmitting] = useState(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [trustLimit, setTrustLimit] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
   const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
   const [saveChange, setSaveChange] = useState<boolean>(true);
