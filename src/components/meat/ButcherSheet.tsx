@@ -7,7 +7,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
-import { fmtMoney, toLatin } from "@/lib/format";
+import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import type { Product } from "@/lib/products";
 import {
