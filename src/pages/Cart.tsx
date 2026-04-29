@@ -873,9 +873,21 @@ const Cart = () => {
             </span>
           )}
         </div>
+
+        {/* Sweets booking — payment rules notice */}
+        {sweetsRules.hasBooking && (
+          <div className="mb-3 flex items-start gap-2 rounded-2xl bg-violet-500/10 p-2.5 ring-1 ring-violet-500/25">
+            <Cake className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
+            <div className="flex-1 text-[11px] font-bold leading-relaxed text-foreground/90">
+              يحتوي طلبك على حجز خاص — يُرجى الدفع مسبقاً (محفظة أو إلكتروني) لتأكيد الحجز.
+            </div>
+          </div>
+        )}
+
         <div className="space-y-2">
           {paymentOptions
             .filter((m) => zone.codAllowed || m.id !== "cash")
+            .filter((m) => !sweetsRules.blockCOD || m.id !== "cash")
             .map((m) => {
             const Icon = m.icon;
             const active = payment === m.id;
@@ -906,6 +918,75 @@ const Cart = () => {
           })}
         </div>
 
+        {/* Deposit toggle — appears only for Type C bookings */}
+        {sweetsRules.hasBooking && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-3 overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500/8 to-fuchsia-500/8 p-3 ring-1 ring-violet-500/25"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-[12px] font-extrabold">دفع عربون 50٪</p>
+                  {sweetsRules.depositRequired && (
+                    <span className="rounded-md bg-amber-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-800 dark:text-amber-300">
+                      إجباري
+                    </span>
+                  )}
+                </div>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  {sweetsRules.depositRequired
+                    ? `الحجز يتجاوز ${toLatin(DEPOSIT_THRESHOLD)} ج.م — يجب تأكيده بعربون.`
+                    : "ادفع نصف قيمة الحجز الآن، والباقي عند التوصيل."}
+                </p>
+              </div>
+              <button
+                role="switch"
+                aria-checked={payDeposit}
+                onClick={() =>
+                  !sweetsRules.depositRequired && setPayDeposit((v) => !v)
+                }
+                disabled={sweetsRules.depositRequired}
+                className={`relative h-7 w-12 shrink-0 rounded-full transition ${
+                  payDeposit ? "bg-violet-600" : "bg-foreground/15"
+                } ${sweetsRules.depositRequired ? "opacity-90" : ""}`}
+              >
+                <span
+                  className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-pill transition-all ${
+                    payDeposit ? "right-0.5" : "right-[1.625rem]"
+                  }`}
+                />
+              </button>
+            </div>
+            <AnimatePresence>
+              {payDeposit && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="mt-2 overflow-hidden rounded-[12px] bg-card/70 p-2.5 ring-1 ring-violet-500/20"
+                >
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-bold text-foreground/80">العربون الآن</span>
+                    <span className="font-display font-extrabold text-violet-700 tabular-nums dark:text-violet-300">
+                      {fmtMoney(sweetsRules.depositAmount)}
+                    </span>
+                  </div>
+                  {payOnDelivery > 0 && (
+                    <div className="mt-1 flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-foreground/80">يُحصّل عند التوصيل</span>
+                      <span className="font-display font-extrabold tabular-nums">
+                        {fmtMoney(payOnDelivery)}
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
         {/* Split-payment helper when wallet < grand */}
         <AnimatePresence>
           {isSplit && (
@@ -925,6 +1006,7 @@ const Cart = () => {
                 {paymentOptions
                   .filter((p) => p.id !== "wallet")
                   .filter((p) => zone.codAllowed || p.id !== "cash")
+                  .filter((p) => !sweetsRules.blockCOD || p.id !== "cash")
                   .map((m) => {
                   const Icon = m.icon;
                   const a = secondaryPayment === m.id;
