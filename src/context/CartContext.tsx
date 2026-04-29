@@ -128,3 +128,22 @@ export const useCart = () => {
   if (!v) throw new Error("useCart must be used within CartProvider");
   return v;
 };
+
+/**
+ * Performance selector: returns ONLY the qty for a given product id.
+ * Memoized at the consumer so a card re-renders only when its own qty changes.
+ * The cart actions (`add`, `setQty`) are stable refs from the provider so
+ * pulling them in as well is safe and does not cause extra re-renders.
+ */
+export const useCartLineQty = (productId: string): number => {
+  const v = useContext(Ctx);
+  if (!v) throw new Error("useCartLineQty must be used within CartProvider");
+  return v.lines.find((l) => l.product.id === productId)?.qty ?? 0;
+};
+
+export const useCartActions = () => {
+  const v = useContext(Ctx);
+  if (!v) throw new Error("useCartActions must be used within CartProvider");
+  // These are stable useCallback refs.
+  return { add: v.add, setQty: v.setQty, remove: v.remove, updateMeta: v.updateMeta, clear: v.clear };
+};
