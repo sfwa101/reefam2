@@ -289,6 +289,47 @@ const Wallet = () => {
         )}
       </motion.section>
 
+      {/* الحصّالة الذكية */}
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.4 }}
+        onClick={() => setShowJar(true)}
+        className="relative cursor-pointer overflow-hidden rounded-2xl p-4 shadow-soft ring-1 ring-border/50"
+        style={{ background: "linear-gradient(135deg, hsl(var(--primary-soft)) 0%, hsl(45 70% 92%) 100%)" }}
+      >
+        <div className="absolute -top-6 -left-6 h-24 w-24 rounded-full bg-primary/15 blur-2xl" />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-[hsl(45_80%_55%)] text-white shadow-pill">
+            <PiggyBank className="h-6 w-6" strokeWidth={2.2} />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-display text-sm font-extrabold text-foreground">حصّالتي</h3>
+              {jar?.auto_save_enabled && (
+                <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-[9px] font-extrabold text-primary">تلقائي ON</span>
+              )}
+            </div>
+            <p className="text-[10px] text-foreground/70">تقريب القروش من كل طلب لتوفير ذكي</p>
+          </div>
+          <div className="text-right">
+            <p className="font-display text-2xl font-extrabold text-foreground tabular-nums">{toLatin(Math.round(jar?.balance ?? 0))}</p>
+            <p className="text-[9px] text-foreground/60">ج.م مُدّخَرة</p>
+          </div>
+        </div>
+        {jar?.goal && jar.goal > 0 && (
+          <div className="relative mt-3">
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="font-bold text-foreground/70">{jar.goal_label || "هدفك"}</span>
+              <span className="font-extrabold tabular-nums text-foreground">{toLatin(Math.min(100, Math.round((jar.balance / jar.goal) * 100)))}٪</span>
+            </div>
+            <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+              <div className="h-full rounded-full bg-gradient-to-r from-primary to-[hsl(45_80%_55%)]" style={{ width: `${Math.min(100, (jar.balance / jar.goal) * 100)}%` }} />
+            </div>
+          </div>
+        )}
+      </motion.section>
+
       {/* السجل */}
       <section>
         <div className="mb-2.5 flex items-baseline justify-between px-1">
@@ -331,6 +372,15 @@ const Wallet = () => {
         {showTopup && <TopupDialog onClose={() => setShowTopup(false)} phone="201080068689" userId={userId!} />}
         {showAffiliate && referralCode && (
           <AffiliateDialog onClose={() => setShowAffiliate(false)} code={referralCode} referrals={referrals} totalCommission={totalCommission} />
+        )}
+        {showJar && jar && (
+          <SavingsJarDialog
+            onClose={() => setShowJar(false)}
+            userId={userId!}
+            jar={jar}
+            txs={jarTxs}
+            onUpdate={(j, t) => { setJar(j); setJarTxs(t); }}
+          />
         )}
       </AnimatePresence>
     </div>
