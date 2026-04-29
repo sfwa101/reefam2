@@ -44,6 +44,38 @@ const formatDate = (iso: string) => {
   return toLatin(d.toLocaleDateString("en-GB"));
 };
 
+const buildInsight = (topName: string, topPct: number, topValue: number): { text: string; cta?: { to: string; label: string } } => {
+  if (topName.includes("لحوم") && topPct >= 30) {
+    const save = Math.round(topValue * 0.15);
+    return {
+      text: `أنت تنفق ${toLatin(topPct)}٪ من ميزانيتك على اللحوم. اشترك في سلة اللحوم العائلية ووفّر حوالي ${toLatin(save)} ج.م شهريًا.`,
+      cta: { to: "/store/baskets" as const, label: "تصفّح السلال" },
+    };
+  }
+  if (topName.includes("سوبر") && topPct >= 35) {
+    return {
+      text: `معظم إنفاقك على السوبر ماركت (${toLatin(topPct)}٪). جرّب اشتراك السلة الأسبوعية لتوفير الوقت والمال.`,
+      cta: { to: "/store/baskets-subs" as const, label: "اشتراك ذكي" },
+    };
+  }
+  if (topName.includes("مطاعم") && topPct >= 30) {
+    return {
+      text: `${toLatin(topPct)}٪ من مصاريفك على المطاعم. اطلب من مطبخ ريف بأقل من نصف السعر مع نفس الجودة.`,
+      cta: { to: "/store/kitchen" as const, label: "مطبخ ريف" },
+    };
+  }
+  if (topName.includes("جملة")) {
+    return {
+      text: `أنت تشتري بذكاء بالجملة! استمر — هذا يوفّر لك مع كل طلب.`,
+      cta: { to: "/store/wholesale" as const, label: "تصفّح الجملة" },
+    };
+  }
+  return {
+    text: `أعلى إنفاق لديك على "${topName}" بنسبة ${toLatin(topPct)}٪. راجع الأقسام البديلة لتنويع مشترياتك وكسب نقاط أكثر.`,
+    cta: { to: "/sections" as const, label: "كل الأقسام" },
+  };
+};
+
 const Wallet = () => {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [txs, setTxs] = useState<Tx[]>([]);
