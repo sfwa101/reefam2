@@ -588,11 +588,15 @@ const Cart = () => {
   /* Savings on this bill: discount + (free delivery saved) */
   const billSavings = discount + (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? zone.deliveryFee : 0);
 
-  /* Split payment: wallet pays partial, remainder in secondary method */
+  /* Split payment: wallet pays partial, remainder in secondary method
+     Trust credit (BNPL) extends spendable amount for verified high-tier users —
+     letting balance go negative up to trustLimit. */
   const isWalletPay = payment === "wallet";
-  const walletShortfall = isWalletPay ? Math.max(0, grand - walletBalance) : 0;
-  const walletApplied = isWalletPay ? Math.min(walletBalance, grand) : 0;
-  const isSplit = isWalletPay && walletShortfall > 0 && walletBalance > 0;
+  const effectiveWallet = walletBalance + trustLimit;
+  const walletShortfall = isWalletPay ? Math.max(0, grand - effectiveWallet) : 0;
+  const walletApplied = isWalletPay ? Math.min(effectiveWallet, grand) : 0;
+  const trustUsed = isWalletPay ? Math.max(0, walletApplied - walletBalance) : 0;
+  const isSplit = isWalletPay && walletShortfall > 0 && effectiveWallet > 0;
 
   /* Smart change-jar: round-up suggestion when paying cash (whole or split-cash) */
   const cashAmount = !isWalletPay ? grand : (isSplit && secondaryPayment === "cash" ? walletShortfall : 0);
