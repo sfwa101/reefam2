@@ -1100,30 +1100,30 @@ const Cart = () => {
         </p>
       </div>
 
-      {/* ============ Cross-sell ============ */}
+      {/* ============ Cross-sell — visually separated upsell rail ============ */}
       {crossSell.length > 0 && (
-        <section>
+        <section className="-mx-4 rounded-none bg-primary/[0.04] px-4 py-3 ring-1 ring-primary/10 sm:mx-0 sm:rounded-2xl">
           <div className="mb-2 flex items-baseline justify-between px-1">
-            <h2 className="font-display text-sm font-extrabold flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-accent" /> غالباً ما يُشترى مع
+            <h2 className="font-display text-[12px] font-extrabold flex items-center gap-1.5 text-foreground/90">
+              <Sparkles className="h-3 w-3 text-accent" /> غالباً ما يُشترى مع
             </h2>
-            <span className="text-[10px] text-muted-foreground">إضافة سريعة</span>
+            <span className="text-[10px] text-muted-foreground">إضافات سريعة</span>
           </div>
           <div className="-mx-4 overflow-x-auto px-4">
-            <div className="flex gap-2.5 pb-1">
+            <div className="flex gap-2 pb-1">
               {crossSell.map((p) => (
                 <motion.button
                   key={p.id}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => { add(p, 1); fireMiniConfetti(); toast.success(`تمت إضافة ${p.name}`); }}
-                  className="relative flex w-[120px] shrink-0 flex-col rounded-2xl bg-card p-2 text-right shadow-[0_4px_14px_-8px_rgba(0,0,0,0.15)] ring-1 ring-border/30"
+                  className="relative flex w-[100px] shrink-0 flex-col rounded-xl bg-card p-1.5 text-right shadow-[0_3px_10px_-6px_rgba(0,0,0,0.12)] ring-1 ring-border/30"
                 >
-                  <img src={p.image} alt="" className="mb-1.5 h-20 w-full rounded-xl object-cover" />
-                  <p className="line-clamp-2 text-[11px] font-bold leading-tight">{p.name}</p>
+                  <img src={p.image} alt="" className="mb-1 h-16 w-full rounded-lg object-cover" />
+                  <p className="line-clamp-2 text-[10px] font-bold leading-tight">{p.name}</p>
                   <div className="mt-1 flex items-center justify-between">
-                    <span className="font-display text-[12px] font-extrabold text-primary tabular-nums">{toLatin(p.price)} ج</span>
-                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary text-primary-foreground shadow-pill">
-                      <Plus className="h-3 w-3" strokeWidth={3} />
+                    <span className="font-display text-[11px] font-extrabold text-primary tabular-nums">{toLatin(p.price)} ج</span>
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill">
+                      <Plus className="h-2.5 w-2.5" strokeWidth={3} />
                     </div>
                   </div>
                 </motion.button>
@@ -1201,12 +1201,17 @@ const Cart = () => {
             const Icon = m.icon;
             const active = payment === m.id;
             const isWallet = m.id === "wallet";
+            const walletAfter = isWallet ? Math.max(0, walletBalance - grand) : 0;
             return (
               <motion.button
                 whileTap={{ scale: 0.99 }}
                 key={m.id}
                 onClick={() => setPayment(m.id)}
-                className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-right transition ${active ? "border-primary bg-primary-soft" : "border-border bg-background"}`}
+                className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-right transition ${
+                  active
+                    ? "border-primary bg-primary-soft shadow-[0_0_0_4px_hsl(var(--primary)/0.08),0_8px_24px_-12px_hsl(var(--primary)/0.45)]"
+                    : "border-border bg-background hover:border-primary/30"
+                }`}
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${active ? "bg-primary text-primary-foreground" : "bg-foreground/5"}`}>
                   <Icon className="h-4 w-4" strokeWidth={2.4} />
@@ -1216,6 +1221,11 @@ const Cart = () => {
                   {isWallet && user ? (
                     <p className="text-[10px] font-bold text-primary">
                       متاح: {toLatin(Math.round(walletBalance))} ج.م
+                      {active && walletBalance >= grand && grand > 0 && (
+                        <span className="ms-1 text-foreground/60 font-extrabold">
+                          · المتبقي بعد العملية {toLatin(Math.round(walletAfter))} ج.م
+                        </span>
+                      )}
                     </p>
                   ) : (
                     <p className="text-[10px] text-muted-foreground">{m.sub}</p>
@@ -1438,11 +1448,13 @@ const Cart = () => {
         {discount > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">خصم ({appliedPromo?.code})</span><span className="font-bold tabular-nums text-primary">-{fmtMoney(discount)}</span></div>}
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">التوصيل</span><span className="font-bold tabular-nums">{delivery === 0 ? <span className="text-primary">مجاني 🚚</span> : fmtMoney(delivery)}</span></div>
         {billSavings > 0 && (
-          <div className="flex items-center justify-between rounded-[10px] bg-primary/8 px-2 py-1.5 text-[12px]">
-            <span className="flex items-center gap-1 font-extrabold text-primary">
-              <Sparkles className="h-3 w-3" /> وفّرت في هذه الفاتورة
+          <div className="flex items-center justify-between rounded-[10px] bg-emerald-500/10 px-2 py-1.5 text-[13px] ring-1 ring-emerald-500/20">
+            <span className="flex items-center gap-1 font-black text-emerald-700 dark:text-emerald-400">
+              <Sparkles className="h-3.5 w-3.5" /> ما وفّرته في هذه الفاتورة
             </span>
-            <span className="font-display font-extrabold tabular-nums text-primary">{fmtMoney(billSavings)}</span>
+            <span className="font-display font-black tabular-nums text-emerald-700 dark:text-emerald-400">
+              {fmtMoney(billSavings)}
+            </span>
           </div>
         )}
         {tip > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">إكرامية</span><span className="font-bold tabular-nums">{fmtMoney(tip)}</span></div>}
