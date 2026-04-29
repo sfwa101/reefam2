@@ -61,7 +61,8 @@ export type Product = {
   subCategory?: string;
   source:
     | "supermarket" | "kitchen" | "dairy" | "produce" | "recipes"
-    | "pharmacy" | "library" | "wholesale" | "home";
+    | "pharmacy" | "library" | "wholesale" | "home"
+    | "village" | "baskets" | "restaurants" | "meat" | "sweets";
   badge?: "best" | "trending" | "premium" | "new";
   variants?: ProductVariant[];
   addons?: ProductAddon[];
@@ -156,6 +157,47 @@ export const products: Product[] = [
   // ========== Home Tools ==========
   { id: "cleaner", name: "بخاخ تنظيف طبيعي", unit: "زجاجة 500مل", price: 65, image: pCleaner, rating: 4.7, category: "أدوات منزلية", subCategory: "تنظيف", source: "home", badge: "best" },
   { id: "utensils", name: "طقم أواني ستانلس", unit: "5 قطع", price: 850, oldPrice: 1100, image: pUtensils, rating: 4.9, category: "أدوات منزلية", subCategory: "مطبخ", source: "home", badge: "premium" },
+
+  // ========== Village (منتجات القرية) ==========
+  { id: "honey", name: "عسل نحل بلدي صافي", brand: "مناحل الريف", unit: "جرة 1 كجم", price: 320, oldPrice: 380, image: pButter, rating: 4.9, category: "خيرات الريف", subCategory: "عسل ومربى", source: "village", badge: "premium" },
+  { id: "ghee", name: "سمن بلدي بقري", brand: "مزرعة الريف", unit: "1 كجم", price: 420, image: pButter, rating: 4.8, category: "خيرات الريف", subCategory: "ألبان بلدية", source: "village", badge: "best" },
+  { id: "village-cheese", name: "جبنة قريش بلدية", brand: "مزرعة الريف", unit: "500غ", price: 75, image: pCheese, rating: 4.7, category: "خيرات الريف", subCategory: "ألبان بلدية", source: "village" },
+  { id: "olives", name: "زيتون أخضر مخلل بلدي", unit: "علبة 1 كجم", price: 95, image: pOil, rating: 4.6, category: "خيرات الريف", subCategory: "مخللات", source: "village" },
+  { id: "molasses", name: "عسل أسود بلدي", unit: "زجاجة 500غ", price: 110, image: pButter, rating: 4.7, category: "خيرات الريف", subCategory: "عسل ومربى", source: "village", badge: "trending" },
+  { id: "village-eggs", name: "بيض بلدي حر مزرعة", brand: "مزرعة الريف", unit: "30 حبة", price: 145, image: pEggs, rating: 4.9, category: "خيرات الريف", subCategory: "ألبان بلدية", source: "village", badge: "best" },
+
+  // ========== Baskets (سلال الريف) ==========
+  { id: "basket-week", name: "سلة الأسبوع العائلية", unit: "12 صنف · يكفي 4 أفراد", price: 650, oldPrice: 780, image: pTomato, rating: 4.9, category: "السلال", subCategory: "أسبوعية", source: "baskets", badge: "best" },
+  { id: "basket-fruit", name: "سلة فواكه موسمية", unit: "8 أنواع · 5 كجم", price: 285, oldPrice: 340, image: pApple, rating: 4.8, category: "السلال", subCategory: "فواكه", source: "baskets", badge: "trending" },
+  { id: "basket-veg", name: "سلة خضار طازجة", unit: "10 أنواع · 6 كجم", price: 220, image: pLettuce, rating: 4.7, category: "السلال", subCategory: "خضار", source: "baskets" },
+  { id: "basket-breakfast", name: "سلة الإفطار الصباحي", unit: "حليب · بيض · جبن · عسل", price: 245, image: pMilk, rating: 4.8, category: "السلال", subCategory: "إفطار", source: "baskets", badge: "new" },
+  { id: "basket-bbq", name: "سلة الشواء", unit: "لحم · دجاج · توابل · فحم", price: 980, image: pBeef, rating: 4.9, category: "السلال", subCategory: "مناسبات", source: "baskets", badge: "premium" },
+
+  // ========== Restaurants (مطاعم مختارة) ==========
+  { id: "rest-koshary", name: "كشري المدينة الفاخر", brand: "مطعم المدينة", unit: "طبق كبير", price: 65, image: pBowl, rating: 4.8, category: "مطاعم", subCategory: "مصري", source: "restaurants", badge: "best", addons: mealAddons },
+  { id: "rest-shawarma", name: "ساندويتش شاورما لحم", brand: "ركن الشام", unit: "ساندويتش جامبو", price: 95, image: pChicken, rating: 4.9, category: "مطاعم", subCategory: "شامي", source: "restaurants", badge: "trending", addons: mealAddons },
+  { id: "rest-pizza", name: "بيتزا مارجريتا إيطالية", brand: "بيتزا توسكانا", unit: "وسط 30سم", price: 145, image: pRisotto, rating: 4.7, category: "مطاعم", subCategory: "إيطالي", source: "restaurants", variants: sizeVariants, addons: mealAddons },
+  { id: "rest-burger", name: "برجر لحم بقري واجيو", brand: "برجر هاوس", unit: "وجبة + بطاطس + مشروب", price: 185, image: pBeef, rating: 4.8, category: "مطاعم", subCategory: "أمريكي", source: "restaurants", badge: "premium", addons: mealAddons },
+  { id: "rest-sushi", name: "طبق سوشي مشكّل", brand: "ساكورا", unit: "16 قطعة", price: 320, image: pSalmon, rating: 4.9, category: "مطاعم", subCategory: "آسيوي", source: "restaurants", badge: "premium" },
+  { id: "rest-grill", name: "مشكّل مشاوي على الفحم", brand: "مشاوي الريف", unit: "وجبة لشخصين", price: 420, image: pChicken, rating: 4.9, category: "مطاعم", subCategory: "مشويات", source: "restaurants", badge: "best", addons: mealAddons },
+
+  // ========== Meat & Frozen (اللحوم والمجمدات) ==========
+  { id: "meat-veal", name: "لحم بتلو طازج فاخر", unit: "كيلو", price: 480, image: pBeef, rating: 4.9, category: "لحوم ومجمدات", subCategory: "لحوم حمراء", source: "meat", badge: "premium", variants: weightVariants },
+  { id: "meat-lamb", name: "ضأن بلدي طازج", unit: "كيلو", price: 520, image: pBeef, rating: 4.9, category: "لحوم ومجمدات", subCategory: "لحوم حمراء", source: "meat", badge: "best", variants: weightVariants },
+  { id: "meat-whole-chicken", name: "دجاج بلدي كامل منظف", unit: "كيلو ونصف", price: 165, image: pChickenRaw, rating: 4.8, category: "لحوم ومجمدات", subCategory: "دواجن", source: "meat", badge: "trending" },
+  { id: "meat-kofta", name: "كفتة لحم بلدي مفرومة", unit: "كيلو", price: 320, image: pBeef, rating: 4.7, category: "لحوم ومجمدات", subCategory: "مفرومات", source: "meat", variants: weightVariants },
+  { id: "meat-fish", name: "سمك بلطي طازج", unit: "كيلو", price: 145, image: pSalmon, rating: 4.7, category: "لحوم ومجمدات", subCategory: "أسماك", source: "meat" },
+  { id: "meat-shrimp", name: "جمبري جامبو مجمّد", unit: "علبة 1 كجم", price: 380, image: pSalmon, rating: 4.8, category: "لحوم ومجمدات", subCategory: "بحريات", source: "meat", badge: "premium" },
+  { id: "meat-frozen-veg", name: "خضار مجمّدة مشكّلة", unit: "علبة 800غ", price: 65, image: pLettuce, rating: 4.6, category: "لحوم ومجمدات", subCategory: "مجمدات", source: "meat" },
+
+  // ========== Sweets & Cakes (الحلويات والتورتة) ==========
+  { id: "cake-choco", name: "تورتة الشوكولاتة الفاخرة", unit: "1 كجم", price: 320, image: pCookies, rating: 4.9, category: "حلويات", subCategory: "تورتات", source: "sweets", badge: "best", variants: sizeVariants },
+  { id: "cake-cheese", name: "تشيز كيك الفراولة", unit: "علبة 8 شرائح", price: 285, image: pStrawberry, rating: 4.8, category: "حلويات", subCategory: "تورتات", source: "sweets", badge: "trending" },
+  { id: "sweet-konafa", name: "كنافة بالقشطة بلدي", unit: "صينية متوسطة", price: 180, image: pCookies, rating: 4.9, category: "حلويات", subCategory: "شرقية", source: "sweets", badge: "premium" },
+  { id: "sweet-baklava", name: "بقلاوة فستق حلبي", unit: "علبة 500غ", price: 220, image: pCookies, rating: 4.8, category: "حلويات", subCategory: "شرقية", source: "sweets" },
+  { id: "sweet-macaron", name: "ماكرون فرنسي مشكّل", unit: "علبة 12 قطعة", price: 165, image: pCookies, rating: 4.7, category: "حلويات", subCategory: "غربية", source: "sweets", badge: "new" },
+  { id: "sweet-donuts", name: "دونتس مغطّس بالشوكولاتة", unit: "علبة 6 حبات", price: 95, image: pCookies, rating: 4.6, category: "حلويات", subCategory: "غربية", source: "sweets" },
+  { id: "sweet-ice-gelato", name: "جيلاتو إيطالي", brand: "جيلاتو روما", unit: "علبة 500مل", price: 110, image: pIcecream, rating: 4.8, category: "حلويات", subCategory: "مثلجات", source: "sweets", badge: "trending" },
 ];
 
 // Dynamically-generated product variants (e.g. wholesale bulk packs) register
