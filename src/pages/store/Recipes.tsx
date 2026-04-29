@@ -32,6 +32,8 @@ type ToolItem = {
   name: string;
   /** Product id in Kitchen-Tools store, if available for purchase */
   productId?: string;
+  /** Fallback product id used automatically when productId is out-of-stock */
+  fallbackId?: string;
   /** Suggested retail price (EGP) when available */
   price?: number;
   /** Image url (optional) */
@@ -48,19 +50,20 @@ type RecipeContent = {
   tools: ToolItem[];
 };
 
-// Default tool catalog — products that exist (or could exist) in "ادوات المطبخ"
+// Default tool catalog — products that exist (or could exist) in "ادوات المطبخ".
+// `fallbackId` is auto-substituted when `productId` is out-of-stock.
 const TOOLS = {
-  pan:       { id: "t-pan",       name: "مقلاة تيفال ٢٤سم",       productId: "kt-pan-24",     price: 380, alternatives: ["أي مقلاة قاعها سميك"] },
-  nonstick:  { id: "t-nonstick",  name: "مقلاة جرانيت غير لاصقة", productId: "kt-pan-granite",price: 520, alternatives: ["مقلاة تيفال عادية"] },
-  pot:       { id: "t-pot",       name: "حلة استانلس ٤ لتر",       productId: "kt-pot-4l",     price: 620, alternatives: ["أي حلة بقاع سميك"] },
-  ovenTray:  { id: "t-tray",      name: "صينية فرن مينا",          productId: "kt-tray-bake", price: 280, alternatives: ["صينية ألومنيوم"] },
-  grill:     { id: "t-grill",     name: "مشواية حديد مضلعة",       productId: "kt-grill-pan", price: 540, alternatives: ["شواية كهربائية"] },
-  blender:   { id: "t-blender",   name: "خلاط كهربائي ٧٠٠وات",     productId: "kt-blender",   price: 850, alternatives: ["محضر طعام يدوي"] },
-  bowl:      { id: "t-bowl",      name: "بول تقديم سيراميك",       productId: "kt-bowl-cer",  price: 140, alternatives: ["أي بول عميق"] },
-  knife:     { id: "t-knife",     name: "سكين شيف ٢٠سم",           productId: "kt-knife-chef",price: 320, alternatives: ["أي سكين حاد"] },
-  board:     { id: "t-board",     name: "لوح تقطيع خشبي",          productId: "kt-board",     price: 180, alternatives: ["لوح بلاستيك"] },
-  whisk:     { id: "t-whisk",     name: "مضرب يدوي",               productId: "kt-whisk",     price: 90,  alternatives: ["شوكة كبيرة"] },
-  measuring: { id: "t-measure",   name: "أكواب وملاعق قياس",        productId: "kt-measure",   price: 110, alternatives: ["تقدير يدوي"] },
+  pan:       { id: "t-pan",       name: "مقلاة تيفال ٢٤سم",       productId: "kt-pan-24",                              alternatives: ["أي مقلاة قاعها سميك"] },
+  nonstick:  { id: "t-nonstick",  name: "مقلاة جرانيت غير لاصقة", productId: "kt-pan-granite", fallbackId: "kt-pan-24", alternatives: ["مقلاة تيفال عادية"] },
+  pot:       { id: "t-pot",       name: "حلة استانلس ٤ لتر",       productId: "kt-pot-4l",                              alternatives: ["أي حلة بقاع سميك"] },
+  ovenTray:  { id: "t-tray",      name: "صينية فرن مينا",          productId: "kt-tray-bake",                           alternatives: ["صينية ألومنيوم"] },
+  grill:     { id: "t-grill",     name: "مشواية حديد مضلعة",       productId: "kt-grill-pan", fallbackId: "kt-tray-bake", alternatives: ["صينية فرن", "شواية كهربائية"] },
+  blender:   { id: "t-blender",   name: "خلاط كهربائي ٧٠٠وات",     productId: "kt-blender",   fallbackId: "kt-whisk",     alternatives: ["مضرب يدوي", "محضر طعام"] },
+  bowl:      { id: "t-bowl",      name: "بول تقديم سيراميك",       productId: "kt-bowl-cer",                            alternatives: ["أي بول عميق"] },
+  knife:     { id: "t-knife",     name: "سكين شيف ٢٠سم",           productId: "kt-knife-chef",                          alternatives: ["أي سكين حاد"] },
+  board:     { id: "t-board",     name: "لوح تقطيع خشبي",          productId: "kt-board",                               alternatives: ["لوح بلاستيك"] },
+  whisk:     { id: "t-whisk",     name: "مضرب يدوي",               productId: "kt-whisk",                               alternatives: ["شوكة كبيرة"] },
+  measuring: { id: "t-measure",   name: "أكواب وملاعق قياس",        productId: "kt-measure",                             alternatives: ["تقدير يدوي"] },
 } satisfies Record<string, ToolItem>;
 
 const RECIPE_CONTENT: Record<string, RecipeContent> = {
