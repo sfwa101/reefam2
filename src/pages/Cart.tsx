@@ -237,6 +237,50 @@ const Cart = () => {
     return ranked;
   }, [lines]);
 
+  /* ============ Multi-vendor segmentation ============
+   * Group cart lines by their originating vendor (restaurant / kitchen / store)
+   * so we can render a separate visual block per vendor and route a separate
+   * WhatsApp message to each vendor's management number on checkout.
+   */
+  type VendorGroup = {
+    key: string;
+    vendor: VendorKey;
+    lines: { product: Product; qty: number }[];
+    subtotal: number;
+    cashback: number; // EGP credited to wallet if user pays with wallet
+  };
+  const vendorGroups = useMemo<VendorGroup[]>(() => {
+    const map = new Map<string, VendorGroup>();
+    for (const l of lines) {
+      const v = vendorForProduct(l.product.id, l.product.source);
+      const key =
+        v.kind === "restaurant" ? `r:${v.restaurant.id}` : v.kind === "kitchen" ? "k" : "s";
+      if (!map.has(key)) {
+        map.set(key, { key, vendor: v, lines: [], subtotal: 0, cashback: 0 });
+      }
+      const g = map.get(key)!;
+      g.lines.push(l);
+      g.subtotal += l.product.price * l.qty;
+    }
+    // Cashback = restaurant cashback% applied on its sub-subtotal (only when paying via wallet)
+    for (const g of map.values()) {
+      if (g.vendor.kind === "restaurant") {
+        g.cashback = Math.round((g.subtotal * g.vendor.restaurant.cashbackPct) / 100);
+      }
+    }
+    // Stable order: restaurants first, then kitchen, then store
+    return Array.from(map.values()).sort((a, b) => {
+      const order = (v: VendorKey) => (v.kind === "restaurant" ? 0 : v.kind === "kitchen" ? 1 : 2);
+      return order(a.vendor) - order(b.vendor);
+    });
+  }, [lines]);
+
+  const isMultiVendor = vendorGroups.length > 1;
+  const totalCashback = useMemo(
+    () => (payment === "wallet" ? vendorGroups.reduce((s, g) => s + g.cashback, 0) : 0),
+    [vendorGroups, payment],
+  );
+
   const applyPromo = () => {
     const code = promo.trim().toUpperCase();
     if (!code) return;
