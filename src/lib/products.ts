@@ -97,6 +97,24 @@ const groceryAddons: ProductAddon[] = [
   { id: "express", label: "توصيل سريع 30 د", price: 15 },
 ];
 
+/* ===== Sweets / cakes specific options ===== */
+const cakeSizeVariants: ProductVariant[] = [
+  { id: "cake-1kg", label: "1 كجم — يكفي 8 أشخاص", priceDelta: 0 },
+  { id: "cake-2kg", label: "2 كجم — يكفي 16 شخص", priceDelta: 220 },
+  { id: "cake-3kg", label: "3 كجم — يكفي 24 شخص", priceDelta: 420 },
+];
+const cakeAddons: ProductAddon[] = [
+  { id: "cake-name", label: "كتابة اسم على التورتة", price: 25 },
+  { id: "cake-candles", label: "شموع عيد ميلاد", price: 20 },
+  { id: "cake-topper", label: "ديكور علوي خاص", price: 60 },
+  { id: "cake-box", label: "علبة هدية فاخرة", price: 35 },
+];
+const sweetTrayVariants: ProductVariant[] = [
+  { id: "tray-s", label: "صينية صغيرة", priceDelta: -40 },
+  { id: "tray-m", label: "صينية متوسطة", priceDelta: 0 },
+  { id: "tray-l", label: "صينية كبيرة", priceDelta: 90 },
+];
+
 export const products: Product[] = [
   // ========== Produce ==========
   { id: "tomato", name: "طماطم بلدي طازجة", unit: "كيلو", price: 18, oldPrice: 22, image: pTomato, rating: 4.8, category: "الخضار والفواكه", subCategory: "خضار طازجة", source: "produce", badge: "best", variants: weightVariants, addons: groceryAddons },
