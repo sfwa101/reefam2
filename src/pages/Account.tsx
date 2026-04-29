@@ -142,18 +142,18 @@ const Account = () => {
       </section>
       <Link
         to="/account/profile"
-        className="relative block overflow-hidden rounded-[2rem] bg-card shadow-tile ring-1 ring-border/60"
+        className="relative block rounded-[2rem] bg-card shadow-tile ring-1 ring-border/60"
       >
         {/* Gradient header band */}
-        <div className={`relative h-28 bg-gradient-to-tr ${tier.gradient}`}>
+        <div className={`relative h-28 overflow-hidden rounded-t-[2rem] bg-gradient-to-tr ${tier.gradient}`}>
           <div className="absolute inset-0 opacity-30 mix-blend-overlay [background-image:radial-gradient(circle_at_20%_30%,white,transparent_45%),radial-gradient(circle_at_80%_70%,white,transparent_40%)]" />
           <ChevronLeft className="absolute top-4 right-4 h-5 w-5 text-white/90" />
         </div>
 
         {/* Avatar floating over the band */}
-        <div className="-mt-12 px-5 pb-5">
+        <div className="relative z-10 -mt-12 px-5 pb-5">
           <div className="flex items-end justify-between gap-3">
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground ring-4 ring-card shadow-lg">
+            <div className="relative z-20 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground ring-4 ring-card shadow-lg">
               <span className="font-display text-2xl font-extrabold">{initials}</span>
             </div>
           </div>
