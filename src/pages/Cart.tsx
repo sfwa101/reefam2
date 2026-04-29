@@ -1,6 +1,6 @@
 import BackHeader from "@/components/BackHeader";
 import { useCart } from "@/context/CartContext";
-import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check, PiggyBank, Store, ChefHat, Utensils, CalendarDays, Cake, AlertCircle } from "lucide-react";
+import { Minus, Plus, Trash2, Tag, ShoppingBag, MessageCircle, Truck, Clock, MapPin, Banknote, Smartphone, CreditCard, Wallet as WalletIcon, Sparkles, Gift, X, Check, PiggyBank, Store, ChefHat, Utensils, CalendarDays, Cake, Pencil, Zap, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
@@ -149,21 +149,24 @@ const CartLineItem = ({
             <span className="font-display text-base font-extrabold text-primary">
               <NumberFlow value={unitPrice * l.qty} /> <span className="text-[10px] font-bold text-muted-foreground">ج.م</span>
             </span>
-            <div className="flex items-center gap-1 rounded-[12px] bg-foreground/5 p-0.5">
+            {/* Pill-shaped, refined qty stepper */}
+            <div className="flex items-center gap-0.5 rounded-full bg-foreground/[0.06] p-0.5 ring-1 ring-border/40">
               <button
                 onClick={() => setQty(l.product.id, l.qty - 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-background shadow-sm transition active:scale-90"
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-background text-foreground/70 shadow-sm transition active:scale-90"
+                aria-label="إنقاص"
               >
-                <Minus className="h-3 w-3" />
+                <Minus className="h-2.5 w-2.5" strokeWidth={2.6} />
               </button>
-              <span className="w-7 text-center text-sm font-extrabold">
+              <span className="w-6 text-center text-[12px] font-extrabold tabular-nums">
                 <NumberFlow value={l.qty} />
               </span>
               <button
                 onClick={() => setQty(l.product.id, l.qty + 1)}
-                className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-primary text-primary-foreground shadow-sm transition active:scale-90"
+                className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition active:scale-90"
+                aria-label="زيادة"
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-2.5 w-2.5" strokeWidth={2.8} />
               </button>
             </div>
           </div>
@@ -195,8 +198,16 @@ const CartLineItem = ({
                  </p>
                </div>
              </div>
-             <span className="rounded-md bg-violet-600 px-2 py-1 text-[9.5px] font-extrabold text-white">
-               {editOpen ? "إغلاق" : "تعديل"}
+             {/* Compact pencil icon instead of a wide "تعديل" button */}
+             <span
+               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition ${
+                 editOpen
+                   ? "bg-violet-600 text-white"
+                   : "bg-violet-600/15 text-violet-700 dark:text-violet-300"
+               }`}
+               aria-label={editOpen ? "إغلاق التعديل" : "تعديل الموعد"}
+             >
+               {editOpen ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3 w-3" strokeWidth={2.6} />}
              </span>
            </button>
 
@@ -330,6 +341,82 @@ const CartLineItem = ({
   );
 };
 
+/* -------- Vendor group card (extracted for fulfillment grouping) -------- */
+type VendorGroupCardProps = {
+  g: {
+    key: string;
+    vendor: VendorKey;
+    lines: { product: Product; qty: number; meta?: CartLineMeta }[];
+    subtotal: number;
+    cashback: number;
+  };
+  payment: string;
+  setQty: (id: string, q: number) => void;
+  remove: (id: string) => void;
+  updateMeta: (id: string, meta: CartLineMeta) => void;
+  showScheduledHint?: boolean;
+};
+const VendorGroupCard = ({
+  g, payment, setQty, remove, updateMeta, showScheduledHint,
+}: VendorGroupCardProps) => {
+  const v = g.vendor;
+  const hue = vendorBrandHue(v);
+  const Icon = v.kind === "restaurant" ? Utensils : v.kind === "kitchen" ? ChefHat : Store;
+  return (
+    <div
+      className="overflow-hidden rounded-2xl bg-card/60 ring-1 ring-border/40"
+      style={{ borderTop: `3px solid hsl(${hue})` }}
+    >
+      <div className="flex items-center justify-between gap-2 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <div
+            className="flex h-7 w-7 items-center justify-center rounded-[10px] text-white"
+            style={{ background: `hsl(${hue})` }}
+          >
+            <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
+          </div>
+          <div className="leading-tight">
+            <p className="text-[12px] font-extrabold">{vendorLabel(v)}</p>
+            <p className="text-[9.5px] text-muted-foreground">
+              {toLatin(g.lines.length)} منتج · إجمالي {fmtMoney(g.subtotal)}
+            </p>
+          </div>
+        </div>
+        {showScheduledHint && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-2 py-0.5 text-[9.5px] font-extrabold text-violet-700 dark:text-violet-300">
+            <CalendarDays className="h-2.5 w-2.5" /> يحتوي حجوزات
+          </span>
+        )}
+        {v.kind === "restaurant" && payment === "wallet" && g.cashback > 0 && (
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold text-white shadow-pill"
+            style={{ background: `hsl(${hue})` }}
+          >
+            <WalletIcon className="h-2.5 w-2.5" />
+            +{toLatin(g.cashback)} ج.م
+          </span>
+        )}
+      </div>
+      <div className="space-y-2 px-2 pb-2">
+        <AnimatePresence initial={false}>
+          {g.lines.map((l) => (
+            <motion.div
+              key={l.product.id}
+              layout
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
+              transition={{ type: "spring", damping: 26, stiffness: 280 }}
+            >
+              <CartLineItem l={l} setQty={setQty} remove={remove} updateMeta={updateMeta} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
 const Cart = () => {
   const { lines, total, count, setQty, remove, add, clear, updateMeta } = useCart();
   const { user } = useAuth();
@@ -347,19 +434,22 @@ const Cart = () => {
   const [showRecharge, setShowRecharge] = useState(false);
   const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
   const [saveChange, setSaveChange] = useState<boolean>(true);
+  const [customerName, setCustomerName] = useState<string>("");
 
   useEffect(() => {
     if (!user) { setAddresses([]); setAddrId(""); setWalletBalance(0); return; }
     (async () => {
-      const [{ data: addrData }, { data: balData }] = await Promise.all([
+      const [{ data: addrData }, { data: balData }, { data: profileData }] = await Promise.all([
         supabase.from("addresses").select("id,label,city,district,street,building,is_default").eq("user_id", user.id).order("is_default", { ascending: false }),
         supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
       ]);
       const list = (addrData as Addr[]) ?? [];
       setAddresses(list);
       const def = list.find((a) => a.is_default) ?? list[0];
       if (def) setAddrId(def.id);
       setWalletBalance(Number(balData?.balance ?? 0));
+      setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
     })();
   }, [user]);
 
@@ -593,6 +683,36 @@ const Cart = () => {
     [vendorGroups, payment],
   );
 
+  /* ============ Fulfillment timing classification ============
+   * Splits vendor groups into:
+   *   - instantGroups   → arrives within ~1 hour (store + kitchen instant + sweets Type A)
+   *   - scheduledGroups → arrives by appointment (sweets Type B fresh, Type C bookings)
+   * Restaurants ride with "instant" (cooked-to-order, fast delivery).
+   * Used for the elegant section headers shown in the cart.
+   */
+  const groupIsScheduled = (g: VendorGroup) => {
+    // a vendor group is scheduled if EVERY line is sweets B/C (booking).
+    return (
+      g.lines.length > 0 &&
+      g.lines.every((l) => {
+        if (!isSweetsProduct(l.product.source)) return false;
+        const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
+        return t === "B" || t === "C";
+      })
+    );
+  };
+  const groupIsMixedScheduled = (g: VendorGroup) =>
+    g.lines.some((l) => {
+      if (!isSweetsProduct(l.product.source)) return false;
+      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
+      return t === "B" || t === "C";
+    });
+
+  const instantGroups = vendorGroups.filter((g) => !groupIsScheduled(g));
+  const scheduledGroups = vendorGroups.filter((g) => groupIsScheduled(g));
+  const showFulfillmentSections =
+    instantGroups.length > 0 && scheduledGroups.length > 0;
+
   const applyPromo = () => {
     const code = promo.trim().toUpperCase();
     if (!code) return;
@@ -621,6 +741,8 @@ const Cart = () => {
       return;
     }
     setSubmitting(true);
+    // Small UX pause so the loading state is perceptible before opening WA
+    const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
       const noteParts = [
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
@@ -669,7 +791,7 @@ const Cart = () => {
         return;
       }
 
-      const orderNum = `RF-${order.id.slice(0, 8).toUpperCase()}`;
+      const orderNum = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
 
       // Auto-save change to savings jar (only if cash + user opted-in)
       if (showChangeJar && saveChange && changeRemainder > 0) {
@@ -728,66 +850,97 @@ const Cart = () => {
         }
       }
 
+      // ===== Build the structured WhatsApp message =====
+      // Split lines into instant items (arrive within ~1h) and bookings.
+      const isBookingLine = (lid: string, src: string, sub?: string) =>
+        isSweetsProduct(src) && fulfillmentTypeFor(lid, sub) === "C";
+      const instantItems = lines.filter(
+        (l) => !isBookingLine(l.product.id, l.product.source, l.product.subCategory),
+      );
+      const bookingItems = lines.filter((l) =>
+        isBookingLine(l.product.id, l.product.source, l.product.subCategory),
+      );
+      const fmtInstantLine = (l: typeof lines[number]) => {
+        const unit = l.meta?.unitPrice ?? l.product.price;
+        return `▪️ ${toLatin(l.qty)}x ${l.product.name} (${fmtMoney(unit * l.qty)})`;
+      };
+      const fmtBookingLine = (l: typeof lines[number]) => {
+        const unit = l.meta?.unitPrice ?? l.product.price;
+        const day = l.meta?.bookingDate
+          ? formatBookingShort(new Date(l.meta.bookingDate))
+          : "—";
+        return `▪️ ${toLatin(l.qty)}x ${l.product.name} — استلام ${day} (${fmtMoney(unit * l.qty)})`;
+      };
+      const addrLine = selectedAddr
+        ? `${[selectedAddr.label, selectedAddr.street, selectedAddr.building, selectedAddr.district, selectedAddr.city].filter(Boolean).join("، ")}`
+        : guestNotes || "—";
+      const etaLine = bookingItems.length > 0 && instantItems.length === 0
+        ? "مجدول"
+        : `خلال ${zone.etaLabel}`;
+      const customerLabel = customerName || (user.email ?? "عميل").split("@")[0];
+      // Map payment id → friendly Arabic label
+      const payShort =
+        payment === "wallet"
+          ? "محفظة"
+          : payment === "cash"
+            ? "كاش"
+            : payment === "instapay"
+              ? "انستاباي"
+              : payment === "vodafone-cash"
+                ? "فودافون كاش"
+                : paymentLabel;
+      // Legacy line list (still used by the per-vendor messages below)
       const lineItems = lines
         .map((l, i) => {
           const unit = l.meta?.unitPrice ?? l.product.price;
           return `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(unit * l.qty)}`;
         })
         .join("\n");
-      const addrLine = selectedAddr
-        ? `${[selectedAddr.label, selectedAddr.street, selectedAddr.building, selectedAddr.district, selectedAddr.city].filter(Boolean).join("، ")}`
-        : guestNotes || "—";
 
       /* ============ Per-vendor WhatsApp routing ============
        * Open ONE main WhatsApp message to the platform (with the full bill),
        * then a separate message for each restaurant vendor with only their
        * items + the platform commission breakdown.
        */
+      // ===== Premium structured customer-facing message =====
       const mainMessage =
-        `🌿 *طلب جديد — ريف المدينة*\n` +
-        `━━━━━━━━━━━━━━\n` +
-        `🆔 *رقم الطلب:* ${orderNum}\n` +
-        `👤 *العميل:* ${user.email ?? "عميل"}\n\n` +
-        (isMultiVendor
-          ? `🧩 *موردون متعدّدون:* ${toLatin(vendorGroups.length)}\n` +
-            vendorGroups.map((g) => `• ${vendorLabel(g.vendor)} — ${fmtMoney(g.subtotal)}`).join("\n") +
-            `\n\n`
+        `مرحباً ريف المدينة 👋\n\n` +
+        `أنا ${customerLabel}، وأريد تأكيد طلبي الجديد.\n\n` +
+        `📝 *رقم الطلب:* #${orderNum}\n` +
+        `📍 *العنوان:* ${addrLine}\n` +
+        `🛵 *وقت التوصيل المتوقع:* ${etaLine}\n\n` +
+        (instantItems.length > 0
+          ? `🛒 *تفاصيل الطلب:*\n${instantItems.map(fmtInstantLine).join("\n")}\n\n`
           : "") +
-        `🛒 *المنتجات:*\n${lineItems}\n\n` +
-        (sweetsRules.hasBooking
-          ? `📅 *حجوزات الحلويات (${toLatin(sweetsBuckets.C.lines.length)}):*\n` +
-            sweetsBuckets.C.lines
-              .map((l) => {
-                const slot = bookingTimeSlots.find((s) => s.id === l.meta?.slot)?.label ?? "—";
-                const day = l.meta?.date ? formatBookingShort(new Date(l.meta.date)) : "—";
-                return `• ${l.product.name} × ${toLatin(l.qty)} → ${day} · ${slot}`;
-              })
-              .join("\n") +
-            `\n\n`
+        (bookingItems.length > 0
+          ? `📅 *حجوزات خاصة:*\n${bookingItems.map(fmtBookingLine).join("\n")}\n\n`
           : "") +
-        `━━━━━━━━━━━━━━\n` +
-        `💵 المجموع الفرعي: ${fmtMoney(subtotal)}\n` +
-        (discount > 0 ? `🏷️ خصم (${appliedPromo?.code}): -${fmtMoney(discount)}\n` : "") +
-        `🚚 التوصيل: ${delivery === 0 ? "مجاني" : fmtMoney(delivery)}\n` +
-        (tip > 0 ? `💚 إكرامية: ${fmtMoney(tip)}\n` : "") +
-        `\n*💰 الإجمالي:* *${fmtMoney(grand)}*\n\n` +
+        `💳 *طريقة الدفع:* ${
+          isSplit
+            ? `محفظة (${fmtMoney(walletApplied)}) + ${secondaryLabel} (${fmtMoney(walletShortfall)})`
+            : payShort
+        }\n\n` +
+        `📊 *ملخص الحساب:*\n` +
+        `الإجمالي الفرعي: ${toLatin(subtotal)} ج.م\n` +
+        `التوصيل: ${delivery === 0 ? "مجاني" : `${toLatin(delivery)} ج.م`}\n` +
+        (billSavings > 0 ? `وفرت معنا: 🟢 ${toLatin(billSavings)} ج.م\n` : "") +
+        (tip > 0 ? `إكرامية المندوب: ${toLatin(tip)} ج.م\n` : "") +
         (sweetsRules.hasBooking
-          ? `🔒 *يُدفع الآن من الحجوزات:* ${fmtMoney(aggregateDeposit)}\n` +
+          ? `\n🔒 يُدفع الآن من الحجوزات: ${toLatin(aggregateDeposit)} ج.م\n` +
             (payOnDelivery > 0
-              ? `📦 *يُحصّل عند التوصيل:* ${fmtMoney(payOnDelivery)}\n\n`
-              : "\n")
+              ? `📦 يُحصّل عند التوصيل: ${toLatin(payOnDelivery)} ج.م\n`
+              : "")
           : "") +
-        (isSplit
-          ? `💳 *طريقة الدفع:* مُجزّأ\n   • محفظة: ${fmtMoney(walletApplied)}\n   • ${secondaryLabel}: ${fmtMoney(walletShortfall)}\n`
-          : `💳 *طريقة الدفع:* ${paymentLabel}\n`) +
+        `\n------------------------\n\n` +
+        `💰 *الإجمالي النهائي المطلوب:* *${toLatin(grand)} ج.م*\n\n` +
         (payment === "wallet" && totalCashback > 0
-          ? `🎁 *كاش باك المحفظة:* +${fmtMoney(totalCashback)} (تمت إضافته لرصيدك)\n`
+          ? `🎁 كاش باك المحفظة: +${toLatin(totalCashback)} ج.م (سيُضاف لرصيدك)\n\n`
           : "") +
-        (showChangeJar && saveChange ? `🐷 *ادخار الفكة:* ${fmtMoney(changeRemainder)} للحصّالة\n` : "") +
-        `📍 *العنوان:* ${addrLine}\n\n` +
-        `✅ برجاء تأكيد الطلب`;
+        `في انتظار تأكيدكم، شكراً لكم! 🍃`;
 
       const mainUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(mainMessage)}`;
+      // Wait at least 1s so the loading state is felt as professional polish
+      await minLoading;
       window.open(mainUrl, "_blank");
 
       // Per-restaurant routing: each restaurant gets its own message with
@@ -919,133 +1072,91 @@ const Cart = () => {
           </div>
         )}
 
-        {/* Split-shipment notice for sweets bookings */}
-        {hasBooking && hasNonBookingItems && !anyWaitForAll && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500/10 via-violet-400/5 to-fuchsia-500/10 p-3 ring-1 ring-violet-500/25"
-          >
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-violet-600 text-white">
-                <CalendarDays className="h-3.5 w-3.5" />
-              </div>
-              <p className="text-[12px] font-extrabold text-foreground">
-                طلبك يصل على دفعتين 📦
-              </p>
+        {/* ============ Fulfillment-aware grouped vendor cards ============
+         * Replaces the prominent split-shipment alert with subtle section
+         * headers above the relevant vendor groups. The customer "reads"
+         * the story visually without long warning text.
+         */}
+        {showFulfillmentSections && (
+          <div className="flex items-center gap-2 px-1">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              <Zap className="h-3 w-3" strokeWidth={2.6} />
             </div>
-            <ul className="space-y-1.5 text-[11px] font-bold text-foreground/85">
-              {(hasInstantSweets || lines.some((l) => !isSweetsProduct(l.product.source))) && (
-                <li className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
-                  <span>المنتجات الفورية تصلك خلال {zone.etaLabel}</span>
-                </li>
-              )}
-              {hasFreshSweets && (
-                <li className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
-                  <span>حلويات «يُحضّر طازجاً» تصلك خلال 4 ساعات</span>
-                </li>
-              )}
-              {hasBooking && (
-                <li className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-600" />
-                  <span>
-                    حجوزات الأسر المنتجة في موعدها المحدّد
-                    {sweetsBuckets.C.lines[0]?.meta?.date
-                      ? ` (${formatBookingShort(new Date(sweetsBuckets.C.lines[0].meta.date!))})`
-                      : ""}
-                  </span>
-                </li>
-              )}
-            </ul>
-          </motion.div>
+            <h3 className="font-display text-[13px] font-extrabold text-foreground">
+              يصلك فوراً
+              <span className="ms-1.5 text-[10px] font-bold text-muted-foreground">
+                خلال {zone.etaLabel}
+              </span>
+            </h3>
+          </div>
         )}
 
-        {vendorGroups.map((g) => {
-          const v = g.vendor;
-          const hue = vendorBrandHue(v);
-          const Icon = v.kind === "restaurant" ? Utensils : v.kind === "kitchen" ? ChefHat : Store;
-          return (
-            <div
-              key={g.key}
-              className="overflow-hidden rounded-2xl bg-card/60 ring-1 ring-border/40"
-              style={{ borderTop: `3px solid hsl(${hue})` }}
-            >
-              {/* Vendor header */}
-              <div className="flex items-center justify-between gap-2 px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="flex h-7 w-7 items-center justify-center rounded-[10px] text-white"
-                    style={{ background: `hsl(${hue})` }}
-                  >
-                    <Icon className="h-3.5 w-3.5" strokeWidth={2.4} />
-                  </div>
-                  <div className="leading-tight">
-                    <p className="text-[12px] font-extrabold">{vendorLabel(v)}</p>
-                    <p className="text-[9.5px] text-muted-foreground">
-                      {toLatin(g.lines.length)} منتج · إجمالي {fmtMoney(g.subtotal)}
-                    </p>
-                  </div>
-                </div>
-                {v.kind === "restaurant" && payment === "wallet" && g.cashback > 0 && (
-                  <span
-                    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold text-white shadow-pill"
-                    style={{ background: `hsl(${hue})` }}
-                  >
-                    <WalletIcon className="h-2.5 w-2.5" />
-                    +{toLatin(g.cashback)} ج.م
-                  </span>
-                )}
+        {(showFulfillmentSections ? instantGroups : vendorGroups).map((g) => (
+          <VendorGroupCard
+            key={g.key}
+            g={g}
+            payment={payment}
+            setQty={setQty}
+            remove={remove}
+            updateMeta={updateMeta}
+            showScheduledHint={!showFulfillmentSections && groupIsMixedScheduled(g)}
+          />
+        ))}
+
+        {showFulfillmentSections && (
+          <>
+            <div className="mt-2 flex items-center gap-2 px-1">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-500/15 text-violet-700 dark:text-violet-300">
+                <CalendarDays className="h-3 w-3" strokeWidth={2.6} />
               </div>
-              <div className="space-y-2 px-2 pb-2">
-                <AnimatePresence initial={false}>
-                  {g.lines.map((l) => (
-                    <motion.div
-                      key={l.product.id}
-                      layout
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -100, transition: { duration: 0.2 } }}
-                      transition={{ type: "spring", damping: 26, stiffness: 280 }}
-                    >
-                      <CartLineItem l={l} setQty={setQty} remove={remove} updateMeta={updateMeta} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+              <h3 className="font-display text-[13px] font-extrabold text-foreground">
+                حجوزات مجدولة
+                <span className="ms-1.5 text-[10px] font-bold text-muted-foreground">
+                  حسب الموعد
+                </span>
+              </h3>
             </div>
-          );
-        })}
+            {scheduledGroups.map((g) => (
+              <VendorGroupCard
+                key={g.key}
+                g={g}
+                payment={payment}
+                setQty={setQty}
+                remove={remove}
+                updateMeta={updateMeta}
+              />
+            ))}
+          </>
+        )}
         <p className="px-1 text-center text-[10px] text-muted-foreground">
           💡 اسحب المنتج لليسار للحذف السريع
         </p>
       </div>
 
-      {/* ============ Cross-sell ============ */}
+      {/* ============ Cross-sell — visually separated upsell rail ============ */}
       {crossSell.length > 0 && (
-        <section>
+        <section className="-mx-4 rounded-none bg-primary/[0.04] px-4 py-3 ring-1 ring-primary/10 sm:mx-0 sm:rounded-2xl">
           <div className="mb-2 flex items-baseline justify-between px-1">
-            <h2 className="font-display text-sm font-extrabold flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-accent" /> غالباً ما يُشترى مع
+            <h2 className="font-display text-[12px] font-extrabold flex items-center gap-1.5 text-foreground/90">
+              <Sparkles className="h-3 w-3 text-accent" /> غالباً ما يُشترى مع
             </h2>
-            <span className="text-[10px] text-muted-foreground">إضافة سريعة</span>
+            <span className="text-[10px] text-muted-foreground">إضافات سريعة</span>
           </div>
           <div className="-mx-4 overflow-x-auto px-4">
-            <div className="flex gap-2.5 pb-1">
+            <div className="flex gap-2 pb-1">
               {crossSell.map((p) => (
                 <motion.button
                   key={p.id}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => { add(p, 1); fireMiniConfetti(); toast.success(`تمت إضافة ${p.name}`); }}
-                  className="relative flex w-[120px] shrink-0 flex-col rounded-2xl bg-card p-2 text-right shadow-[0_4px_14px_-8px_rgba(0,0,0,0.15)] ring-1 ring-border/30"
+                  className="relative flex w-[100px] shrink-0 flex-col rounded-xl bg-card p-1.5 text-right shadow-[0_3px_10px_-6px_rgba(0,0,0,0.12)] ring-1 ring-border/30"
                 >
-                  <img src={p.image} alt="" className="mb-1.5 h-20 w-full rounded-xl object-cover" />
-                  <p className="line-clamp-2 text-[11px] font-bold leading-tight">{p.name}</p>
+                  <img src={p.image} alt="" className="mb-1 h-16 w-full rounded-lg object-cover" />
+                  <p className="line-clamp-2 text-[10px] font-bold leading-tight">{p.name}</p>
                   <div className="mt-1 flex items-center justify-between">
-                    <span className="font-display text-[12px] font-extrabold text-primary tabular-nums">{toLatin(p.price)} ج</span>
-                    <div className="flex h-6 w-6 items-center justify-center rounded-[8px] bg-primary text-primary-foreground shadow-pill">
-                      <Plus className="h-3 w-3" strokeWidth={3} />
+                    <span className="font-display text-[11px] font-extrabold text-primary tabular-nums">{toLatin(p.price)} ج</span>
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill">
+                      <Plus className="h-2.5 w-2.5" strokeWidth={3} />
                     </div>
                   </div>
                 </motion.button>
@@ -1123,12 +1234,17 @@ const Cart = () => {
             const Icon = m.icon;
             const active = payment === m.id;
             const isWallet = m.id === "wallet";
+            const walletAfter = isWallet ? Math.max(0, walletBalance - grand) : 0;
             return (
               <motion.button
                 whileTap={{ scale: 0.99 }}
                 key={m.id}
                 onClick={() => setPayment(m.id)}
-                className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-right transition ${active ? "border-primary bg-primary-soft" : "border-border bg-background"}`}
+                className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-right transition ${
+                  active
+                    ? "border-primary bg-primary-soft shadow-[0_0_0_4px_hsl(var(--primary)/0.08),0_8px_24px_-12px_hsl(var(--primary)/0.45)]"
+                    : "border-border bg-background hover:border-primary/30"
+                }`}
               >
                 <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${active ? "bg-primary text-primary-foreground" : "bg-foreground/5"}`}>
                   <Icon className="h-4 w-4" strokeWidth={2.4} />
@@ -1138,6 +1254,11 @@ const Cart = () => {
                   {isWallet && user ? (
                     <p className="text-[10px] font-bold text-primary">
                       متاح: {toLatin(Math.round(walletBalance))} ج.م
+                      {active && walletBalance >= grand && grand > 0 && (
+                        <span className="ms-1 text-foreground/60 font-extrabold">
+                          · المتبقي بعد العملية {toLatin(Math.round(walletAfter))} ج.م
+                        </span>
+                      )}
                     </p>
                   ) : (
                     <p className="text-[10px] text-muted-foreground">{m.sub}</p>
@@ -1360,11 +1481,13 @@ const Cart = () => {
         {discount > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">خصم ({appliedPromo?.code})</span><span className="font-bold tabular-nums text-primary">-{fmtMoney(discount)}</span></div>}
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">التوصيل</span><span className="font-bold tabular-nums">{delivery === 0 ? <span className="text-primary">مجاني 🚚</span> : fmtMoney(delivery)}</span></div>
         {billSavings > 0 && (
-          <div className="flex items-center justify-between rounded-[10px] bg-primary/8 px-2 py-1.5 text-[12px]">
-            <span className="flex items-center gap-1 font-extrabold text-primary">
-              <Sparkles className="h-3 w-3" /> وفّرت في هذه الفاتورة
+          <div className="flex items-center justify-between rounded-[10px] bg-emerald-500/10 px-2 py-1.5 text-[13px] ring-1 ring-emerald-500/20">
+            <span className="flex items-center gap-1 font-black text-emerald-700 dark:text-emerald-400">
+              <Sparkles className="h-3.5 w-3.5" /> ما وفّرته في هذه الفاتورة
             </span>
-            <span className="font-display font-extrabold tabular-nums text-primary">{fmtMoney(billSavings)}</span>
+            <span className="font-display font-black tabular-nums text-emerald-700 dark:text-emerald-400">
+              {fmtMoney(billSavings)}
+            </span>
           </div>
         )}
         {tip > 0 && <div className="flex justify-between text-sm"><span className="text-muted-foreground">إكرامية</span><span className="font-bold tabular-nums">{fmtMoney(tip)}</span></div>}
@@ -1385,7 +1508,7 @@ const Cart = () => {
 
       <button onClick={() => clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">تفريغ السلة</button>
 
-      {/* ============ Sticky Bottom Bar ============ */}
+      {/* ============ Sticky Bottom Bar — theme-aware checkout button ============ */}
       <motion.div
         initial={{ y: 80 }}
         animate={{ y: 0 }}
@@ -1393,20 +1516,27 @@ const Cart = () => {
         className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pt-2"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
       >
-        <div className="mx-auto max-w-md rounded-[20px] bg-gradient-to-r from-[hsl(142_70%_38%)] via-[hsl(150_65%_42%)] to-[hsl(142_70%_38%)] p-0.5 shadow-[0_10px_30px_-10px_hsl(142_70%_42%/0.55)]">
-          <button
+        <div className="mx-auto max-w-md rounded-[20px] bg-gradient-to-r from-primary via-[hsl(var(--primary)/0.85)] to-primary p-0.5 shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)]">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             onClick={checkoutWA}
             disabled={submitting}
-            className="flex w-full items-center justify-between gap-3 rounded-[18px] bg-[hsl(142_70%_42%)] px-4 py-3.5 font-extrabold text-white transition active:scale-[0.98] disabled:opacity-60"
+            className="flex w-full items-center justify-between gap-3 rounded-[18px] bg-primary px-4 py-3.5 font-extrabold text-primary-foreground transition disabled:opacity-90"
           >
             <span className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <span className="text-sm">{submitting ? "جارٍ الإرسال…" : "إتمام عبر واتساب"}</span>
+              {submitting ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <MessageCircle className="h-5 w-5" />
+              )}
+              <span className="text-sm">
+                {submitting ? "جارٍ تجهيز الفاتورة ⏳" : "إتمام عبر واتساب"}
+              </span>
             </span>
-            <span className="rounded-[12px] bg-white/15 px-3 py-1.5 text-sm font-extrabold backdrop-blur">
+            <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold backdrop-blur">
               {fmtMoney(grand)}
             </span>
-          </button>
+          </motion.button>
         </div>
       </motion.div>
 
