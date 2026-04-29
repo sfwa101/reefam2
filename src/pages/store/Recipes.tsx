@@ -32,6 +32,8 @@ type ToolItem = {
   name: string;
   /** Product id in Kitchen-Tools store, if available for purchase */
   productId?: string;
+  /** Fallback product id used automatically when productId is out-of-stock */
+  fallbackId?: string;
   /** Suggested retail price (EGP) when available */
   price?: number;
   /** Image url (optional) */
@@ -48,19 +50,20 @@ type RecipeContent = {
   tools: ToolItem[];
 };
 
-// Default tool catalog — products that exist (or could exist) in "ادوات المطبخ"
+// Default tool catalog — products that exist (or could exist) in "ادوات المطبخ".
+// `fallbackId` is auto-substituted when `productId` is out-of-stock.
 const TOOLS = {
-  pan:       { id: "t-pan",       name: "مقلاة تيفال ٢٤سم",       productId: "kt-pan-24",     price: 380, alternatives: ["أي مقلاة قاعها سميك"] },
-  nonstick:  { id: "t-nonstick",  name: "مقلاة جرانيت غير لاصقة", productId: "kt-pan-granite",price: 520, alternatives: ["مقلاة تيفال عادية"] },
-  pot:       { id: "t-pot",       name: "حلة استانلس ٤ لتر",       productId: "kt-pot-4l",     price: 620, alternatives: ["أي حلة بقاع سميك"] },
-  ovenTray:  { id: "t-tray",      name: "صينية فرن مينا",          productId: "kt-tray-bake", price: 280, alternatives: ["صينية ألومنيوم"] },
-  grill:     { id: "t-grill",     name: "مشواية حديد مضلعة",       productId: "kt-grill-pan", price: 540, alternatives: ["شواية كهربائية"] },
-  blender:   { id: "t-blender",   name: "خلاط كهربائي ٧٠٠وات",     productId: "kt-blender",   price: 850, alternatives: ["محضر طعام يدوي"] },
-  bowl:      { id: "t-bowl",      name: "بول تقديم سيراميك",       productId: "kt-bowl-cer",  price: 140, alternatives: ["أي بول عميق"] },
-  knife:     { id: "t-knife",     name: "سكين شيف ٢٠سم",           productId: "kt-knife-chef",price: 320, alternatives: ["أي سكين حاد"] },
-  board:     { id: "t-board",     name: "لوح تقطيع خشبي",          productId: "kt-board",     price: 180, alternatives: ["لوح بلاستيك"] },
-  whisk:     { id: "t-whisk",     name: "مضرب يدوي",               productId: "kt-whisk",     price: 90,  alternatives: ["شوكة كبيرة"] },
-  measuring: { id: "t-measure",   name: "أكواب وملاعق قياس",        productId: "kt-measure",   price: 110, alternatives: ["تقدير يدوي"] },
+  pan:       { id: "t-pan",       name: "مقلاة تيفال ٢٤سم",       productId: "kt-pan-24",                              alternatives: ["أي مقلاة قاعها سميك"] },
+  nonstick:  { id: "t-nonstick",  name: "مقلاة جرانيت غير لاصقة", productId: "kt-pan-granite", fallbackId: "kt-pan-24", alternatives: ["مقلاة تيفال عادية"] },
+  pot:       { id: "t-pot",       name: "حلة استانلس ٤ لتر",       productId: "kt-pot-4l",                              alternatives: ["أي حلة بقاع سميك"] },
+  ovenTray:  { id: "t-tray",      name: "صينية فرن مينا",          productId: "kt-tray-bake",                           alternatives: ["صينية ألومنيوم"] },
+  grill:     { id: "t-grill",     name: "مشواية حديد مضلعة",       productId: "kt-grill-pan", fallbackId: "kt-tray-bake", alternatives: ["صينية فرن", "شواية كهربائية"] },
+  blender:   { id: "t-blender",   name: "خلاط كهربائي ٧٠٠وات",     productId: "kt-blender",   fallbackId: "kt-whisk",     alternatives: ["مضرب يدوي", "محضر طعام"] },
+  bowl:      { id: "t-bowl",      name: "بول تقديم سيراميك",       productId: "kt-bowl-cer",                            alternatives: ["أي بول عميق"] },
+  knife:     { id: "t-knife",     name: "سكين شيف ٢٠سم",           productId: "kt-knife-chef",                          alternatives: ["أي سكين حاد"] },
+  board:     { id: "t-board",     name: "لوح تقطيع خشبي",          productId: "kt-board",                               alternatives: ["لوح بلاستيك"] },
+  whisk:     { id: "t-whisk",     name: "مضرب يدوي",               productId: "kt-whisk",                               alternatives: ["شوكة كبيرة"] },
+  measuring: { id: "t-measure",   name: "أكواب وملاعق قياس",        productId: "kt-measure",                             alternatives: ["تقدير يدوي"] },
 } satisfies Record<string, ToolItem>;
 
 const RECIPE_CONTENT: Record<string, RecipeContent> = {
@@ -672,17 +675,27 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
   };
 
   const addTool = (t: ToolItem) => {
-    if (!t.productId) {
-      toast.error("هذه الأداة غير متوفرة حاليًا في المتجر");
-      return;
+    // 1) primary product
+    if (t.productId) {
+      const primary = getById(t.productId);
+      if (primary) {
+        add(primary, 1);
+        toast.success(`تمت إضافة ${primary.name} إلى السلة`);
+        return;
+      }
     }
-    const product = getById(t.productId);
-    if (!product) {
-      toast.error(`${t.name} نفذ من المخزون — جرّب البديل`);
-      return;
+    // 2) auto fallback
+    if (t.fallbackId) {
+      const fb = getById(t.fallbackId);
+      if (fb) {
+        add(fb, 1);
+        toast.success(`تمت إضافة البديل: ${fb.name}`, {
+          description: `${t.name} غير متوفر حاليًا — أضفنا البديل المناسب.`,
+        });
+        return;
+      }
     }
-    add(product, 1);
-    toast.success(`تمت إضافة ${product.name} إلى السلة`);
+    toast.error(`${t.name} غير متوفر حاليًا في المتجر`);
   };
 
   return (
@@ -912,12 +925,27 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
                   {content.tools.map((t) => {
                     const stockProduct = t.productId ? getById(t.productId) : undefined;
                     const inStock = !!stockProduct;
-                    const displayPrice = stockProduct?.price ?? t.price;
+                    const fallbackProduct = !inStock && t.fallbackId ? getById(t.fallbackId) : undefined;
+                    const effective = stockProduct ?? fallbackProduct;
+                    const displayPrice = effective?.price ?? t.price;
                     return (
                     <div key={t.id} className="glass-strong rounded-2xl p-3 shadow-soft">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <p className="font-display text-sm font-extrabold">{t.name}</p>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="font-display text-sm font-extrabold">{t.name}</p>
+                            {!inStock && fallbackProduct && (
+                              <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
+                                بديل تلقائي
+                              </span>
+                            )}
+                          </div>
+                          {!inStock && fallbackProduct && (
+                            <p className="mt-1 flex items-start gap-1 text-[11px] text-foreground/80">
+                              <Sparkles className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                              <span>سنضيف <b>{fallbackProduct.name}</b> بدلاً منه</span>
+                            </p>
+                          )}
                           {t.alternatives && t.alternatives.length > 0 && (
                             <p className="mt-1 flex items-start gap-1 text-[11px] text-muted-foreground">
                               <Repeat className="mt-0.5 h-3 w-3 shrink-0" />
@@ -925,18 +953,20 @@ function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
                             </p>
                           )}
                         </div>
-                        {inStock && displayPrice ? (
+                        {effective && displayPrice ? (
                           <button
                             onClick={() => addTool(t)}
-                            className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[11px] font-extrabold text-primary-foreground shadow-pill active:scale-95"
+                            className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold shadow-pill active:scale-95 ${
+                              inStock
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-amber-500 text-white"
+                            }`}
                           >
                             <ShoppingBasket className="h-3 w-3" />
-                            <span className="tabular-nums">{toLatin(displayPrice)} ج</span>
+                            <span className="tabular-nums">
+                              {inStock ? "" : "البديل "}{toLatin(displayPrice)} ج
+                            </span>
                           </button>
-                        ) : t.productId ? (
-                          <span className="shrink-0 rounded-full bg-destructive/10 px-2.5 py-1 text-[10px] font-bold text-destructive">
-                            نفذ من المخزون
-                          </span>
                         ) : (
                           <span className="shrink-0 rounded-full bg-foreground/5 px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
                             غير متوفر
