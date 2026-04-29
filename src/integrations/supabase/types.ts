@@ -130,6 +130,48 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_verifications: {
+        Row: {
+          back_image_path: string | null
+          created_at: string
+          front_image_path: string | null
+          id: string
+          national_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          status: string
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          back_image_path?: string | null
+          created_at?: string
+          front_image_path?: string | null
+          id?: string
+          national_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          back_image_path?: string | null
+          created_at?: string
+          front_image_path?: string | null
+          id?: string
+          national_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
@@ -799,6 +841,7 @@ export type Database = {
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       user_store_ids: { Args: { _user_id: string }; Returns: string[] }
+      user_total_spent: { Args: { _user_id: string }; Returns: number }
     }
     Enums: {
       app_role:
