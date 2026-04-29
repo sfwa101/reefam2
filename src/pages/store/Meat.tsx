@@ -99,29 +99,6 @@ const Meat = () => {
 
   const currentGroup = groups.find((g) => g.id === activeMain) ?? groups[0];
 
-  // Reset active sub when group changes
-  useEffect(() => {
-    setActiveSub(currentGroup.subs[0].id);
-  }, [activeMain, currentGroup.subs]);
-
-  const filteredForGroup = useMemo(() => {
-    const q = query.trim();
-    return meatProducts
-      .filter((p) => groupOf(p.subCategory) === activeMain)
-      .filter((p) => !q || p.name.includes(q));
-  }, [meatProducts, activeMain, query]);
-
-  // Subgroup -> filter predicate. Most subs are textual hints over name/subCategory.
-  const matchSub = (subId: string, p: (typeof meatProducts)[number]) => {
-    if (subId.startsWith("all-")) return true;
-    return (p.name + " " + (p.subCategory ?? "")).includes(subId);
-  };
-
-  const subSections = currentGroup.subs.map((s) => ({
-    ...s,
-    items: filteredForGroup.filter((p) => matchSub(s.id, p)),
-  }));
-
   // ScrollSpy: track both main group and active sub-section across the
   // single continuous feed (Intersection-style via scroll position).
   useEffect(() => {
