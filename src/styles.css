@@ -875,3 +875,41 @@
 /* Hide scrollbar utility (used by wheel pickers) */
 .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ============================================
+   Admin / ERP iOS18 utilities
+============================================ */
+@layer utilities {
+  .bg-surface { background-color: hsl(var(--surface)); }
+  .bg-surface-muted { background-color: hsl(var(--surface-muted)); }
+  .text-foreground-secondary { color: hsl(var(--foreground-secondary)); }
+  .text-foreground-tertiary { color: hsl(var(--foreground-tertiary)); }
+  .text-info { color: hsl(var(--info)); }
+  .text-success { color: hsl(var(--success)); }
+  .text-warning { color: hsl(var(--warning)); }
+  .bg-info\/10 { background-color: hsl(var(--info) / 0.1); }
+  .bg-info\/12 { background-color: hsl(var(--info) / 0.12); }
+  .bg-info\/15 { background-color: hsl(var(--info) / 0.15); }
+  .bg-success\/10 { background-color: hsl(var(--success) / 0.1); }
+  .bg-success\/12 { background-color: hsl(var(--success) / 0.12); }
+  .bg-success\/15 { background-color: hsl(var(--success) / 0.15); }
+  .bg-warning\/10 { background-color: hsl(var(--warning) / 0.1); }
+  .bg-warning\/12 { background-color: hsl(var(--warning) / 0.12); }
+  .bg-warning\/15 { background-color: hsl(var(--warning) / 0.15); }
+  .bg-info { background-color: hsl(var(--info)); }
+  .bg-success { background-color: hsl(var(--success)); }
+  .bg-warning { background-color: hsl(var(--warning)); }
+  .bg-gradient-primary { background-image: var(--gradient-primary); }
+  .glass-strong { backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); background: hsl(var(--surface) / 0.85); }
+  .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: hsl(var(--surface) / 0.7); }
+  .press { transition: transform 0.15s; }
+  .press:active { transform: scale(0.96); }
+  .transition-base { transition: all 0.2s ease; }
+  .transition-spring { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  .pb-tab { padding-bottom: 5rem; }
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .ios-divider > * + * { border-top: 0.5px solid hsl(var(--border)); }
+  .shadow-glow { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
+}
