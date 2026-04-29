@@ -349,19 +349,31 @@ const HomePage = () => {
         </div>
       </section>
 
-      <ProductCarousel title="مختارات لك" subtitle="بناءً على تفضيلاتك ووقتك" accent="✨ مخصص" products={recommended} seeAllTo="/sections" />
-      <ProductCarousel title="عروض ذكية" subtitle="خصومات تناسب ذوقك" accent="🔥 وفّر أكثر" products={personalizedOffers} seeAllTo="/offers" />
-      <ProductCarousel
-        title={`رائج في ${zone.shortName}`}
-        subtitle="الأكثر طلباً في منطقتك الآن"
-        accent="📍 قريب منك"
-        products={trendingInZone}
-        seeAllTo="/sections"
-      />
-      <ProductCarousel title="رائج لك" accent="📈 الأعلى تفاعلًا" products={trending} seeAllTo="/sections" />
-      <ProductCarousel title="جديد ومميز لك" accent="⭐ مختار" products={newForYou} seeAllTo="/sections" />
+      {/* Wrap below-fold rails in content-visibility:auto so the browser
+          skips painting offscreen sections — keeps scroll at 60fps. */}
+      <div style={cv}>
+        <ProductCarousel title="مختارات لك" subtitle="بناءً على تفضيلاتك ووقتك" accent="✨ مخصص" products={recommended} seeAllTo="/sections" />
+      </div>
+      <div style={cv}>
+        <ProductCarousel title="عروض ذكية" subtitle="خصومات تناسب ذوقك" accent="🔥 وفّر أكثر" products={personalizedOffers} seeAllTo="/offers" />
+      </div>
+      <div style={cv}>
+        <ProductCarousel
+          title={`رائج في ${zone.shortName}`}
+          subtitle="الأكثر طلباً في منطقتك الآن"
+          accent="📍 قريب منك"
+          products={trendingInZone}
+          seeAllTo="/sections"
+        />
+      </div>
+      <div style={cv}>
+        <ProductCarousel title="رائج لك" accent="📈 الأعلى تفاعلًا" products={trending} seeAllTo="/sections" />
+      </div>
+      <div style={cv}>
+        <ProductCarousel title="جديد ومميز لك" accent="⭐ مختار" products={newForYou} seeAllTo="/sections" />
+      </div>
 
-      <section className="animate-float-up">
+      <section className="animate-float-up" style={cv}>
         <h2 className="mb-3 px-1 font-display text-xl font-extrabold text-foreground">استكشف بطريقتك</h2>
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -386,7 +398,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section>
+      <section style={cv}>
         <h2 className="mb-3 px-1 font-display text-xl font-extrabold text-foreground">يناسبك الآن</h2>
         <div className="grid grid-cols-2 gap-3.5">
           {recommended.slice(0, 6).map((p) => <ProductCard key={p.id} product={p} />)}
