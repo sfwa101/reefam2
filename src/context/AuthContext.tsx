@@ -60,17 +60,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let active = true;
 
-    // Order: subscribe first, then read existing session
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    // Order: subscribe first, then read existing session.
+    // Silent recovery: only clear local state on explicit SIGNED_OUT.
+    // Token refreshes / tab focus events should NOT log the user out.
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       if (!active) return;
-      setSession(s);
-      setUser(s?.user ?? null);
-      setLoading(false);
-      if (s?.user) {
-        setTimeout(() => fetchProfile(s.user.id), 0);
-      } else {
+
+      if (event === "SIGNED_OUT") {
+        setSession(null);
+        setUser(null);
         setProfile(null);
+        setLoading(false);
+        return;
       }
+
+      // For SIGNED_IN, TOKEN_REFRESHED, USER_UPDATED, INITIAL_SESSION:
+      // keep whatever session Supabase hands us (it pulled from localStorage).
+      if (s) {
+        setSession(s);
+        setUser(s.user ?? null);
+        setTimeout(() => fetchProfile(s.user.id), 0);
+      }
+      setLoading(false);
     });
 
     const failSafe = window.setTimeout(() => {
@@ -80,15 +91,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession()
       .then(({ data: { session: s } }) => {
         if (!active) return;
-        setSession(s);
-        setUser(s?.user ?? null);
-        if (s?.user) fetchProfile(s.user.id);
+        if (s) {
+          setSession(s);
+          setUser(s.user ?? null);
+          fetchProfile(s.user.id);
+        }
+        // If no session, leave state as-is (null) — onAuthStateChange will
+        // also fire INITIAL_SESSION and keep things consistent.
       })
       .catch(() => {
-        if (!active) return;
-        setSession(null);
-        setUser(null);
-        setProfile(null);
+        // Network blip on cold start — DO NOT wipe local session.
+        // The persisted token in localStorage will recover on next call.
       })
       .finally(() => {
         if (active) setLoading(false);
