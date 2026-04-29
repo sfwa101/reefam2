@@ -117,34 +117,11 @@ const personalRail: PantryChip[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Lazy image — native lazy, no React state churn                      */
+/* Tiles — vector backdrops, defined OUTSIDE the page                  */
 /* ------------------------------------------------------------------ */
 
-const LazyImg = ({
-  src,
-  alt = "",
-  className = "",
-}: {
-  src: string;
-  alt?: string;
-  className?: string;
-}) => (
-  <img
-    src={src}
-    alt={alt}
-    loading="lazy"
-    decoding="async"
-    width={1024}
-    height={768}
-    className={className}
-  />
-);
-
-/* ------------------------------------------------------------------ */
-/* Tiles — defined OUTSIDE the page so they don't re-create per render */
-/* ------------------------------------------------------------------ */
-
-const TILE_SHADOW = "0 8px 22px -14px rgba(0,0,0,.22)";
+const TILE_SHADOW =
+  "0 1px 2px rgba(0,0,0,.03), 0 8px 22px -14px rgba(0,0,0,.18)";
 
 const HeroTile = ({
   card,
@@ -154,39 +131,41 @@ const HeroTile = ({
   card: HeroCard;
   className: string;
   onPick: (to: string) => void;
-}) => (
-  <button
-    onClick={() => onPick(card.to)}
-    className={`relative overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97] ${className}`}
-    style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
-    aria-label={card.title}
-  >
-    <LazyImg
-      src={card.image}
-      className="absolute inset-0 h-full w-full object-cover"
-    />
-    <span
-      aria-hidden
-      className="absolute inset-0"
-      style={{
-        background: `linear-gradient(180deg, hsl(${card.overlay} / 0.05) 0%, hsl(${card.overlay} / 0.45) 55%, hsl(${card.overlay} / 0.88) 100%)`,
-      }}
-    />
-    {card.badge && (
-      <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold text-foreground shadow-sm">
-        {card.badge}
-      </span>
-    )}
-    <div className="relative flex h-full w-full flex-col justify-end p-4">
-      <h3 className="font-display text-[19px] font-extrabold leading-tight text-white drop-shadow-sm">
-        {card.title}
-      </h3>
-      <p className="mt-1 text-[12px] font-medium leading-snug text-white/85 line-clamp-2">
-        {card.desc}
-      </p>
-    </div>
-  </button>
-);
+}) => {
+  const ink = motifInk(card.motif);
+  return (
+    <button
+      onClick={() => onPick(card.to)}
+      className={`relative overflow-hidden rounded-[24px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97] ${className}`}
+      style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
+      aria-label={card.title}
+    >
+      <VectorBackdrop motif={card.motif} />
+      {card.badge && (
+        <span
+          className="absolute right-3 top-3 rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-extrabold shadow-sm"
+          style={{ color: ink }}
+        >
+          {card.badge}
+        </span>
+      )}
+      <div className="relative flex h-full w-full flex-col justify-end p-4">
+        <h3
+          className="font-display text-[19px] font-extrabold leading-tight"
+          style={{ color: ink }}
+        >
+          {card.title}
+        </h3>
+        <p
+          className="mt-1 text-[12px] font-medium leading-snug line-clamp-2"
+          style={{ color: ink, opacity: 0.72 }}
+        >
+          {card.desc}
+        </p>
+      </div>
+    </button>
+  );
+};
 
 const SmartTile = ({
   s,
@@ -194,37 +173,48 @@ const SmartTile = ({
 }: {
   s: SmartCard;
   onPick: (to: string) => void;
-}) => (
-  <button
-    onClick={() => onPick(s.to)}
-    className="relative h-[150px] overflow-hidden rounded-[22px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97]"
-    style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
-    aria-label={s.title}
-  >
-    <LazyImg
-      src={s.image}
-      className="absolute inset-0 h-full w-full object-cover opacity-50"
-    />
-    <span aria-hidden className="absolute inset-0" style={{ background: s.gradient, opacity: 0.85 }} />
-    <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-extrabold text-foreground shadow-sm">
-      💸 {s.saving}
-    </span>
-    <div className="relative flex h-full w-full flex-col justify-between p-4">
-      <s.icon className="h-6 w-6 text-white/95" strokeWidth={2.2} />
-      <div>
-        <h3 className="font-display text-[18px] font-extrabold leading-tight text-white drop-shadow-sm">
-          {s.title}
-        </h3>
-        <p className="mt-1 text-[11.5px] font-medium leading-snug text-white/85 line-clamp-2">
-          {s.pitch}
-        </p>
-        <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-white/95">
-          ابدأ التوفير <ArrowLeft className="h-3 w-3" />
-        </span>
+}) => {
+  const ink = motifInk(s.motif);
+  return (
+    <button
+      onClick={() => onPick(s.to)}
+      className="relative h-[150px] overflow-hidden rounded-[22px] text-right ring-1 ring-black/5 transition-transform duration-200 ease-apple active:scale-[0.97]"
+      style={{ boxShadow: TILE_SHADOW, contain: "layout paint" }}
+      aria-label={s.title}
+    >
+      <VectorBackdrop motif={s.motif} />
+      <span
+        className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-extrabold shadow-sm"
+        style={{ color: ink }}
+      >
+        💸 {s.saving}
+      </span>
+      <div className="relative flex h-full w-full flex-col justify-between p-4">
+        <s.icon className="h-6 w-6" strokeWidth={2.2} style={{ color: ink, opacity: 0.85 }} />
+        <div>
+          <h3
+            className="font-display text-[18px] font-extrabold leading-tight"
+            style={{ color: ink }}
+          >
+            {s.title}
+          </h3>
+          <p
+            className="mt-1 text-[11.5px] font-medium leading-snug line-clamp-2"
+            style={{ color: ink, opacity: 0.72 }}
+          >
+            {s.pitch}
+          </p>
+          <span
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold"
+            style={{ color: ink }}
+          >
+            ابدأ التوفير <ArrowLeft className="h-3 w-3" />
+          </span>
+        </div>
       </div>
-    </div>
-  </button>
-);
+    </button>
+  );
+};
 
 const RailChip = ({
   c,
