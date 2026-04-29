@@ -9,7 +9,7 @@
  * Everything renders instantly — no network requests, no decoding.
  */
 
-import type { SVGProps } from "react";
+import type { ReactElement, SVGProps } from "react";
 
 export type MotifId =
   | "village" | "supermarket" | "kitchen" | "produce"
@@ -204,7 +204,7 @@ const G = (props: GlyphProps & { children: React.ReactNode }) => (
   </svg>
 );
 
-const Glyphs: Record<MotifId, (p: GlyphProps) => JSX.Element> = {
+const Glyphs: Record<MotifId, (p: GlyphProps) => ReactElement> = {
   village: (p) => (
     <G {...p}>
       <path d="M3 21V10l9-6 9 6v11" />
