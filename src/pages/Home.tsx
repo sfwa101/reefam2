@@ -1,4 +1,4 @@
-import { Search, MapPin, Sparkles, Clock, Flame, Award, ChevronLeft, ChevronDown, Plus, Check, RotateCcw } from "lucide-react";
+import { Search, MapPin, Sparkles, Clock, Flame, Award, ChevronLeft, ChevronDown, Plus, Check } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
