@@ -12,6 +12,8 @@ import {
   isSweetsProduct,
 } from "@/lib/sweetsFulfillment";
 import SweetsProductSheet from "@/components/sweets/SweetsProductSheet";
+import ButcherSheet from "@/components/meat/ButcherSheet";
+import { isButcheryProduct } from "@/lib/butcheryPrep";
 
 interface ProductCardProps {
   product: Product;
@@ -43,9 +45,11 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
     ? fulfillmentTypeFor(product.id, product.subCategory)
     : null;
   const fMeta = fType ? fulfillmentMeta[fType] : null;
+  const meat = isButcheryProduct(product.source);
   // Tapping any sweets card opens the unified sheet (full details + booking).
+  // Meat / poultry / seafood opens the Butcher's Block sheet.
   // Other product types keep their classic add-to-cart behaviour.
-  const opensSheet = sweets;
+  const opensSheet = sweets || meat;
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const [pulse, setPulse] = useState(0);
@@ -265,8 +269,15 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
           </div>
         </div>
       </div>
-      {opensSheet && (
+      {opensSheet && sweets && (
         <SweetsProductSheet
+          product={product}
+          open={sheetOpen}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
+      {opensSheet && meat && (
+        <ButcherSheet
           product={product}
           open={sheetOpen}
           onClose={() => setSheetOpen(false)}
