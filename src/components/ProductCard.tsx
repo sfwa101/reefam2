@@ -11,7 +11,7 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
 } from "@/lib/sweetsFulfillment";
-import SweetsBookingSheet from "@/components/sweets/SweetsBookingSheet";
+import SweetsProductSheet from "@/components/sweets/SweetsProductSheet";
 
 interface ProductCardProps {
   product: Product;
@@ -43,8 +43,10 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
     ? fulfillmentTypeFor(product.id, product.subCategory)
     : null;
   const fMeta = fType ? fulfillmentMeta[fType] : null;
-  const requiresBooking = fType === "C";
-  const [bookingOpen, setBookingOpen] = useState(false);
+  // Tapping any sweets card opens the unified sheet (full details + booking).
+  // Other product types keep their classic add-to-cart behaviour.
+  const opensSheet = sweets;
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const [pulse, setPulse] = useState(0);
   const lastQtyRef = useRef(qty);
@@ -58,8 +60,8 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (requiresBooking) {
-      setBookingOpen(true);
+    if (opensSheet) {
+      setSheetOpen(true);
       return;
     }
     add(product);
@@ -67,8 +69,8 @@ const ProductCard = ({ product, variant = "grid" }: ProductCardProps) => {
   const handleInc = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (requiresBooking) {
-      setBookingOpen(true);
+    if (opensSheet) {
+      setSheetOpen(true);
       return;
     }
     add(product);
