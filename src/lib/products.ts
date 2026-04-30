@@ -78,17 +78,25 @@ function rowToProduct(row: DbRow): Product {
   };
 }
 
-// In-memory cache (mutable). Hydrated lazily on first import.
+// In-memory cache (mutable). Hydrated lazily on first CLIENT-SIDE import.
+// IMPORTANT: This cache must NEVER be populated during SSR. The module is
+// shared across server requests, so populating it on the server would (a)
+// leak data between users and (b) cause hydration mismatches because the
+// client always starts empty and only fills after mount.
 const cache: Product[] = [];
 let hydrated = false;
 let hydratePromise: Promise<Product[]> | null = null;
 const listeners = new Set<() => void>();
+
+const isBrowser = typeof window !== "undefined";
 
 function notify() {
   for (const fn of listeners) fn();
 }
 
 async function fetchAll(): Promise<Product[]> {
+  // Hard guard: never fetch from the server runtime — cache is browser-only.
+  if (!isBrowser) return [];
   const { data, error } = await supabase
     .from("products")
     .select("id,name,brand,unit,price,old_price,image,image_url,rating,category,sub_category,source,badge,variants,addons,perishable,is_active")
@@ -108,6 +116,7 @@ async function fetchAll(): Promise<Product[]> {
 }
 
 export function ensureProductsLoaded(): Promise<Product[]> {
+  if (!isBrowser) return Promise.resolve([]);
   if (hydrated) return Promise.resolve(cache);
   if (!hydratePromise) hydratePromise = fetchAll();
   return hydratePromise;
