@@ -49,7 +49,7 @@ const paymentOptions = [
 
 /* -------- Animated number counter -------- */
 const NumberFlow = ({ value, className = "" }: { value: number; className?: string }) => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const mv = useMotionValue(value);
   const display = useTransform(mv, (v) => toLatin(Math.round(v)));
   useEffect(() => {

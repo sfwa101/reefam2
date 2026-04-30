@@ -73,7 +73,7 @@ type Addr = {
 const cv = { contentVisibility: "auto" as const, containIntrinsicSize: "1px 360px" };
 
 const HomePage = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const { user, profile } = useAuth();
   const { zone } = useLocation();
   const [addresses, setAddresses] = useState<Addr[]>([]);

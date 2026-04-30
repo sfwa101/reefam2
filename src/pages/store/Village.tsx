@@ -46,7 +46,7 @@ const loadRoutines = (): RoutineRecord[] => {
   }
 };
 const saveRoutines = (r: RoutineRecord[]) => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   try { localStorage.setItem(ROUTINE_KEY, JSON.stringify(r)); } catch { /* */ }
 };
 

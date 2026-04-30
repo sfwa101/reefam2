@@ -19,7 +19,7 @@ const tabs = [
 ] as const;
 
 const useDailyCountdown = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const [left, setLeft] = useState("");
   useEffect(() => {
     const tick = () => {
@@ -43,7 +43,7 @@ const Offers = () => {
   const [tab, setTab] = useState<typeof tabs[number]["id"]>("all");
   const countdown = useDailyCountdown();
 
-  const discounted = useMemo(() => products.filter((p) => p.oldPrice), []);
+  const discounted = useMemo(() => products.filter((p) => p.oldPrice), [_pv]);
   const flashSale = useMemo(() => discounted.slice(0, 4), [discounted]);
 
   const filtered = useMemo(() => {
@@ -52,7 +52,7 @@ const Offers = () => {
     if (tab === "all") return featured;
     if (tab === "discount") return discounted;
     return featured.filter((p) => p.badge === tab);
-  }, [tab, discounted]);
+  }, [tab, discounted, _pv]);
 
   return (
     <div className="space-y-6">

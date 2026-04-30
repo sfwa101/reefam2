@@ -18,7 +18,7 @@ const categories = [
 ];
 
 const Baskets = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const theme = storeThemes.baskets;
   const [active, setActive] = useState("all");
   const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
@@ -28,7 +28,7 @@ const Baskets = () => {
   const list = useMemo(() => {
     const all = products.filter((p) => p.source === "baskets");
     return active === "all" ? all : all.filter((p) => p.subCategory === active);
-  }, [active]);
+  }, [active, _pv]);
 
   return (
     <div className="space-y-5 pb-10">

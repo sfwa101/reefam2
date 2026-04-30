@@ -82,7 +82,7 @@ const TIER2 = 44;
 const TRIGGER = 14;
 
 const Meat = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const theme = storeThemes.meat;
   const meatProducts = useMemo(
     () => products.filter((p) => p.source === "meat"),

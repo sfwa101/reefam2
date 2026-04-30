@@ -29,7 +29,7 @@ const cats: StoreCategory[] = [
 ];
 
 const Wholesale = () => {
-  const v = useProductsVersion();
+  const v = const _pv = useProductsVersion();
   const bulkProducts = useMemo(() => buildBulk(), [v]);
   return (
   <SinglePageStore
