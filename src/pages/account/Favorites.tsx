@@ -1,11 +1,12 @@
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/lib/products";
+import { products, useProductsVersion } from "@/lib/products";
 import { useFavorites } from "@/lib/favorites";
 import { Heart } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const Favorites = () => {
+  useProductsVersion();
   const { favs } = useFavorites();
   const items = products.filter((p) => favs.includes(p.id));
 
