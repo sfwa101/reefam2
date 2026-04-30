@@ -153,10 +153,12 @@ export type Database = {
           affiliate_user_id: string
           base_amount: number
           category: string | null
+          clawed_back_at: string | null
           commission_amount: number
           commission_pct: number
           created_at: string
           customer_user_id: string | null
+          delivered_at: string | null
           id: string
           notes: string | null
           order_id: string | null
@@ -164,15 +166,18 @@ export type Database = {
           product_id: string | null
           product_name: string | null
           status: string
+          vest_release_at: string | null
         }
         Insert: {
           affiliate_user_id: string
           base_amount?: number
           category?: string | null
+          clawed_back_at?: string | null
           commission_amount?: number
           commission_pct?: number
           created_at?: string
           customer_user_id?: string | null
+          delivered_at?: string | null
           id?: string
           notes?: string | null
           order_id?: string | null
@@ -180,15 +185,18 @@ export type Database = {
           product_id?: string | null
           product_name?: string | null
           status?: string
+          vest_release_at?: string | null
         }
         Update: {
           affiliate_user_id?: string
           base_amount?: number
           category?: string | null
+          clawed_back_at?: string | null
           commission_amount?: number
           commission_pct?: number
           created_at?: string
           customer_user_id?: string | null
+          delivered_at?: string | null
           id?: string
           notes?: string | null
           order_id?: string | null
@@ -196,6 +204,7 @@ export type Database = {
           product_id?: string | null
           product_name?: string | null
           status?: string
+          vest_release_at?: string | null
         }
         Relationships: []
       }
@@ -568,9 +577,11 @@ export type Database = {
           is_active: boolean
           name: string
           old_price: number | null
+          packaging_cost: number | null
           perishable: boolean | null
           price: number
           rating: number | null
+          selling_price: number | null
           sort_order: number
           source: string
           stock: number
@@ -598,9 +609,11 @@ export type Database = {
           is_active?: boolean
           name: string
           old_price?: number | null
+          packaging_cost?: number | null
           perishable?: boolean | null
           price?: number
           rating?: number | null
+          selling_price?: number | null
           sort_order?: number
           source?: string
           stock?: number
@@ -628,9 +641,11 @@ export type Database = {
           is_active?: boolean
           name?: string
           old_price?: number | null
+          packaging_cost?: number | null
           perishable?: boolean | null
           price?: number
           rating?: number | null
+          selling_price?: number | null
           sort_order?: number
           source?: string
           stock?: number
@@ -1069,36 +1084,45 @@ export type Database = {
       wallet_topup_requests: {
         Row: {
           amount: number
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           id: string
           method: string
           note: string | null
           performed_by: string
           performed_by_name: string | null
+          rejection_reason: string | null
           status: string
           transfer_reference: string
           user_id: string
         }
         Insert: {
           amount: number
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           method: string
           note?: string | null
           performed_by: string
           performed_by_name?: string | null
+          rejection_reason?: string | null
           status?: string
           transfer_reference: string
           user_id: string
         }
         Update: {
           amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           method?: string
           note?: string | null
           performed_by?: string
           performed_by_name?: string | null
+          rejection_reason?: string | null
           status?: string
           transfer_reference?: string
           user_id?: string
@@ -1108,30 +1132,48 @@ export type Database = {
       wallet_transactions: {
         Row: {
           amount: number
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
+          created_by_admin: string | null
           id: string
           kind: string
           label: string
+          reference_order_id: string | null
           source: string | null
+          status: string
           user_id: string
+          vest_release_at: string | null
         }
         Insert: {
           amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
+          created_by_admin?: string | null
           id?: string
           kind?: string
           label: string
+          reference_order_id?: string | null
           source?: string | null
+          status?: string
           user_id: string
+          vest_release_at?: string | null
         }
         Update: {
           amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
+          created_by_admin?: string | null
           id?: string
           kind?: string
           label?: string
+          reference_order_id?: string | null
           source?: string | null
+          status?: string
           user_id?: string
+          vest_release_at?: string | null
         }
         Relationships: []
       }
@@ -1150,6 +1192,8 @@ export type Database = {
         }
         Returns: Json
       }
+      approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
+      cfo_dashboard_stats: { Args: never; Returns: Json }
       ensure_referral_code: { Args: { _user_id: string }; Returns: string }
       executive_dashboard_stats: { Args: { _days?: number }; Returns: Json }
       has_role: {
@@ -1170,6 +1214,12 @@ export type Database = {
           price: number
           stock: number
         }[]
+      }
+      process_commission_vesting: { Args: never; Returns: Json }
+      recompute_wallet_balance: { Args: { _user: string }; Returns: number }
+      reject_wallet_topup: {
+        Args: { _reason: string; _topup_id: string }
+        Returns: Json
       }
       user_store_ids: { Args: { _user_id: string }; Returns: string[] }
       user_total_spent: { Args: { _user_id: string }; Returns: number }
