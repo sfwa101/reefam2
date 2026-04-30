@@ -89,9 +89,9 @@ export default function AdminWallets() {
         _note: note.trim() || null,
       } as never);
       if (error) throw error;
-      const result = data as { ok: boolean; new_balance: number };
-      toast.success(`تم شحن ${fmtMoney(Number(amount))} — الرصيد الجديد ${fmtMoney(result.new_balance)}`);
-      setBalance(result.new_balance);
+      toast.success(`تم تسجيل الطلب — قيد اعتماد الأدمن (Maker-Checker)`, {
+        description: `${fmtMoney(Number(amount))} • سيظهر في رصيد العميل بعد الاعتماد`,
+      });
       setAmount(""); setReference(""); setNote("");
       // Reload history
       const { data: h } = await supabase.from("wallet_topup_requests" as never)
