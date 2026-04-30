@@ -3378,6 +3378,8 @@ export type Database = {
         | "delivery"
         | "finance"
         | "vendor"
+        | "branch_manager"
+        | "inventory_clerk"
       app_user_level: "bronze" | "silver" | "gold" | "platinum"
     }
     CompositeTypes: {
@@ -3515,6 +3517,8 @@ export const Constants = {
         "delivery",
         "finance",
         "vendor",
+        "branch_manager",
+        "inventory_clerk",
       ],
       app_user_level: ["bronze", "silver", "gold", "platinum"],
     },
