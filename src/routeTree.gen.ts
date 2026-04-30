@@ -24,15 +24,18 @@ import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
+import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
+import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -154,6 +157,11 @@ const AdminMoreRoute = AdminMoreRouteImport.update({
   path: '/more',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLowStockRoute = AdminLowStockRouteImport.update({
+  id: '/low-stock',
+  path: '/low-stock',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminKycRoute = AdminKycRouteImport.update({
   id: '/kyc',
   path: '/kyc',
@@ -167,6 +175,11 @@ const AdminInventoryRoute = AdminInventoryRouteImport.update({
 const AdminFinanceRoute = AdminFinanceRouteImport.update({
   id: '/finance',
   path: '/finance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExecutiveRoute = AdminExecutiveRouteImport.update({
+  id: '/executive',
+  path: '/executive',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
@@ -197,6 +210,11 @@ const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAffiliateSettingsRoute = AdminAffiliateSettingsRouteImport.update({
+  id: '/affiliate-settings',
+  path: '/affiliate-settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AppWalletRoute = AppWalletRouteImport.update({
@@ -443,15 +461,18 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
+  '/admin/executive': typeof AdminExecutiveRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -511,15 +532,18 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
+  '/admin/executive': typeof AdminExecutiveRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -584,15 +608,18 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
+  '/admin/executive': typeof AdminExecutiveRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
+  '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -658,15 +685,18 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/affiliate-settings'
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/categories'
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
+    | '/admin/executive'
     | '/admin/finance'
     | '/admin/inventory'
     | '/admin/kyc'
+    | '/admin/low-stock'
     | '/admin/more'
     | '/admin/print-jobs'
     | '/admin/products'
@@ -726,15 +756,18 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/affiliate-settings'
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/categories'
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
+    | '/admin/executive'
     | '/admin/finance'
     | '/admin/inventory'
     | '/admin/kyc'
+    | '/admin/low-stock'
     | '/admin/more'
     | '/admin/print-jobs'
     | '/admin/products'
@@ -798,15 +831,18 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/admin/affiliate-settings'
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/categories'
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
+    | '/admin/executive'
     | '/admin/finance'
     | '/admin/inventory'
     | '/admin/kyc'
+    | '/admin/low-stock'
     | '/admin/more'
     | '/admin/print-jobs'
     | '/admin/products'
@@ -973,6 +1009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMoreRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/low-stock': {
+      id: '/admin/low-stock'
+      path: '/low-stock'
+      fullPath: '/admin/low-stock'
+      preLoaderRoute: typeof AdminLowStockRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/kyc': {
       id: '/admin/kyc'
       path: '/kyc'
@@ -992,6 +1035,13 @@ declare module '@tanstack/react-router' {
       path: '/finance'
       fullPath: '/admin/finance'
       preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/executive': {
+      id: '/admin/executive'
+      path: '/executive'
+      fullPath: '/admin/executive'
+      preLoaderRoute: typeof AdminExecutiveRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/delivery': {
@@ -1034,6 +1084,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/admin/analytics'
       preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/affiliate-settings': {
+      id: '/admin/affiliate-settings'
+      path: '/affiliate-settings'
+      fullPath: '/admin/affiliate-settings'
+      preLoaderRoute: typeof AdminAffiliateSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_app/wallet': {
@@ -1482,15 +1539,18 @@ const AdminDeliveryRouteWithChildren = AdminDeliveryRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCostBulkRoute: typeof AdminCostBulkRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
+  AdminExecutiveRoute: typeof AdminExecutiveRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminKycRoute: typeof AdminKycRoute
+  AdminLowStockRoute: typeof AdminLowStockRoute
   AdminMoreRoute: typeof AdminMoreRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -1511,15 +1571,18 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCostBulkRoute: AdminCostBulkRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
+  AdminExecutiveRoute: AdminExecutiveRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminKycRoute: AdminKycRoute,
+  AdminLowStockRoute: AdminLowStockRoute,
   AdminMoreRoute: AdminMoreRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
   AdminProductsRoute: AdminProductsRoute,

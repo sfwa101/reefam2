@@ -38,8 +38,11 @@ export default function More() {
       { to: "/admin/reviews", icon: Star, label: "التقييمات", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
     ]},
     { title: "المالية", items: [
+      { to: "/admin/executive", icon: TrendingUp, label: "اللوحة التنفيذية", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/wallets", icon: Wallet, label: "شحن المحافظ", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/cost-bulk", icon: Receipt, label: "تعبئة التكاليف", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
+      { to: "/admin/affiliate-settings", icon: Gift, label: "عمولات الأفلييت", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/low-stock", icon: Warehouse, label: "تنبيهات المخزون", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
       { to: "/admin/savings", icon: Receipt, label: "الادخار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/finance", icon: TrendingUp, label: "التقارير", color: "from-primary to-primary-glow" },
       { to: "/admin/analytics", icon: BarChart3, label: "التحليلات", color: "from-[hsl(var(--indigo))] to-[hsl(var(--purple))]" },
