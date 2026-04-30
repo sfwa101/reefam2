@@ -971,7 +971,7 @@ const Cart = () => {
       }
 
       /* ============ Wallet cashback (only when paying via wallet) ============ */
-      if (payment === "wallet" && totalCashback > 0) {
+      if (!isGuest && currentUser && payment === "wallet" && totalCashback > 0) {
         try {
           const { data: bal } = await supabase
             .from("wallet_balances")
