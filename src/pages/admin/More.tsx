@@ -7,7 +7,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   ChevronLeft, Warehouse, Store, ShieldCheck, Star, Wallet, Receipt, TrendingUp,
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
-  FileClock, BarChart3, Settings, LogOut, Moon, Printer,
+  FileClock, BarChart3, Settings, LogOut, Moon, Printer, Boxes, Scale, Ban, MessageCircle,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
