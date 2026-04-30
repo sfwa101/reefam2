@@ -19,7 +19,6 @@ const tabs = [
 ] as const;
 
 const useDailyCountdown = () => {
-  const _pv = useProductsVersion();
   const [left, setLeft] = useState("");
   useEffect(() => {
     const tick = () => {
