@@ -1,5 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Placeholder from "@/pages/admin/Placeholder";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+// Consolidated under /admin/delivery#zones tab to reduce screen sprawl.
 export const Route = createFileRoute("/admin/delivery/zones")({
-  component: () => <Placeholder title="مناطق التوصيل" description="قيد التطوير" />,
+  beforeLoad: () => {
+    throw redirect({ to: "/admin/delivery", hash: "zones" });
+  },
 });
