@@ -821,16 +821,13 @@ const Cart = () => {
   const checkoutWA = async () => {
     // Hard check to bypass stale React state on slow/older devices
     const { data: { session } } = await supabase.auth.getSession();
-    const currentUser = user || session?.user;
+    const currentUser = (user ?? session?.user) || null;
 
     if (!currentUser) {
       toast.error("سجّل الدخول أولًا لإتمام الطلب");
       navigate({ to: "/auth" });
       return;
     }
-    // Alias so the rest of this function (which references `user.id`) works
-    // even when the Auth Context hasn't hydrated yet on slow devices.
-    const user = currentUser;
     if (minOrderTotal > 0 && grand < minOrderTotal) {
       toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
       return;
