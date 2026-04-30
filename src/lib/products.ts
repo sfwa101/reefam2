@@ -216,3 +216,21 @@ export async function refetchProducts(): Promise<void> {
   hydratePromise = fetchAll();
   await hydratePromise;
 }
+
+/**
+ * Lightweight subscription that returns an incrementing version each time the
+ * products cache is refreshed (initial hydration + realtime updates + manual
+ * refetches). Components that read the synchronous `products` snapshot can
+ * call this to re-render whenever data changes, without restructuring to use
+ * `useProducts()`.
+ */
+export function useProductsVersion(): number {
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const fn = () => setVersion((v) => v + 1);
+    listeners.add(fn);
+    ensureProductsLoaded();
+    return () => { listeners.delete(fn); };
+  }, []);
+  return version;
+}
