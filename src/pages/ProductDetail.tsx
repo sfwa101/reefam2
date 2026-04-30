@@ -84,7 +84,12 @@ const ProductDetail = () => {
     () => (product?.addons ?? []).filter((a) => addonIds.includes(a.id)).reduce((s, a) => s + a.price, 0),
     [product?.addons, addonIds],
   );
-  const unitPrice = (product?.price ?? 0) + (variant?.priceDelta ?? 0) + addonsTotal;
+  const baseUnitPrice = (product?.price ?? 0) + (variant?.priceDelta ?? 0) + addonsTotal;
+  const unitPrice = selectedUnit?.selling_price != null
+    ? Number(selectedUnit.selling_price) + (variant?.priceDelta ?? 0) + addonsTotal
+    : selectedUnit
+      ? baseUnitPrice * selectedUnit.conversion_factor
+      : baseUnitPrice;
   const total = unitPrice * qty;
 
   /* Trigger flash whenever any pricing input changes */
