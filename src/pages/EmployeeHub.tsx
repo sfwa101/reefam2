@@ -53,12 +53,11 @@ export default function EmployeeHub() {
 
   const checkIn = async () => {
     setBusy(true);
-    const finish = (lat: number | null, lng: number | null) => {
-      supabase.from("staff_attendance")
-        .insert({ user_id: user!.id, branch_id: branchId, check_in_lat: lat, check_in_lng: lng })
-        .then(() => { toast.success("تم تسجيل حضورك"); load(); })
-        .then(undefined, (e) => toast.error(e.message))
-        .finally(() => setBusy(false));
+    const finish = async (lat: number | null, lng: number | null) => {
+      const { error } = await supabase.from("staff_attendance")
+        .insert({ user_id: user!.id, branch_id: branchId, check_in_lat: lat, check_in_lng: lng });
+      if (error) toast.error(error.message); else { toast.success("تم تسجيل حضورك"); load(); }
+      setBusy(false);
     };
     if (!navigator.geolocation) return finish(null, null);
     navigator.geolocation.getCurrentPosition(
