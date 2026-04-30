@@ -1,7 +1,7 @@
 import { useSearch, useNavigate, Link } from "@tanstack/react-router";
 import { Search as SearchIcon, X, PackageSearch, SlidersHorizontal, ArrowUpDown, Star, CheckCircle2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { products } from "@/lib/products";
+import { products, useProductsVersion } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import BackHeader from "@/components/BackHeader";
 import { toLatin } from "@/lib/format";
@@ -16,6 +16,7 @@ const SORTS: { id: SortId; label: string }[] = [
 ];
 
 const SearchPage = () => {
+  useProductsVersion();
   const { q } = useSearch({ from: "/_app/search" });
   const navigate = useNavigate();
   const [sort, setSort] = useState<SortId>("relevance");

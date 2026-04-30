@@ -2,12 +2,13 @@ import DualNavStore from "@/components/store/DualNavStore";
 import BuyItAgainRail from "@/components/store/BuyItAgainRail";
 import VolumeDealsRail from "@/components/store/VolumeDealsRail";
 import SmartPairingWatcher from "@/components/store/SmartPairingWatcher";
-import { products } from "@/lib/products";
+import { products, useProductsVersion } from "@/lib/products";
 import { supermarketPool } from "@/lib/supermarketTaxonomy";
 import { useMemo } from "react";
 
 const Supermarket = () => {
-  const pool = useMemo(() => supermarketPool(products), []);
+  const v = useProductsVersion();
+  const pool = useMemo(() => supermarketPool(products), [v]);
   return (
     <>
       <DualNavStore

@@ -1,5 +1,5 @@
 import SinglePageStore, { type StoreCategory } from "@/components/SinglePageStore";
-import { products } from "@/lib/products";
+import { products, useProductsVersion } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import { fulfillmentMeta } from "@/lib/sweetsFulfillment";
 
@@ -12,6 +12,7 @@ const cats: StoreCategory[] = [
 ];
 
 const Sweets = () => {
+  useProductsVersion();
   const theme = storeThemes.sweets;
   return (
     <SinglePageStore
