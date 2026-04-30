@@ -12,6 +12,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { logBehavior } from "@/lib/behavior";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   trustBadgesFor,
