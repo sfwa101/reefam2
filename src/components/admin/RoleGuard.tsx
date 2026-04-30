@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ShieldAlert, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export type AppRole = "admin" | "manager" | "operator" | "delivery" | "support" | "finance";
+export type AppRole = "admin" | "staff" | "cashier" | "store_manager" | "collector" | "delivery" | "finance";
 
 export function useAdminRoles() {
   const { user } = useAuth();
