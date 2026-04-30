@@ -1677,6 +1677,46 @@ const Cart = () => {
 
       <button onClick={() => clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">تفريغ السلة</button>
 
+      {/* ============ Guest Checkout Form (shown only when not logged in) ============ */}
+      {!user && (
+        <section className="space-y-3 rounded-2xl bg-card p-4 ring-1 ring-border/40">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-display text-sm font-extrabold">إتمام الطلب كضيف</p>
+              <p className="text-[11px] text-muted-foreground">أو <Link to="/auth" className="font-bold text-primary underline">سجّل الدخول</Link> لحفظ طلباتك</p>
+            </div>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-extrabold text-primary">سريع</span>
+          </div>
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value)}
+              placeholder="الاسم بالكامل"
+              maxLength={80}
+              className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <input
+              type="tel"
+              inputMode="tel"
+              value={guestPhone}
+              onChange={(e) => setGuestPhone(e.target.value)}
+              placeholder="رقم الهاتف"
+              maxLength={20}
+              className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <textarea
+              value={guestAddress}
+              onChange={(e) => setGuestAddress(e.target.value)}
+              placeholder="عنوان التوصيل بالتفصيل"
+              maxLength={300}
+              rows={2}
+              className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+            />
+          </div>
+        </section>
+      )}
+
       {/* ============ Sticky Bottom Bar — theme-aware checkout button ============ */}
       <motion.div
         initial={{ y: 80 }}
