@@ -168,6 +168,14 @@ const Account = () => {
     return formatPhone(raw);
   }, [profile, user]);
 
+  if (isInitializing) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-muted-foreground animate-pulse">جاري تحميل بيانات الحساب...</p>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="space-y-6">
