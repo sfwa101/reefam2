@@ -66,7 +66,6 @@ const RestaurantDetail = () => {
   const accent = `hsl(${r.brandHue})`;
 
   const scrollToCat = (catId: string) => {
-  const _pv = useProductsVersion();
     const el = sectionRefs.current[catId];
     if (el) {
       const tabsH = tabsRef.current?.offsetHeight ?? 0;
