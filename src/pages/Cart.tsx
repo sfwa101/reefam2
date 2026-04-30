@@ -826,12 +826,19 @@ const Cart = () => {
     // Hard check to bypass stale React state on slow/older devices
     const { data: { session } } = await supabase.auth.getSession();
     const currentUser = (user ?? session?.user) || null;
+    const isGuest = !currentUser;
 
-    if (!currentUser) {
-      toast.error("سجّل الدخول أولًا لإتمام الطلب");
-      navigate({ to: "/auth" });
-      return;
+    // Guest mode: require name + phone + address instead of forcing login
+    if (isGuest) {
+      const n = guestName.trim();
+      const p = guestPhone.trim();
+      const a = guestAddress.trim();
+      if (!n || !p || !a) {
+        toast.error("من فضلك اكتب الاسم ورقم الهاتف وعنوان التوصيل");
+        return;
+      }
     }
+
     if (minOrderTotal > 0 && grand < minOrderTotal) {
       toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
       return;
