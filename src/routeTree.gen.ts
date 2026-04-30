@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
+import { Route as PosRouteImport } from './routes/pos'
+import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -66,6 +68,7 @@ import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
+import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advance-approvals'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -116,6 +119,16 @@ import { Route as AppAccountAddressesRouteImport } from './routes/_app/account.a
 const VendorRoute = VendorRouteImport.update({
   id: '/vendor',
   path: '/vendor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PosRoute = PosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployeeRoute = EmployeeRouteImport.update({
+  id: '/employee',
+  path: '/employee',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DriverRoute = DriverRouteImport.update({
@@ -397,6 +410,11 @@ const AdminAffiliateSettingsRoute = AdminAffiliateSettingsRouteImport.update({
   path: '/affiliate-settings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAdvanceApprovalsRoute = AdminAdvanceApprovalsRouteImport.update({
+  id: '/advance-approvals',
+  path: '/advance-approvals',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -635,6 +653,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
+  '/employee': typeof EmployeeRoute
+  '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
   '/cart': typeof AppCartRoute
@@ -643,6 +663,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -736,12 +757,15 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/employee': typeof EmployeeRoute
+  '/pos': typeof PosRoute
   '/cart': typeof AppCartRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -840,6 +864,8 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
+  '/employee': typeof EmployeeRoute
+  '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/cart': typeof AppCartRoute
@@ -848,6 +874,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -947,6 +974,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/driver'
+    | '/employee'
+    | '/pos'
     | '/vendor'
     | '/account'
     | '/cart'
@@ -955,6 +984,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
@@ -1048,12 +1078,15 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/employee'
+    | '/pos'
     | '/cart'
     | '/offers'
     | '/order-success'
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
@@ -1151,6 +1184,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/driver'
+    | '/employee'
+    | '/pos'
     | '/vendor'
     | '/_app/account'
     | '/_app/cart'
@@ -1159,6 +1194,7 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
@@ -1257,6 +1293,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
+  EmployeeRoute: typeof EmployeeRoute
+  PosRoute: typeof PosRoute
   VendorRoute: typeof VendorRouteWithChildren
 }
 
@@ -1267,6 +1305,20 @@ declare module '@tanstack/react-router' {
       path: '/vendor'
       fullPath: '/vendor'
       preLoaderRoute: typeof VendorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pos': {
+      id: '/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof PosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employee': {
+      id: '/employee'
+      path: '/employee'
+      fullPath: '/employee'
+      preLoaderRoute: typeof EmployeeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/driver': {
@@ -1659,6 +1711,13 @@ declare module '@tanstack/react-router' {
       path: '/affiliate-settings'
       fullPath: '/admin/affiliate-settings'
       preLoaderRoute: typeof AdminAffiliateSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/advance-approvals': {
+      id: '/admin/advance-approvals'
+      path: '/advance-approvals'
+      fullPath: '/admin/advance-approvals'
+      preLoaderRoute: typeof AdminAdvanceApprovalsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_app/wallet': {
@@ -2107,6 +2166,7 @@ const AdminDeliveryRouteWithChildren = AdminDeliveryRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAdvanceApprovalsRoute: typeof AdminAdvanceApprovalsRoute
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAllocationRoute: typeof AdminAllocationRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
@@ -2161,6 +2221,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAdvanceApprovalsRoute: AdminAdvanceApprovalsRoute,
   AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAllocationRoute: AdminAllocationRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
@@ -2251,6 +2312,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
+  EmployeeRoute: EmployeeRoute,
+  PosRoute: PosRoute,
   VendorRoute: VendorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
