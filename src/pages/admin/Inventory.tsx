@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Search, Save, Loader2, AlertTriangle } from "lucide-react";
+import { Search, Save, Loader2, AlertTriangle, Boxes } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
