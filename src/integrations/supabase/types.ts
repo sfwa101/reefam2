@@ -3175,6 +3175,10 @@ export type Database = {
       process_commission_vesting: { Args: never; Returns: Json }
       progress_to_next_level: { Args: { _user_id: string }; Returns: Json }
       recompute_wallet_balance: { Args: { _user: string }; Returns: number }
+      redeem_coupon: {
+        Args: { _code: string; _order_id: string; _order_total: number }
+        Returns: Json
+      }
       reject_wallet_topup: {
         Args: { _reason: string; _topup_id: string }
         Returns: Json
@@ -3201,6 +3205,10 @@ export type Database = {
       user_total_spent: { Args: { _user_id: string }; Returns: number }
       user_trust_limit: { Args: { _user_id: string }; Returns: number }
       user_vendor_ids: { Args: { _user_id: string }; Returns: string[] }
+      validate_coupon: {
+        Args: { _code: string; _order_total: number }
+        Returns: Json
+      }
       validate_discount: {
         Args: { _cost_price: number; _new_price: number; _sale_price: number }
         Returns: Json
