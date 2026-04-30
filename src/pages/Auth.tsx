@@ -5,6 +5,28 @@ import { toast } from "sonner";
 import reefLogo from "@/assets/reef-logo.webp";
 import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
+import { pathForRole, type AppRole } from "@/hooks/useUserRole";
+
+const ROLE_PRIORITY: Record<string, number> = {
+  admin: 1, finance: 2, branch_manager: 3, store_manager: 4,
+  inventory_clerk: 5, cashier: 6, delivery: 7, staff: 8, collector: 9, vendor: 10,
+};
+
+async function resolveRedirectPath(userId: string): Promise<string> {
+  try {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("is_active", true);
+    if (!data || data.length === 0) return "/";
+    const sorted = [...data].sort(
+      (a, b) => (ROLE_PRIORITY[a.role] ?? 99) - (ROLE_PRIORITY[b.role] ?? 99),
+    );
+    return pathForRole(sorted[0].role as AppRole);
+  } catch { return "/"; }
+}
 
 const Auth = () => {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -17,7 +39,9 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/", replace: true });
+    if (!loading && user) {
+      resolveRedirectPath(user.id).then((to) => navigate({ to, replace: true }));
+    }
   }, [loading, navigate, user]);
 
   const submit = async (e: FormEvent) => {
@@ -29,7 +53,12 @@ const Auth = () => {
     try {
       const res = mode === "signin" ? await signInWithPhone(phone, password) : await signUpWithPhone(phone, password, fullName.trim());
       if (res.error) toast.error(res.error);
-      else { toast.success(mode === "signin" ? "أهلاً بعودتك" : "تم إنشاء حسابك بنجاح"); navigate({ to: "/", replace: true }); }
+      else {
+        toast.success(mode === "signin" ? "أهلاً بعودتك" : "تم إنشاء حسابك بنجاح");
+        const { data: { user: u } } = await supabase.auth.getUser();
+        const to = u ? await resolveRedirectPath(u.id) : "/";
+        navigate({ to, replace: true });
+      }
     } finally { setBusy(false); }
   };
 

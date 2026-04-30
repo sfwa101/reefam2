@@ -131,6 +131,53 @@ export type Database = {
         }
         Relationships: []
       }
+      cashier_sessions: {
+        Row: {
+          branch_id: string | null
+          cashier_id: string
+          closed_at: string | null
+          closing_cash: number | null
+          id: string
+          notes: string | null
+          opened_at: string
+          opening_float: number
+          total_orders: number
+          total_sales: number
+        }
+        Insert: {
+          branch_id?: string | null
+          cashier_id: string
+          closed_at?: string | null
+          closing_cash?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_float?: number
+          total_orders?: number
+          total_sales?: number
+        }
+        Update: {
+          branch_id?: string | null
+          cashier_id?: string
+          closed_at?: string | null
+          closing_cash?: number | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          opening_float?: number
+          total_orders?: number
+          total_sales?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cashier_sessions_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -2326,6 +2373,109 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_advance_requests: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          branch_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          reason: string
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          reason: string
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          reason?: string
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_advance_requests_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_attendance: {
+        Row: {
+          branch_id: string | null
+          check_in_at: string
+          check_in_lat: number | null
+          check_in_lng: number | null
+          check_out_at: string | null
+          check_out_lat: number | null
+          check_out_lng: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          check_in_at?: string
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          check_in_at?: string
+          check_in_lat?: number | null
+          check_in_lng?: number | null
+          check_out_at?: string | null
+          check_out_lat?: number | null
+          check_out_lng?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_attendance_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_settlements: {
         Row: {
           commission_amount: number
@@ -3169,6 +3319,7 @@ export type Database = {
         Returns: Json
       }
       allocation_overview: { Args: { _order_id: string }; Returns: Json }
+      approve_advance_request: { Args: { _request_id: string }; Returns: Json }
       approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
       auto_route_order_to_branch: {
         Args: {
@@ -3219,6 +3370,11 @@ export type Database = {
         Returns: number
       }
       current_mega_event: { Args: never; Returns: Json }
+      current_user_branch_id: { Args: never; Returns: string }
+      current_user_role: {
+        Args: never
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       driver_log_event: {
         Args: { _event: string; _lat?: number; _lng?: number; _task_id: string }
         Returns: Json
@@ -3319,6 +3475,10 @@ export type Database = {
         Returns: Json
       }
       refresh_user_preferences: { Args: { _user_id?: string }; Returns: Json }
+      reject_advance_request: {
+        Args: { _reason: string; _request_id: string }
+        Returns: Json
+      }
       reject_wallet_topup: {
         Args: { _reason: string; _topup_id: string }
         Returns: Json
@@ -3330,6 +3490,7 @@ export type Database = {
       }
       rotate_flash_sale: { Args: never; Returns: string }
       rotate_flash_sale_v2: { Args: never; Returns: Json }
+      same_branch: { Args: { _branch_id: string }; Returns: boolean }
       scan_riba_suspicions: { Args: never; Returns: Json }
       settle_vendor_payout: {
         Args: {
@@ -3378,6 +3539,8 @@ export type Database = {
         | "delivery"
         | "finance"
         | "vendor"
+        | "branch_manager"
+        | "inventory_clerk"
       app_user_level: "bronze" | "silver" | "gold" | "platinum"
     }
     CompositeTypes: {
@@ -3515,6 +3678,8 @@ export const Constants = {
         "delivery",
         "finance",
         "vendor",
+        "branch_manager",
+        "inventory_clerk",
       ],
       app_user_level: ["bronze", "silver", "gold", "platinum"],
     },
