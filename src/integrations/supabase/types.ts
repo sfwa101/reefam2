@@ -348,6 +348,80 @@ export type Database = {
         }
         Relationships: []
       }
+      cross_branch_transfers: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string | null
+          product_id: string
+          quantity_pieces: number
+          shipping_cost: number | null
+          source_branch_id: string | null
+          source_warehouse_id: string | null
+          status: string
+          target_branch_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          product_id: string
+          quantity_pieces: number
+          shipping_cost?: number | null
+          source_branch_id?: string | null
+          source_warehouse_id?: string | null
+          status?: string
+          target_branch_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string | null
+          product_id?: string
+          quantity_pieces?: number
+          shipping_cost?: number | null
+          source_branch_id?: string | null
+          source_warehouse_id?: string | null
+          status?: string
+          target_branch_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_branch_transfers_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_branch_transfers_source_branch_id_fkey"
+            columns: ["source_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_branch_transfers_source_warehouse_id_fkey"
+            columns: ["source_warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_branch_transfers_target_branch_id_fkey"
+            columns: ["target_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_expenses: {
         Row: {
           amount: number
@@ -823,6 +897,65 @@ export type Database = {
         }
         Relationships: []
       }
+      hakim_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hakim_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "hakim_chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hakim_chat_sessions: {
+        Row: {
+          context_period_days: number | null
+          created_at: string
+          id: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          context_period_days?: number | null
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          context_period_days?: number | null
+          created_at?: string
+          id?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hakim_insights: {
         Row: {
           created_at: string
@@ -1284,6 +1417,63 @@ export type Database = {
           },
         ]
       }
+      product_units: {
+        Row: {
+          conversion_factor: number
+          cost_price_per_unit: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default_buy: boolean
+          is_default_sell: boolean
+          product_id: string
+          selling_price: number | null
+          unit_code: string
+          updated_at: string
+        }
+        Insert: {
+          conversion_factor: number
+          cost_price_per_unit?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default_buy?: boolean
+          is_default_sell?: boolean
+          product_id: string
+          selling_price?: number | null
+          unit_code: string
+          updated_at?: string
+        }
+        Update: {
+          conversion_factor?: number
+          cost_price_per_unit?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default_buy?: boolean
+          is_default_sell?: boolean
+          product_id?: string
+          selling_price?: number | null
+          unit_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_units_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_units_unit_code_fkey"
+            columns: ["unit_code"]
+            isOneToOne: false
+            referencedRelation: "units_of_measure"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       products: {
         Row: {
           addons: Json | null
@@ -1683,6 +1873,51 @@ export type Database = {
         }
         Relationships: []
       }
+      riba_audit_log: {
+        Row: {
+          amount: number | null
+          category: string
+          created_at: string
+          description: string
+          id: string
+          recommendation: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          severity: string
+          source_id: string
+          source_table: string
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          recommendation?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          source_id: string
+          source_table: string
+          status?: string
+        }
+        Update: {
+          amount?: number | null
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          recommendation?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          severity?: string
+          source_id?: string
+          source_table?: string
+          status?: string
+        }
+        Relationships: []
+      }
       savings_jar: {
         Row: {
           auto_save_enabled: boolean
@@ -1973,6 +2208,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      units_of_measure: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_base: boolean
+          name_ar: string
+          name_en: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_base?: boolean
+          name_ar: string
+          name_en?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_base?: boolean
+          name_ar?: string
+          name_en?: string | null
+          sort_order?: number | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -2361,6 +2626,60 @@ export type Database = {
           },
         ]
       }
+      zakat_assessments: {
+        Row: {
+          cash_balances: number
+          computed_by: string | null
+          created_at: string
+          id: string
+          inventory_market_value: number
+          is_above_nisab: boolean
+          liabilities: number
+          nisab_value: number
+          notes: string | null
+          period_end: string
+          period_start: string
+          receivables: number
+          status: string
+          zakat_base: number
+          zakat_due: number
+        }
+        Insert: {
+          cash_balances?: number
+          computed_by?: string | null
+          created_at?: string
+          id?: string
+          inventory_market_value?: number
+          is_above_nisab?: boolean
+          liabilities?: number
+          nisab_value?: number
+          notes?: string | null
+          period_end: string
+          period_start: string
+          receivables?: number
+          status?: string
+          zakat_base?: number
+          zakat_due?: number
+        }
+        Update: {
+          cash_balances?: number
+          computed_by?: string | null
+          created_at?: string
+          id?: string
+          inventory_market_value?: number
+          is_above_nisab?: boolean
+          liabilities?: number
+          nisab_value?: number
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          receivables?: number
+          status?: string
+          zakat_base?: number
+          zakat_due?: number
+        }
+        Relationships: []
+      }
       zone_availability: {
         Row: {
           branch_id: string | null
@@ -2434,6 +2753,15 @@ export type Database = {
       }
       allocation_overview: { Args: { _order_id: string }; Returns: Json }
       approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
+      auto_route_order_to_branch: {
+        Args: {
+          _order_id: string
+          _product_id: string
+          _qty_pieces: number
+          _target_branch: string
+        }
+        Returns: Json
+      }
       cfo_dashboard_stats: { Args: never; Returns: Json }
       commit_sub_order_stock: { Args: { _sub_order_id: string }; Returns: Json }
       complete_delivery: {
@@ -2452,6 +2780,14 @@ export type Database = {
       }
       compute_driver_commission: {
         Args: { _driver_id: string; _order_total: number }
+        Returns: number
+      }
+      compute_zakat_assessment: {
+        Args: { _nisab_value?: number }
+        Returns: Json
+      }
+      convert_to_pieces: {
+        Args: { _product_id: string; _qty: number; _unit_code: string }
         Returns: number
       }
       driver_log_event: {
@@ -2482,6 +2818,10 @@ export type Database = {
           warehouse_type: string
         }[]
       }
+      hakim_deep_report: {
+        Args: { _from?: string; _to?: string }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2509,6 +2849,7 @@ export type Database = {
           stock: number
         }[]
       }
+      nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
       payments_schedule: { Args: { _days_ahead?: number }; Returns: Json }
       process_commission_vesting: { Args: never; Returns: Json }
       recompute_wallet_balance: { Args: { _user: string }; Returns: number }
@@ -2521,6 +2862,7 @@ export type Database = {
         Args: { _branch_id: string; _product_id: string; _zone?: string }
         Returns: Json
       }
+      scan_riba_suspicions: { Args: never; Returns: Json }
       settle_vendor_payout: {
         Args: {
           _amount: number
@@ -2538,6 +2880,14 @@ export type Database = {
       user_vendor_ids: { Args: { _user_id: string }; Returns: string[] }
       validate_discount: {
         Args: { _cost_price: number; _new_price: number; _sale_price: number }
+        Returns: Json
+      }
+      validate_unit_pricing: {
+        Args: {
+          _product_id: string
+          _selling_price: number
+          _unit_code: string
+        }
         Returns: Json
       }
       vendor_portal_stats: { Args: never; Returns: Json }
