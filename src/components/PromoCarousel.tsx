@@ -152,7 +152,7 @@ const PromoCarousel = () => {
         style={{ contain: "layout paint" }}
       >
         <div
-          className="flex transition-transform duration-700 ease-apple"
+          className={mounted ? "flex transition-transform duration-700 ease-apple" : "flex"}
           style={{ transform: `translateX(${i * 100}%)`, willChange: "transform" }}
         >
           {SLIDES.map((s) => (
