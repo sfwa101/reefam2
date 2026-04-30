@@ -1059,11 +1059,14 @@ const Cart = () => {
        * items + the platform commission breakdown.
        */
       // ===== Premium structured customer-facing message =====
+      const guestHeader = isGuest
+        ? `👤 *الاسم:* ${guestName.trim()}\n📞 *الهاتف:* ${guestPhone.trim()}\n📍 *العنوان:* ${guestAddress.trim()}\n\n`
+        : "";
       const mainMessage =
         `مرحباً ريف المدينة 👋\n\n` +
-        `أنا ${customerLabel}، وأريد تأكيد طلبي الجديد.\n\n` +
+        (isGuest ? `طلب جديد (ضيف):\n\n${guestHeader}` : `أنا ${customerLabel}، وأريد تأكيد طلبي الجديد.\n\n`) +
         `📝 *رقم الطلب:* #${orderNum}\n` +
-        `📍 *العنوان:* ${addrLine}\n` +
+        (isGuest ? "" : `📍 *العنوان:* ${addrLine}\n`) +
         `🛵 *وقت التوصيل المتوقع:* ${etaLine}\n\n` +
         (instantItems.length > 0
           ? `🛒 *تفاصيل الطلب:*\n${instantItems.map(fmtInstantLine).join("\n")}\n\n`
