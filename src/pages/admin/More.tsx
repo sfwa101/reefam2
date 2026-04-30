@@ -38,7 +38,8 @@ export default function More() {
       { to: "/admin/reviews", icon: Star, label: "التقييمات", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
     ]},
     { title: "المالية", items: [
-      { to: "/admin/wallets", icon: Wallet, label: "المحافظ", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/wallets", icon: Wallet, label: "شحن المحافظ", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/cost-bulk", icon: Receipt, label: "تعبئة التكاليف", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/savings", icon: Receipt, label: "الادخار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/finance", icon: TrendingUp, label: "التقارير", color: "from-primary to-primary-glow" },
       { to: "/admin/analytics", icon: BarChart3, label: "التحليلات", color: "from-[hsl(var(--indigo))] to-[hsl(var(--purple))]" },
