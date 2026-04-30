@@ -89,9 +89,9 @@ export default function AdminWallets() {
         _note: note.trim() || null,
       } as never);
       if (error) throw error;
-      const result = data as { ok: boolean; new_balance: number };
-      toast.success(`تم شحن ${fmtMoney(Number(amount))} — الرصيد الجديد ${fmtMoney(result.new_balance)}`);
-      setBalance(result.new_balance);
+      toast.success(`تم تسجيل الطلب — قيد اعتماد الأدمن (Maker-Checker)`, {
+        description: `${fmtMoney(Number(amount))} • سيظهر في رصيد العميل بعد الاعتماد`,
+      });
       setAmount(""); setReference(""); setNote("");
       // Reload history
       const { data: h } = await supabase.from("wallet_topup_requests" as never)
@@ -264,7 +264,7 @@ export default function AdminWallets() {
               </button>
 
               <p className="text-[11px] text-foreground-tertiary text-center">
-                ستُسجَّل العملية باسمك ولن تكون قابلة للتعديل أو الحذف.
+                الطلب يبقى <b>معلّقاً</b> حتى يعتمده الأدمن من شاشة "موافقات الشحن".
               </p>
             </div>
 
@@ -288,10 +288,18 @@ export default function AdminWallets() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <p className="text-[13.5px] font-bold num">{fmtMoney(Number(t.amount))}</p>
-                            <p className="text-[11px] text-foreground-tertiary">
-                              {new Date(t.created_at).toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" })}
-                            </p>
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded-full font-bold",
+                              t.status === "completed" && "bg-success/10 text-success",
+                              t.status === "pending" && "bg-warning/10 text-warning",
+                              t.status === "rejected" && "bg-destructive/10 text-destructive",
+                            )}>
+                              {t.status === "completed" ? "معتمد" : t.status === "pending" ? "معلّق" : t.status === "rejected" ? "مرفوض" : t.status}
+                            </span>
                           </div>
+                          <p className="text-[11px] text-foreground-tertiary mt-0.5">
+                            {new Date(t.created_at).toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" })}
+                          </p>
                           <p className="text-[11.5px] text-foreground-secondary truncate num">
                             #{t.transfer_reference} • بواسطة {t.performed_by_name ?? "—"}
                           </p>

@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
+import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-approvals'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStoresRouteImport } from './routes/admin.stores'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
@@ -32,6 +33,7 @@ import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
+import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -110,6 +112,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AdminWalletsRoute = AdminWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTopupApprovalsRoute = AdminTopupApprovalsRouteImport.update({
+  id: '/topup-approvals',
+  path: '/topup-approvals',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSupportRoute = AdminSupportRouteImport.update({
@@ -195,6 +202,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
 const AdminCostBulkRoute = AdminCostBulkRouteImport.update({
   id: '/cost-bulk',
   path: '/cost-bulk',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCfoRoute = AdminCfoRouteImport.update({
+  id: '/cfo',
+  path: '/cfo',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
@@ -465,6 +477,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/cfo': typeof AdminCfoRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
@@ -482,6 +495,7 @@ export interface FileRoutesByFullPath {
   '/admin/staff': typeof AdminStaffRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
+  '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
@@ -536,6 +550,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/cfo': typeof AdminCfoRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
@@ -553,6 +568,7 @@ export interface FileRoutesByTo {
   '/admin/staff': typeof AdminStaffRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
+  '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -612,6 +628,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/cfo': typeof AdminCfoRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
@@ -629,6 +646,7 @@ export interface FileRoutesById {
   '/admin/staff': typeof AdminStaffRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
+  '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/_app/': typeof AppIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -689,6 +707,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/categories'
+    | '/admin/cfo'
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
@@ -706,6 +725,7 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/admin/stores'
     | '/admin/support'
+    | '/admin/topup-approvals'
     | '/admin/wallets'
     | '/admin/'
     | '/account/addresses'
@@ -760,6 +780,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/categories'
+    | '/admin/cfo'
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
@@ -777,6 +798,7 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/admin/stores'
     | '/admin/support'
+    | '/admin/topup-approvals'
     | '/admin/wallets'
     | '/'
     | '/admin'
@@ -835,6 +857,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/categories'
+    | '/admin/cfo'
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
@@ -852,6 +875,7 @@ export interface FileRouteTypes {
     | '/admin/staff'
     | '/admin/stores'
     | '/admin/support'
+    | '/admin/topup-approvals'
     | '/admin/wallets'
     | '/_app/'
     | '/admin/'
@@ -944,6 +968,13 @@ declare module '@tanstack/react-router' {
       path: '/wallets'
       fullPath: '/admin/wallets'
       preLoaderRoute: typeof AdminWalletsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/topup-approvals': {
+      id: '/admin/topup-approvals'
+      path: '/topup-approvals'
+      fullPath: '/admin/topup-approvals'
+      preLoaderRoute: typeof AdminTopupApprovalsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/support': {
@@ -1063,6 +1094,13 @@ declare module '@tanstack/react-router' {
       path: '/cost-bulk'
       fullPath: '/admin/cost-bulk'
       preLoaderRoute: typeof AdminCostBulkRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cfo': {
+      id: '/admin/cfo'
+      path: '/cfo'
+      fullPath: '/admin/cfo'
+      preLoaderRoute: typeof AdminCfoRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories': {
@@ -1543,6 +1581,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCfoRoute: typeof AdminCfoRoute
   AdminCostBulkRoute: typeof AdminCostBulkRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
@@ -1560,6 +1599,7 @@ interface AdminRouteChildren {
   AdminStaffRoute: typeof AdminStaffRoute
   AdminStoresRoute: typeof AdminStoresRoute
   AdminSupportRoute: typeof AdminSupportRoute
+  AdminTopupApprovalsRoute: typeof AdminTopupApprovalsRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminMarketingBannersRoute: typeof AdminMarketingBannersRoute
@@ -1575,6 +1615,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCfoRoute: AdminCfoRoute,
   AdminCostBulkRoute: AdminCostBulkRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
@@ -1592,6 +1633,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminStaffRoute: AdminStaffRoute,
   AdminStoresRoute: AdminStoresRoute,
   AdminSupportRoute: AdminSupportRoute,
+  AdminTopupApprovalsRoute: AdminTopupApprovalsRoute,
   AdminWalletsRoute: AdminWalletsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminMarketingBannersRoute: AdminMarketingBannersRoute,
