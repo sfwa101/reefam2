@@ -946,7 +946,7 @@ const Cart = () => {
       }
 
       // Auto-save change to savings jar (only if cash + user opted-in)
-      if (showChangeJar && saveChange && changeRemainder > 0) {
+      if (!isGuest && currentUser && showChangeJar && saveChange && changeRemainder > 0) {
         try {
           const { data: jarRow } = await supabase
             .from("savings_jar")
