@@ -4,7 +4,7 @@ import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { HakimSovereignCard } from "@/components/admin/HakimSovereignCard";
 import { BentoStats } from "@/components/admin/BentoStats";
 import { OrderSlideOver } from "@/components/admin/OrderSlideOver";
-import { ChevronLeft, Sparkles, Package, Users, Wallet, ShoppingBag, Truck } from "lucide-react";
+import { ChevronLeft, Package, Users, Wallet, ShoppingBag } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
