@@ -85,6 +85,7 @@ const Wholesale = () => {
       </div>
     }
   />
-);
+  );
+};
 
 export default Wholesale;
