@@ -29,6 +29,7 @@ import PromoCarousel from "@/components/PromoCarousel";
 import MiniStoreGrid from "@/components/MiniStoreGrid";
 import { buyAgainProducts } from "@/lib/buyAgain";
 import { useLocation } from "@/context/LocationContext";
+import { logBehavior, fetchCategoryAffinity } from "@/lib/behavior";
 
 import tileSupermarket from "@/assets/tile-supermarket.jpg";
 import tileKitchen from "@/assets/tile-kitchen.jpg";
