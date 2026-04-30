@@ -42,6 +42,7 @@ import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-un
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
 import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
@@ -274,6 +275,11 @@ const AdminPaymentsScheduleRoute = AdminPaymentsScheduleRouteImport.update({
 const AdminPartnersRoute = AdminPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOffersRoute = AdminOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMoreRoute = AdminMoreRouteImport.update({
@@ -660,6 +666,7 @@ export interface FileRoutesByFullPath {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/more': typeof AdminMoreRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
@@ -758,6 +765,7 @@ export interface FileRoutesByTo {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/more': typeof AdminMoreRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
@@ -863,6 +871,7 @@ export interface FileRoutesById {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/more': typeof AdminMoreRoute
+  '/admin/offers': typeof AdminOffersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
@@ -969,6 +978,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/more'
+    | '/admin/offers'
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/print-jobs'
@@ -1067,6 +1077,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/more'
+    | '/admin/offers'
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/print-jobs'
@@ -1171,6 +1182,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/more'
+    | '/admin/offers'
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/print-jobs'
@@ -1479,6 +1491,13 @@ declare module '@tanstack/react-router' {
       path: '/partners'
       fullPath: '/admin/partners'
       preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/offers': {
+      id: '/admin/offers'
+      path: '/offers'
+      fullPath: '/admin/offers'
+      preLoaderRoute: typeof AdminOffersRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/more': {
@@ -2111,6 +2130,7 @@ interface AdminRouteChildren {
   AdminKycRoute: typeof AdminKycRoute
   AdminLowStockRoute: typeof AdminLowStockRoute
   AdminMoreRoute: typeof AdminMoreRoute
+  AdminOffersRoute: typeof AdminOffersRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
@@ -2164,6 +2184,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminKycRoute: AdminKycRoute,
   AdminLowStockRoute: AdminLowStockRoute,
   AdminMoreRoute: AdminMoreRoute,
+  AdminOffersRoute: AdminOffersRoute,
   AdminPartnersRoute: AdminPartnersRoute,
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
