@@ -7,8 +7,8 @@ import { supermarketPool } from "@/lib/supermarketTaxonomy";
 import { useMemo } from "react";
 
 const Supermarket = () => {
-  const v = const _pv = useProductsVersion();
-  const pool = useMemo(() => supermarketPool(products), [v, _pv]);
+  const _pv = useProductsVersion();
+  const pool = useMemo(() => supermarketPool(products), [_pv]);
   return (
     <>
       <DualNavStore
