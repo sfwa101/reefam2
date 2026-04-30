@@ -41,6 +41,9 @@ import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
+import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
+import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
+import { Route as AdminDeliverySettingsRouteImport } from './routes/admin.delivery-settings'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
@@ -255,6 +258,21 @@ const AdminFinanceRoute = AdminFinanceRouteImport.update({
 const AdminExecutiveRoute = AdminExecutiveRouteImport.update({
   id: '/executive',
   path: '/executive',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDriversRoute = AdminDriversRouteImport.update({
+  id: '/drivers',
+  path: '/drivers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDriverSettlementsRoute = AdminDriverSettlementsRouteImport.update({
+  id: '/driver-settlements',
+  path: '/driver-settlements',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDeliverySettingsRoute = AdminDeliverySettingsRouteImport.update({
+  id: '/delivery-settings',
+  path: '/delivery-settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
@@ -563,6 +581,9 @@ export interface FileRoutesByFullPath {
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
+  '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
+  '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
@@ -647,6 +668,9 @@ export interface FileRoutesByTo {
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
+  '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
+  '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
@@ -738,6 +762,9 @@ export interface FileRoutesById {
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
+  '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
+  '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
+  '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/inventory': typeof AdminInventoryRoute
@@ -830,6 +857,9 @@ export interface FileRouteTypes {
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
+    | '/admin/delivery-settings'
+    | '/admin/driver-settlements'
+    | '/admin/drivers'
     | '/admin/executive'
     | '/admin/finance'
     | '/admin/inventory'
@@ -914,6 +944,9 @@ export interface FileRouteTypes {
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
+    | '/admin/delivery-settings'
+    | '/admin/driver-settlements'
+    | '/admin/drivers'
     | '/admin/executive'
     | '/admin/finance'
     | '/admin/inventory'
@@ -1004,6 +1037,9 @@ export interface FileRouteTypes {
     | '/admin/cost-bulk'
     | '/admin/customers'
     | '/admin/delivery'
+    | '/admin/delivery-settings'
+    | '/admin/driver-settlements'
+    | '/admin/drivers'
     | '/admin/executive'
     | '/admin/finance'
     | '/admin/inventory'
@@ -1304,6 +1340,27 @@ declare module '@tanstack/react-router' {
       path: '/executive'
       fullPath: '/admin/executive'
       preLoaderRoute: typeof AdminExecutiveRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/drivers': {
+      id: '/admin/drivers'
+      path: '/drivers'
+      fullPath: '/admin/drivers'
+      preLoaderRoute: typeof AdminDriversRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/driver-settlements': {
+      id: '/admin/driver-settlements'
+      path: '/driver-settlements'
+      fullPath: '/admin/driver-settlements'
+      preLoaderRoute: typeof AdminDriverSettlementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/delivery-settings': {
+      id: '/admin/delivery-settings'
+      path: '/delivery-settings'
+      fullPath: '/admin/delivery-settings'
+      preLoaderRoute: typeof AdminDeliverySettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/delivery': {
@@ -1832,6 +1889,9 @@ interface AdminRouteChildren {
   AdminCostBulkRoute: typeof AdminCostBulkRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
+  AdminDeliverySettingsRoute: typeof AdminDeliverySettingsRoute
+  AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
+  AdminDriversRoute: typeof AdminDriversRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
@@ -1871,6 +1931,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCostBulkRoute: AdminCostBulkRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
+  AdminDeliverySettingsRoute: AdminDeliverySettingsRoute,
+  AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
+  AdminDriversRoute: AdminDriversRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminInventoryRoute: AdminInventoryRoute,
