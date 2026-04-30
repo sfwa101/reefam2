@@ -46,6 +46,7 @@ import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.paymen
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
+import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
@@ -300,6 +301,11 @@ const AdminMoreRoute = AdminMoreRouteImport.update({
   path: '/more',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminLowStockRoute = AdminLowStockRouteImport.update({
   id: '/low-stock',
   path: '/low-stock',
@@ -466,25 +472,25 @@ const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMarketingReferralsRoute = AdminMarketingReferralsRouteImport.update({
-  id: '/marketing/referrals',
-  path: '/marketing/referrals',
-  getParentRoute: () => AdminRoute,
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => AdminMarketingRoute,
 } as any)
 const AdminMarketingPromosRoute = AdminMarketingPromosRouteImport.update({
-  id: '/marketing/promos',
-  path: '/marketing/promos',
-  getParentRoute: () => AdminRoute,
+  id: '/promos',
+  path: '/promos',
+  getParentRoute: () => AdminMarketingRoute,
 } as any)
 const AdminMarketingNotificationsRoute =
   AdminMarketingNotificationsRouteImport.update({
-    id: '/marketing/notifications',
-    path: '/marketing/notifications',
-    getParentRoute: () => AdminRoute,
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AdminMarketingRoute,
   } as any)
 const AdminMarketingBannersRoute = AdminMarketingBannersRouteImport.update({
-  id: '/marketing/banners',
-  path: '/marketing/banners',
-  getParentRoute: () => AdminRoute,
+  id: '/banners',
+  path: '/banners',
+  getParentRoute: () => AdminMarketingRoute,
 } as any)
 const AdminDeliveryZonesRoute = AdminDeliveryZonesRouteImport.update({
   id: '/zones',
@@ -686,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
+  '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -788,6 +795,7 @@ export interface FileRoutesByTo {
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
+  '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -897,6 +905,7 @@ export interface FileRoutesById {
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
+  '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/partners': typeof AdminPartnersRoute
@@ -1007,6 +1016,7 @@ export interface FileRouteTypes {
     | '/admin/inventory'
     | '/admin/kyc'
     | '/admin/low-stock'
+    | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
     | '/admin/partners'
@@ -1109,6 +1119,7 @@ export interface FileRouteTypes {
     | '/admin/inventory'
     | '/admin/kyc'
     | '/admin/low-stock'
+    | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
     | '/admin/partners'
@@ -1217,6 +1228,7 @@ export interface FileRouteTypes {
     | '/admin/inventory'
     | '/admin/kyc'
     | '/admin/low-stock'
+    | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
     | '/admin/partners'
@@ -1559,6 +1571,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMoreRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/low-stock': {
       id: '/admin/low-stock'
       path: '/low-stock'
@@ -1792,31 +1811,31 @@ declare module '@tanstack/react-router' {
     }
     '/admin/marketing/referrals': {
       id: '/admin/marketing/referrals'
-      path: '/marketing/referrals'
+      path: '/referrals'
       fullPath: '/admin/marketing/referrals'
       preLoaderRoute: typeof AdminMarketingReferralsRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminMarketingRoute
     }
     '/admin/marketing/promos': {
       id: '/admin/marketing/promos'
-      path: '/marketing/promos'
+      path: '/promos'
       fullPath: '/admin/marketing/promos'
       preLoaderRoute: typeof AdminMarketingPromosRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminMarketingRoute
     }
     '/admin/marketing/notifications': {
       id: '/admin/marketing/notifications'
-      path: '/marketing/notifications'
+      path: '/notifications'
       fullPath: '/admin/marketing/notifications'
       preLoaderRoute: typeof AdminMarketingNotificationsRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminMarketingRoute
     }
     '/admin/marketing/banners': {
       id: '/admin/marketing/banners'
-      path: '/marketing/banners'
+      path: '/banners'
       fullPath: '/admin/marketing/banners'
       preLoaderRoute: typeof AdminMarketingBannersRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminMarketingRoute
     }
     '/admin/delivery/zones': {
       id: '/admin/delivery/zones'
@@ -2165,6 +2184,24 @@ const AdminDeliveryRouteWithChildren = AdminDeliveryRoute._addFileChildren(
   AdminDeliveryRouteChildren,
 )
 
+interface AdminMarketingRouteChildren {
+  AdminMarketingBannersRoute: typeof AdminMarketingBannersRoute
+  AdminMarketingNotificationsRoute: typeof AdminMarketingNotificationsRoute
+  AdminMarketingPromosRoute: typeof AdminMarketingPromosRoute
+  AdminMarketingReferralsRoute: typeof AdminMarketingReferralsRoute
+}
+
+const AdminMarketingRouteChildren: AdminMarketingRouteChildren = {
+  AdminMarketingBannersRoute: AdminMarketingBannersRoute,
+  AdminMarketingNotificationsRoute: AdminMarketingNotificationsRoute,
+  AdminMarketingPromosRoute: AdminMarketingPromosRoute,
+  AdminMarketingReferralsRoute: AdminMarketingReferralsRoute,
+}
+
+const AdminMarketingRouteWithChildren = AdminMarketingRoute._addFileChildren(
+  AdminMarketingRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAdvanceApprovalsRoute: typeof AdminAdvanceApprovalsRoute
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
@@ -2189,6 +2226,7 @@ interface AdminRouteChildren {
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminKycRoute: typeof AdminKycRoute
   AdminLowStockRoute: typeof AdminLowStockRoute
+  AdminMarketingRoute: typeof AdminMarketingRouteWithChildren
   AdminMoreRoute: typeof AdminMoreRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
@@ -2212,10 +2250,6 @@ interface AdminRouteChildren {
   AdminWarehousesRoute: typeof AdminWarehousesRoute
   AdminZakatRoute: typeof AdminZakatRoute
   AdminIndexRoute: typeof AdminIndexRoute
-  AdminMarketingBannersRoute: typeof AdminMarketingBannersRoute
-  AdminMarketingNotificationsRoute: typeof AdminMarketingNotificationsRoute
-  AdminMarketingPromosRoute: typeof AdminMarketingPromosRoute
-  AdminMarketingReferralsRoute: typeof AdminMarketingReferralsRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
 }
@@ -2244,6 +2278,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInventoryRoute: AdminInventoryRoute,
   AdminKycRoute: AdminKycRoute,
   AdminLowStockRoute: AdminLowStockRoute,
+  AdminMarketingRoute: AdminMarketingRouteWithChildren,
   AdminMoreRoute: AdminMoreRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminPartnersRoute: AdminPartnersRoute,
@@ -2267,10 +2302,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminWarehousesRoute: AdminWarehousesRoute,
   AdminZakatRoute: AdminZakatRoute,
   AdminIndexRoute: AdminIndexRoute,
-  AdminMarketingBannersRoute: AdminMarketingBannersRoute,
-  AdminMarketingNotificationsRoute: AdminMarketingNotificationsRoute,
-  AdminMarketingPromosRoute: AdminMarketingPromosRoute,
-  AdminMarketingReferralsRoute: AdminMarketingReferralsRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
 }
