@@ -9,15 +9,21 @@ import { useBanners } from "@/hooks/useMarketing";
 export default function LiveBanners({ placement = "hero" }: { placement?: string }) {
   const { data: banners } = useBanners(placement);
   const [idx, setIdx] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const list = banners ?? [];
 
   useEffect(() => {
-    if (list.length <= 1) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || list.length <= 1) return;
     const t = setInterval(() => setIdx((i) => (i + 1) % list.length), 5000);
     return () => clearInterval(t);
-  }, [list.length]);
+  }, [mounted, list.length]);
 
-  if (list.length === 0) return null;
+  // SSR-safe: render nothing until client hydration completes.
+  if (!mounted || list.length === 0) return null;
 
   return (
     <section className="-mx-4 px-4 animate-float-up">
