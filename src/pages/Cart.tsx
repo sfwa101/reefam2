@@ -824,6 +824,10 @@ const Cart = () => {
       navigate({ to: "/auth" });
       return;
     }
+    if (minOrderTotal > 0 && grand < minOrderTotal) {
+      toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
+      return;
+    }
     setSubmitting(true);
     // Small UX pause so the loading state is perceptible before opening WA
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
