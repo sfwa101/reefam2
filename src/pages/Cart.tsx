@@ -454,6 +454,10 @@ const Cart = () => {
   const [saveChange, setSaveChange] = useState<boolean>(true);
   const [customerName, setCustomerName] = useState<string>("");
   const [minOrderTotal, setMinOrderTotal] = useState<number>(0);
+  // Guest checkout fields (used when there is no logged-in user)
+  const [guestName, setGuestName] = useState<string>("");
+  const [guestPhone, setGuestPhone] = useState<string>("");
+  const [guestAddress, setGuestAddress] = useState<string>("");
 
   // Fetch finance settings (min order total) once on mount
   useEffect(() => {
