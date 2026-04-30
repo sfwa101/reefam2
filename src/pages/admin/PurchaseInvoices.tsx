@@ -8,7 +8,8 @@ import { toast } from "sonner";
 
 type Supplier = { id: string; name: string };
 type Product = { id: string; name: string; cost_price: number | null };
-type Item = { product_id: string; product_name: string; quantity: number; unit_cost: number };
+type ProductUnit = { id: string; product_id: string; unit_code: string; conversion_factor: number; is_default_buy: boolean };
+type Item = { product_id: string; product_name: string; quantity: number; unit_cost: number; unit_code?: string; conversion_factor?: number; base_quantity?: number };
 type Invoice = {
   id: string; invoice_number: string | null; invoice_date: string; due_date: string | null;
   total: number; paid_amount: number; remaining: number; status: string; supplier_id: string;
