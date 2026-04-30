@@ -14,8 +14,10 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AdminWarehousesRouteImport } from './routes/admin.warehouses'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
+import { Route as AdminVendorSettlementsRouteImport } from './routes/admin.vendor-settlements'
 import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-approvals'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStoresRouteImport } from './routes/admin.stores'
@@ -110,6 +112,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AdminWarehousesRoute = AdminWarehousesRouteImport.update({
+  id: '/warehouses',
+  path: '/warehouses',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminWalletsRoute = AdminWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
@@ -118,6 +125,11 @@ const AdminWalletsRoute = AdminWalletsRouteImport.update({
 const AdminVendorsRoute = AdminVendorsRouteImport.update({
   id: '/vendors',
   path: '/vendors',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVendorSettlementsRoute = AdminVendorSettlementsRouteImport.update({
+  id: '/vendor-settlements',
+  path: '/vendor-settlements',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTopupApprovalsRoute = AdminTopupApprovalsRouteImport.update({
@@ -502,8 +514,10 @@ export interface FileRoutesByFullPath {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
   '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
+  '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
@@ -576,8 +590,10 @@ export interface FileRoutesByTo {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
   '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
+  '/admin/warehouses': typeof AdminWarehousesRoute
   '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
@@ -655,8 +671,10 @@ export interface FileRoutesById {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
   '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
+  '/admin/warehouses': typeof AdminWarehousesRoute
   '/_app/': typeof AppIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/_app/account/addresses': typeof AppAccountAddressesRoute
@@ -735,8 +753,10 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/support'
     | '/admin/topup-approvals'
+    | '/admin/vendor-settlements'
     | '/admin/vendors'
     | '/admin/wallets'
+    | '/admin/warehouses'
     | '/admin/'
     | '/account/addresses'
     | '/account/favorites'
@@ -809,8 +829,10 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/support'
     | '/admin/topup-approvals'
+    | '/admin/vendor-settlements'
     | '/admin/vendors'
     | '/admin/wallets'
+    | '/admin/warehouses'
     | '/'
     | '/admin'
     | '/account/addresses'
@@ -887,8 +909,10 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/support'
     | '/admin/topup-approvals'
+    | '/admin/vendor-settlements'
     | '/admin/vendors'
     | '/admin/wallets'
+    | '/admin/warehouses'
     | '/_app/'
     | '/admin/'
     | '/_app/account/addresses'
@@ -975,6 +999,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/admin/warehouses': {
+      id: '/admin/warehouses'
+      path: '/warehouses'
+      fullPath: '/admin/warehouses'
+      preLoaderRoute: typeof AdminWarehousesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/wallets': {
       id: '/admin/wallets'
       path: '/wallets'
@@ -987,6 +1018,13 @@ declare module '@tanstack/react-router' {
       path: '/vendors'
       fullPath: '/admin/vendors'
       preLoaderRoute: typeof AdminVendorsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/vendor-settlements': {
+      id: '/admin/vendor-settlements'
+      path: '/vendor-settlements'
+      fullPath: '/admin/vendor-settlements'
+      preLoaderRoute: typeof AdminVendorSettlementsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/topup-approvals': {
@@ -1619,8 +1657,10 @@ interface AdminRouteChildren {
   AdminStoresRoute: typeof AdminStoresRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminTopupApprovalsRoute: typeof AdminTopupApprovalsRoute
+  AdminVendorSettlementsRoute: typeof AdminVendorSettlementsRoute
   AdminVendorsRoute: typeof AdminVendorsRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
+  AdminWarehousesRoute: typeof AdminWarehousesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminMarketingBannersRoute: typeof AdminMarketingBannersRoute
   AdminMarketingNotificationsRoute: typeof AdminMarketingNotificationsRoute
@@ -1654,8 +1694,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminStoresRoute: AdminStoresRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminTopupApprovalsRoute: AdminTopupApprovalsRoute,
+  AdminVendorSettlementsRoute: AdminVendorSettlementsRoute,
   AdminVendorsRoute: AdminVendorsRoute,
   AdminWalletsRoute: AdminWalletsRoute,
+  AdminWarehousesRoute: AdminWarehousesRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminMarketingBannersRoute: AdminMarketingBannersRoute,
   AdminMarketingNotificationsRoute: AdminMarketingNotificationsRoute,
