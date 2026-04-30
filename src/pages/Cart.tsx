@@ -919,7 +919,7 @@ const Cart = () => {
       }
 
       /* ============ Wallet debit (when paying via wallet, including BNPL) ============ */
-      if (isWalletPay && walletApplied > 0) {
+      if (!isGuest && currentUser && isWalletPay && walletApplied > 0) {
         try {
           const { data: bal } = await supabase
             .from("wallet_balances")
