@@ -58,6 +58,11 @@ const ProductDetail = () => {
 
   useEffect(() => {
     if (!product) return;
+    void logBehavior({ event: "view_product", productId: product.id, category: product.category });
+  }, [product?.id]);
+
+  useEffect(() => {
+    if (!product) return;
     let cancelled = false;
     (async () => {
       const [{ count }, { data: units }] = await Promise.all([
