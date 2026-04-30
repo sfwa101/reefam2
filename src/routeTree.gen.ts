@@ -46,6 +46,7 @@ import { Route as AdminMoreRouteImport } from './routes/admin.more'
 import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
+import { Route as AdminHakimChatRouteImport } from './routes/admin.hakim-chat'
 import { Route as AdminHakimRouteImport } from './routes/admin.hakim'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
@@ -293,6 +294,11 @@ const AdminKycRoute = AdminKycRouteImport.update({
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHakimChatRoute = AdminHakimChatRouteImport.update({
+  id: '/hakim-chat',
+  path: '/hakim-chat',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminHakimRoute = AdminHakimRouteImport.update({
@@ -649,6 +655,7 @@ export interface FileRoutesByFullPath {
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/hakim': typeof AdminHakimRoute
+  '/admin/hakim-chat': typeof AdminHakimChatRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
@@ -746,6 +753,7 @@ export interface FileRoutesByTo {
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/hakim': typeof AdminHakimRoute
+  '/admin/hakim-chat': typeof AdminHakimChatRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
@@ -850,6 +858,7 @@ export interface FileRoutesById {
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/hakim': typeof AdminHakimRoute
+  '/admin/hakim-chat': typeof AdminHakimChatRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
@@ -955,6 +964,7 @@ export interface FileRouteTypes {
     | '/admin/expenses'
     | '/admin/finance'
     | '/admin/hakim'
+    | '/admin/hakim-chat'
     | '/admin/inventory'
     | '/admin/kyc'
     | '/admin/low-stock'
@@ -1052,6 +1062,7 @@ export interface FileRouteTypes {
     | '/admin/expenses'
     | '/admin/finance'
     | '/admin/hakim'
+    | '/admin/hakim-chat'
     | '/admin/inventory'
     | '/admin/kyc'
     | '/admin/low-stock'
@@ -1155,6 +1166,7 @@ export interface FileRouteTypes {
     | '/admin/expenses'
     | '/admin/finance'
     | '/admin/hakim'
+    | '/admin/hakim-chat'
     | '/admin/inventory'
     | '/admin/kyc'
     | '/admin/low-stock'
@@ -1495,6 +1507,13 @@ declare module '@tanstack/react-router' {
       path: '/inventory'
       fullPath: '/admin/inventory'
       preLoaderRoute: typeof AdminInventoryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hakim-chat': {
+      id: '/admin/hakim-chat'
+      path: '/hakim-chat'
+      fullPath: '/admin/hakim-chat'
+      preLoaderRoute: typeof AdminHakimChatRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/hakim': {
@@ -2087,6 +2106,7 @@ interface AdminRouteChildren {
   AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminHakimRoute: typeof AdminHakimRoute
+  AdminHakimChatRoute: typeof AdminHakimChatRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminKycRoute: typeof AdminKycRoute
   AdminLowStockRoute: typeof AdminLowStockRoute
@@ -2139,6 +2159,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminExpensesRoute: AdminExpensesRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminHakimRoute: AdminHakimRoute,
+  AdminHakimChatRoute: AdminHakimChatRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminKycRoute: AdminKycRoute,
   AdminLowStockRoute: AdminLowStockRoute,
@@ -2214,12 +2235,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
