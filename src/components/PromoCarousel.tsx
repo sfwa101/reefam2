@@ -137,8 +137,10 @@ const Slide = memo(function Slide({ s }: { s: Slide }) {
 
 const PromoCarousel = () => {
   const [i, setI] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const t = setInterval(() => setI((x) => (x + 1) % SLIDES.length), 4800);
     return () => clearInterval(t);
   }, []);
