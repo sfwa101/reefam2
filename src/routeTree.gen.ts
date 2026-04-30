@@ -22,6 +22,7 @@ import { Route as VendorWalletRouteImport } from './routes/vendor.wallet'
 import { Route as VendorProductsRouteImport } from './routes/vendor.products'
 import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
 import { Route as DriverMapRouteImport } from './routes/driver.map'
+import { Route as AdminZakatRouteImport } from './routes/admin.zakat'
 import { Route as AdminWarehousesRouteImport } from './routes/admin.warehouses'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
@@ -33,9 +34,11 @@ import { Route as AdminStoresRouteImport } from './routes/admin.stores'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
+import { Route as AdminRibaAuditRouteImport } from './routes/admin.riba-audit'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminPurchasesRouteImport } from './routes/admin.purchases'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
+import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-units'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
@@ -172,6 +175,11 @@ const DriverMapRoute = DriverMapRouteImport.update({
   path: '/map',
   getParentRoute: () => DriverRoute,
 } as any)
+const AdminZakatRoute = AdminZakatRouteImport.update({
+  id: '/zakat',
+  path: '/zakat',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminWarehousesRoute = AdminWarehousesRouteImport.update({
   id: '/warehouses',
   path: '/warehouses',
@@ -227,6 +235,11 @@ const AdminSavingsRoute = AdminSavingsRouteImport.update({
   path: '/savings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRibaAuditRoute = AdminRibaAuditRouteImport.update({
+  id: '/riba-audit',
+  path: '/riba-audit',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReviewsRoute = AdminReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -240,6 +253,11 @@ const AdminPurchasesRoute = AdminPurchasesRouteImport.update({
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
   path: '/products',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductUnitsRoute = AdminProductUnitsRouteImport.update({
+  id: '/product-units',
+  path: '/product-units',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPrintJobsRoute = AdminPrintJobsRouteImport.update({
@@ -638,9 +656,11 @@ export interface FileRoutesByFullPath {
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
+  '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/riba-audit': typeof AdminRibaAuditRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -652,6 +672,7 @@ export interface FileRoutesByFullPath {
   '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/warehouses': typeof AdminWarehousesRoute
+  '/admin/zakat': typeof AdminZakatRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -732,9 +753,11 @@ export interface FileRoutesByTo {
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
+  '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/riba-audit': typeof AdminRibaAuditRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -746,6 +769,7 @@ export interface FileRoutesByTo {
   '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/warehouses': typeof AdminWarehousesRoute
+  '/admin/zakat': typeof AdminZakatRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -833,9 +857,11 @@ export interface FileRoutesById {
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
+  '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/riba-audit': typeof AdminRibaAuditRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -847,6 +873,7 @@ export interface FileRoutesById {
   '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/warehouses': typeof AdminWarehousesRoute
+  '/admin/zakat': typeof AdminZakatRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -935,9 +962,11 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/print-jobs'
+    | '/admin/product-units'
     | '/admin/products'
     | '/admin/purchases'
     | '/admin/reviews'
+    | '/admin/riba-audit'
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
@@ -949,6 +978,7 @@ export interface FileRouteTypes {
     | '/admin/vendors'
     | '/admin/wallets'
     | '/admin/warehouses'
+    | '/admin/zakat'
     | '/driver/map'
     | '/driver/wallet'
     | '/vendor/products'
@@ -1029,9 +1059,11 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/print-jobs'
+    | '/admin/product-units'
     | '/admin/products'
     | '/admin/purchases'
     | '/admin/reviews'
+    | '/admin/riba-audit'
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
@@ -1043,6 +1075,7 @@ export interface FileRouteTypes {
     | '/admin/vendors'
     | '/admin/wallets'
     | '/admin/warehouses'
+    | '/admin/zakat'
     | '/driver/map'
     | '/driver/wallet'
     | '/vendor/products'
@@ -1129,9 +1162,11 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/print-jobs'
+    | '/admin/product-units'
     | '/admin/products'
     | '/admin/purchases'
     | '/admin/reviews'
+    | '/admin/riba-audit'
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
@@ -1143,6 +1178,7 @@ export interface FileRouteTypes {
     | '/admin/vendors'
     | '/admin/wallets'
     | '/admin/warehouses'
+    | '/admin/zakat'
     | '/driver/map'
     | '/driver/wallet'
     | '/vendor/products'
@@ -1293,6 +1329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DriverMapRouteImport
       parentRoute: typeof DriverRoute
     }
+    '/admin/zakat': {
+      id: '/admin/zakat'
+      path: '/zakat'
+      fullPath: '/admin/zakat'
+      preLoaderRoute: typeof AdminZakatRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/warehouses': {
       id: '/admin/warehouses'
       path: '/warehouses'
@@ -1370,6 +1413,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSavingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/riba-audit': {
+      id: '/admin/riba-audit'
+      path: '/riba-audit'
+      fullPath: '/admin/riba-audit'
+      preLoaderRoute: typeof AdminRibaAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/reviews': {
       id: '/admin/reviews'
       path: '/reviews'
@@ -1389,6 +1439,13 @@ declare module '@tanstack/react-router' {
       path: '/products'
       fullPath: '/admin/products'
       preLoaderRoute: typeof AdminProductsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/product-units': {
+      id: '/admin/product-units'
+      path: '/product-units'
+      fullPath: '/admin/product-units'
+      preLoaderRoute: typeof AdminProductUnitsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/print-jobs': {
@@ -2037,9 +2094,11 @@ interface AdminRouteChildren {
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
+  AdminProductUnitsRoute: typeof AdminProductUnitsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminPurchasesRoute: typeof AdminPurchasesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminRibaAuditRoute: typeof AdminRibaAuditRoute
   AdminSavingsRoute: typeof AdminSavingsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
@@ -2051,6 +2110,7 @@ interface AdminRouteChildren {
   AdminVendorsRoute: typeof AdminVendorsRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
   AdminWarehousesRoute: typeof AdminWarehousesRoute
+  AdminZakatRoute: typeof AdminZakatRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminMarketingBannersRoute: typeof AdminMarketingBannersRoute
   AdminMarketingNotificationsRoute: typeof AdminMarketingNotificationsRoute
@@ -2086,9 +2146,11 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPartnersRoute: AdminPartnersRoute,
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
+  AdminProductUnitsRoute: AdminProductUnitsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminPurchasesRoute: AdminPurchasesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
+  AdminRibaAuditRoute: AdminRibaAuditRoute,
   AdminSavingsRoute: AdminSavingsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
@@ -2100,6 +2162,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminVendorsRoute: AdminVendorsRoute,
   AdminWalletsRoute: AdminWalletsRoute,
   AdminWarehousesRoute: AdminWarehousesRoute,
+  AdminZakatRoute: AdminZakatRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminMarketingBannersRoute: AdminMarketingBannersRoute,
   AdminMarketingNotificationsRoute: AdminMarketingNotificationsRoute,
