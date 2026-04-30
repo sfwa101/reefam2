@@ -317,6 +317,11 @@ const HomePage = () => {
       {/* Hero Slider — pure CSS mesh gradients, zero images */}
       <PromoCarousel />
 
+      <InactivityNudger />
+      <MegaEventBanner />
+      <LoyaltyProgress />
+      <FlashSalesRail />
+
       {/* BUY IT AGAIN — only when we have history */}
       {mounted && buyAgain.length > 0 && (
         <section style={{ contentVisibility: "auto", containIntrinsicSize: "1px 320px" }}>
