@@ -23,6 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import SmartBanners from "@/components/SmartBanners";
+import LiveBanners from "@/components/LiveBanners";
 import TypewriterPlaceholder from "@/components/TypewriterPlaceholder";
 import ReefStories from "@/components/ReefStories";
 import PromoCarousel from "@/components/PromoCarousel";
@@ -313,6 +314,9 @@ const HomePage = () => {
 
       {/* Smart contextual banners (wallet / referral) */}
       <SmartBanners walletBalance={walletBalance} hasReferralCode={hasReferralCode} />
+
+      {/* Live admin-managed banners (TanStack Query, 60s cache) */}
+      <LiveBanners placement="hero" />
 
       {/* Hero Slider — pure CSS mesh gradients, zero images */}
       <PromoCarousel />
