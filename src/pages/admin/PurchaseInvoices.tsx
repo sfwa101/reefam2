@@ -21,6 +21,7 @@ export default function PurchaseInvoices() {
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productUnits, setProductUnits] = useState<ProductUnit[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -29,7 +30,7 @@ export default function PurchaseInvoices() {
     due_date: "", paid_amount: "0", tax: "0", notes: "",
   });
   const [items, setItems] = useState<Item[]>([]);
-  const [newItem, setNewItem] = useState({ product_id: "", product_name: "", quantity: "1", unit_cost: "0" });
+  const [newItem, setNewItem] = useState({ product_id: "", product_name: "", quantity: "1", unit_cost: "0", unit_code: "" });
 
   const load = async () => {
     setLoading(true);
