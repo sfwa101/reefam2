@@ -12,7 +12,7 @@ const cats: StoreCategory[] = [
 ];
 
 const Dairy = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const theme = storeThemes.dairy;
   return (
     <SinglePageStore

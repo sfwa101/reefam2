@@ -441,7 +441,7 @@ const SchoolLibrary = () => {
   const products = useMemo(libraryProducts, []);
 
   const onBorrowClick = (p: Product) => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
     if (!user) { toast.error("سجل الدخول أولاً"); return; }
     if (!isVerified) { setKycOpen(true); return; }
     setBorrowProduct(p);

@@ -13,6 +13,7 @@ import RestaurantItemSheet from "@/components/restaurants/RestaurantItemSheet";
 const RestaurantDetail = () => {
   const { id } = useParams({ from: "/_app/restaurant/$id" });
   const navigate = useNavigate();
+  const _pv = useProductsVersion();
   const r = getRestaurant(id);
   const tabsRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -28,7 +29,7 @@ const RestaurantDetail = () => {
         .map((pid) => ALL_PRODUCTS.find((p) => p.id === pid))
         .filter((p): p is Product => !!p),
     }));
-  }, [r]);
+  }, [r, _pv]);
 
   // Scroll-spy: highlight the tab whose section is in view
   useEffect(() => {
@@ -65,7 +66,6 @@ const RestaurantDetail = () => {
   const accent = `hsl(${r.brandHue})`;
 
   const scrollToCat = (catId: string) => {
-  useProductsVersion();
     const el = sectionRefs.current[catId];
     if (el) {
       const tabsH = tabsRef.current?.offsetHeight ?? 0;

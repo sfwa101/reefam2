@@ -6,7 +6,7 @@ import { Heart } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const Favorites = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const { favs } = useFavorites();
   const items = products.filter((p) => favs.includes(p.id));
 

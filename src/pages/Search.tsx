@@ -16,7 +16,7 @@ const SORTS: { id: SortId; label: string }[] = [
 ];
 
 const SearchPage = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const { q } = useSearch({ from: "/_app/search" });
   const navigate = useNavigate();
   const [sort, setSort] = useState<SortId>("relevance");
@@ -38,7 +38,7 @@ const SearchPage = () => {
         (p.subCategory ?? "").toLowerCase().includes(term) ||
         (p.brand ?? "").toLowerCase().includes(term),
     );
-  }, [q]);
+  }, [q, _pv]);
 
   const priceCeiling = useMemo(
     () => (matches.length ? Math.max(...matches.map((p) => p.price)) : 0),
@@ -82,7 +82,7 @@ const SearchPage = () => {
       map.set(p.category, arr);
     }
     return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
-  }, [filtered]);
+  }, [filtered, _pv]);
 
   const total = filtered.length;
   const filtersActive =

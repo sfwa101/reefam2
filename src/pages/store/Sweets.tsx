@@ -12,7 +12,7 @@ const cats: StoreCategory[] = [
 ];
 
 const Sweets = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const theme = storeThemes.sweets;
   return (
     <SinglePageStore

@@ -76,7 +76,7 @@ const SUBS: Record<string, SubDef> = {
 };
 
 const SubCategory = () => {
-  useProductsVersion();
+  const _pv = useProductsVersion();
   const { slug } = useParams({ from: "/_app/sub/$slug" });
   const def = SUBS[slug];
 
