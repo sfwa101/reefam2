@@ -59,14 +59,25 @@ const ProductDetail = () => {
     if (!product) return;
     let cancelled = false;
     (async () => {
-      const { count } = await supabase
-        .from("reviews")
-        .select("id", { count: "exact", head: true })
-        .eq("product_id", product.id);
-      if (!cancelled) setReviewCount(count ?? 0);
+      const [{ count }, { data: units }] = await Promise.all([
+        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("product_id", product.id),
+        (supabase as any).from("product_units").select("id,unit_code,conversion_factor,selling_price,is_default_sell").eq("product_id", product.id).eq("is_active", true).order("conversion_factor", { ascending: true }),
+      ]);
+      if (cancelled) return;
+      setReviewCount(count ?? 0);
+      const list = (units || []) as PUnit[];
+      setProductUnits(list);
+      if (list.length > 0) {
+        const def = list.find((u) => u.is_default_sell) || list[0];
+        setUnitId(def.id);
+      } else {
+        setUnitId(null);
+      }
     })();
     return () => { cancelled = true; };
   }, [product?.id]);
+
+  const selectedUnit = productUnits.find((u) => u.id === unitId);
 
   const variant = product?.variants?.find((v) => v.id === variantId);
   const addonsTotal = useMemo(
