@@ -170,7 +170,17 @@ const DualNavStore = ({
               }}
             >
               <div ref={mainBarRef} className="-mx-3 flex gap-1.5 overflow-x-auto px-3 no-scrollbar">
-                {supermarketTaxonomy.map((g) => {
+                {(() => {
+                  const seen = new Set<string>();
+                  const allGroups = [
+                    ...supermarketTaxonomy,
+                    ...grouped.map((x) => x.group),
+                  ].filter((g) => {
+                    if (seen.has(g.id)) return false;
+                    seen.add(g.id);
+                    return true;
+                  });
+                  return allGroups.map((g) => {
                   const isActive = g.id === activeGroup.id;
                   const enabled = grouped.some((x) => x.group.id === g.id);
                   return (
@@ -197,7 +207,8 @@ const DualNavStore = ({
                       <span>{g.name}</span>
                     </button>
                   );
-                })}
+                  });
+                })()}
               </div>
             </div>
 
