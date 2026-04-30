@@ -1161,7 +1161,7 @@ const Cart = () => {
         );
       }
 
-      const orderId = order.id;
+      const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
       clear();
       fireConfetti();
