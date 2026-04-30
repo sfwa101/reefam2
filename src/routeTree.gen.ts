@@ -15,6 +15,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
+import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-approvals'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminStoresRouteImport } from './routes/admin.stores'
@@ -112,6 +113,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AdminWalletsRoute = AdminWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVendorsRoute = AdminVendorsRouteImport.update({
+  id: '/vendors',
+  path: '/vendors',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTopupApprovalsRoute = AdminTopupApprovalsRouteImport.update({
@@ -496,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/': typeof AdminIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
@@ -569,6 +576,7 @@ export interface FileRoutesByTo {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
@@ -647,6 +655,7 @@ export interface FileRoutesById {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/support': typeof AdminSupportRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/_app/': typeof AppIndexRoute
   '/admin/': typeof AdminIndexRoute
@@ -726,6 +735,7 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/support'
     | '/admin/topup-approvals'
+    | '/admin/vendors'
     | '/admin/wallets'
     | '/admin/'
     | '/account/addresses'
@@ -799,6 +809,7 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/support'
     | '/admin/topup-approvals'
+    | '/admin/vendors'
     | '/admin/wallets'
     | '/'
     | '/admin'
@@ -876,6 +887,7 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/support'
     | '/admin/topup-approvals'
+    | '/admin/vendors'
     | '/admin/wallets'
     | '/_app/'
     | '/admin/'
@@ -968,6 +980,13 @@ declare module '@tanstack/react-router' {
       path: '/wallets'
       fullPath: '/admin/wallets'
       preLoaderRoute: typeof AdminWalletsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/vendors': {
+      id: '/admin/vendors'
+      path: '/vendors'
+      fullPath: '/admin/vendors'
+      preLoaderRoute: typeof AdminVendorsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/topup-approvals': {
@@ -1600,6 +1619,7 @@ interface AdminRouteChildren {
   AdminStoresRoute: typeof AdminStoresRoute
   AdminSupportRoute: typeof AdminSupportRoute
   AdminTopupApprovalsRoute: typeof AdminTopupApprovalsRoute
+  AdminVendorsRoute: typeof AdminVendorsRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminMarketingBannersRoute: typeof AdminMarketingBannersRoute
@@ -1634,6 +1654,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminStoresRoute: AdminStoresRoute,
   AdminSupportRoute: AdminSupportRoute,
   AdminTopupApprovalsRoute: AdminTopupApprovalsRoute,
+  AdminVendorsRoute: AdminVendorsRoute,
   AdminWalletsRoute: AdminWalletsRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminMarketingBannersRoute: AdminMarketingBannersRoute,
