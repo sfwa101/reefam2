@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Search, ChevronLeft, Inbox, type LucideIcon } from "lucide-react";
+import { Search, ChevronLeft, Inbox, Rows3, Rows2, type LucideIcon } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+type Density = "compact" | "comfortable";
+const DENSITY_ROW: Record<Density, string> = {
+  compact: "px-3 lg:px-4 py-1.5",
+  comfortable: "px-4 lg:px-5 py-3",
+};
 
 /**
  * UniversalAdminGrid — "Stem Cell" polymorphic component
@@ -134,10 +140,7 @@ export function UniversalAdminGrid<T = any>({
   const [rows, setRows] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
+  const [density, setDensity] = useState<Density>("comfortable");
       setLoading(true);
       try {
         let data: any[] = [];
