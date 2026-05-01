@@ -14,6 +14,7 @@ import {
 import SweetsProductSheet from "@/components/sweets/SweetsProductSheet";
 import ButcherSheet from "@/components/meat/ButcherSheet";
 import { isButcheryProduct } from "@/lib/butcheryPrep";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface ProductCardProps {
   product: Product;
@@ -113,11 +114,9 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
           className="relative block aspect-square w-full overflow-hidden bg-secondary/40 text-right"
           aria-label={product.name}
         >
-        <img
+        <OptimizedImage
           src={product.image}
           alt={product.name}
-          loading="lazy"
-          decoding="async"
           className="h-full w-full object-cover"
         />
         {badge && (
@@ -177,11 +176,9 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
           params={{ productId: product.id }}
           className="relative block aspect-square overflow-hidden bg-secondary/40"
         >
-          <img
+          <OptimizedImage
             src={product.image}
             alt={product.name}
-            loading="lazy"
-            decoding="async"
             className="h-full w-full object-cover"
           />
           {badge && (
