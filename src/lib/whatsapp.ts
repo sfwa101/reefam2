@@ -100,7 +100,12 @@ export type OpenResult =
  */
 export const openWhatsApp = (
   target: WaTarget,
-  opts?: { preOpened?: Window | null; preferLocation?: boolean; source?: string },
+  opts?: {
+    preOpened?: Window | null;
+    preferLocation?: boolean;
+    source?: string;
+    allowWindowOpen?: boolean;
+  },
 ): OpenResult => {
   const url = buildWaUrl(target);
   const text = target.text ?? "";
@@ -124,6 +129,11 @@ export const openWhatsApp = (
     } catch (e) {
       console.warn("[wa] location.href failed", { source, error: e });
     }
+  }
+
+  if (opts?.allowWindowOpen === false) {
+    console.warn("[wa] skipped direct window.open outside gesture", { source });
+    return { ok: false, url, text, reason: "popup_blocked" };
   }
 
   // 3) window.open (only safe when caller is still inside a user gesture).
