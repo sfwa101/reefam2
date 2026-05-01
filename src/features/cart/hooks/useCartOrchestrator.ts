@@ -860,6 +860,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       clear();
       fireConfetti();
       toast.success("تم إرسال طلبك إلى واتساب 🎉");
+      setSubmitting(false);
       submittingRef.current = false;
       navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
     } catch (err) {
