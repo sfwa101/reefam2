@@ -5,6 +5,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldAlert, Sparkles, Send, Calendar, Plus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import { HakimPulseMonitor } from "@/features/hakim/components/HakimPulseMonitor";
 
 type Msg = { role: "user" | "assistant"; content: string; id?: string };
 type Session = { id: string; title: string | null; updated_at: string };
@@ -153,6 +154,11 @@ export default function HakimChat() {
             <button onClick={newSession} className="lg:hidden ml-auto text-[11px] text-primary flex items-center gap-1">
               <Plus className="h-3 w-3" /> جديد
             </button>
+          </div>
+
+          {/* Phase 13 — Hakim Pulse Monitor (local-first heartbeat) */}
+          <div className="px-3 pt-3">
+            <HakimPulseMonitor />
           </div>
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-3">

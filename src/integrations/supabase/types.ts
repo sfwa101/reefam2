@@ -1669,6 +1669,57 @@ export type Database = {
           },
         ]
       }
+      hakim_anomalies: {
+        Row: {
+          created_at: string
+          description: string
+          fingerprint: string | null
+          id: string
+          occurrences: number
+          payload: Json
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          source: string | null
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          fingerprint?: string | null
+          id?: string
+          occurrences?: number
+          payload?: Json
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source?: string | null
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          fingerprint?: string | null
+          id?: string
+          occurrences?: number
+          payload?: Json
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       hakim_chat_messages: {
         Row: {
           content: string
@@ -4388,6 +4439,7 @@ export type Database = {
         Args: { _from?: string; _to?: string }
         Returns: Json
       }
+      hakim_pulse_stats: { Args: { _minutes?: number }; Returns: Json }
       has_permission: {
         Args: { _permission_key: string; _user_id: string }
         Returns: boolean
@@ -4481,6 +4533,17 @@ export type Database = {
         Returns: Json
       }
       release_order_reservation: { Args: { _order_id: string }; Returns: Json }
+      report_anomaly: {
+        Args: {
+          _description: string
+          _fingerprint?: string
+          _payload?: Json
+          _severity: string
+          _source?: string
+          _type: string
+        }
+        Returns: Json
+      }
       request_vendor_payout: {
         Args: {
           _amount: number
@@ -4490,6 +4553,7 @@ export type Database = {
         }
         Returns: Json
       }
+      resolve_anomaly: { Args: { _id: string }; Returns: Json }
       resolve_fulfillment: {
         Args: { _branch_id: string; _product_id: string; _zone?: string }
         Returns: Json

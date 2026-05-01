@@ -1,9 +1,12 @@
+import { useRef } from "react";
 import { Outlet, useLocation } from "@tanstack/react-router";
 import TopBar from "@/components/TopBar";
 import TabBar from "@/components/TabBar";
 import SectionsPanel from "@/components/desktop/SectionsPanel";
 import CartPanel from "@/components/desktop/CartPanel";
 import GlobalApprovalBanner from "@/components/GlobalApprovalBanner";
+import { useCartLines } from "@/context/CartContext";
+import { useHakimEdgeWorker } from "@/features/hakim/hooks/useHakimEdgeWorker";
 
 // Routes where the bottom TabBar should be HIDDEN to make room for a sticky CTA.
 const HIDE_TABBAR_ROUTES = [
@@ -19,6 +22,22 @@ const AppShell = () => {
   );
   // Hide desktop cart panel on the cart page itself (avoid duplicate cart UI).
   const hideCartPanel = pathname === "/cart" || pathname === "/auth";
+
+  // Hakim edge agent — local-first monitoring, zero external LLM calls.
+  const cartLines = useCartLines();
+  const cartUpdatedAtRef = useRef<number>(Date.now());
+  const cartSnapshotRef = useRef<string>("");
+  const sig = cartLines.map((l) => `${l.product.id}x${l.qty}`).join("|");
+  if (sig !== cartSnapshotRef.current) {
+    cartSnapshotRef.current = sig;
+    cartUpdatedAtRef.current = Date.now();
+  }
+  useHakimEdgeWorker({
+    getCart: () => ({
+      items: cartLines.map((l) => ({ id: l.product.id, quantity: l.qty })),
+      updatedAt: cartUpdatedAtRef.current,
+    }),
+  });
 
   return (
     <div className="relative min-h-screen [overflow-x:clip]">
