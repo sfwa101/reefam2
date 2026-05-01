@@ -417,7 +417,7 @@ export async function runMegaSeed(): Promise<{ inserted: number; total: number; 
   ];
   const errors: string[] = [];
   let inserted = 0;
-  const chunkSize = 80;
+  const chunkSize = 50;
   for (let i = 0; i < all.length; i += chunkSize) {
     const chunk = all.slice(i, i + chunkSize);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
