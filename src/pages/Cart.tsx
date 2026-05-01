@@ -2,11 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
-  Cake,
   Check,
   Clock,
   Gift,
-  PiggyBank,
   Plus,
   ShoppingBag,
   Sparkles,
