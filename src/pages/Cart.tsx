@@ -126,6 +126,19 @@ const Cart = () => {
 
       <CartAddressSelector user={o.user} addresses={o.addresses} addrId={o.addrId} setAddrId={o.setAddrId} guestNotes={o.guestNotes} setGuestNotes={o.setGuestNotes} />
 
+      {o.isSharedMode && o.sharedCart && (
+        <SharedCartManager
+          cart={o.sharedCart}
+          participants={o.sharedParticipants}
+          isOwner={o.sharedIsOwner}
+          subtotal={o.subtotal}
+          onRequestApprovals={o.sharedRequestApprovals}
+          onReopenForEdits={o.sharedReopenForEdits}
+          onCancel={o.sharedCancel}
+          onUpdateSplit={updateSplit}
+        />
+      )}
+
       <CartPaymentMethods o={o} />
 
       {/* Promo */}
