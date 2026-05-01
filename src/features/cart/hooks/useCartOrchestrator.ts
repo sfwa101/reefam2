@@ -133,6 +133,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [showRecharge, setShowRecharge] = useState(false);
   const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
   const [saveChange, setSaveChange] = useState<boolean>(true);
+  const [donateChange, setDonateChange] = useState<boolean>(false);
   const [customerName, setCustomerName] = useState<string>("");
   const [minOrderTotal, setMinOrderTotal] = useState<number>(0);
   const [guestName, setGuestName] = useState<string>("");
@@ -615,7 +616,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      if (!isGuest && currentUser && showChangeJar && saveChange && changeRemainder > 0) {
+      if (
+        !isGuest &&
+        currentUser &&
+        showChangeJar &&
+        saveChange &&
+        !donateChange &&
+        changeRemainder > 0
+      ) {
         try {
           const { data: jarRow } = await supabase
             .from("savings_jar")
@@ -641,6 +649,25 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
           });
         } catch (e) {
           console.warn("savings jar update skipped", e);
+        }
+      }
+
+      // Phase 8 — route spare change to General Charity Pool when toggled.
+      if (
+        !isGuest &&
+        currentUser &&
+        showChangeJar &&
+        donateChange &&
+        changeRemainder > 0
+      ) {
+        try {
+          await supabase.rpc("donate_to_campaign", {
+            _campaign_id: null as unknown as string,
+            _amount: changeRemainder,
+            _source: "spare_change",
+          });
+        } catch (e) {
+          console.warn("charity spare-change donation skipped", e);
         }
       }
 
