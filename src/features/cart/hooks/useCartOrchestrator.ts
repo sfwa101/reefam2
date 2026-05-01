@@ -30,7 +30,6 @@ import {
 } from "lucide-react";
 import {
   WA_NUMBER,
-  HOME_PRODUCERS_WA,
   GIFT_BONUS,
   type Addr,
   type AppliedPromo,
