@@ -69,6 +69,7 @@ export function pathForRole(role: AppRole): string {
     case "store_manager":
     case "finance":
     case "admin": return "/admin";
+    case "vendor": return "/vendor";
     case "staff": return "/employee";
     default: return "/";
   }
