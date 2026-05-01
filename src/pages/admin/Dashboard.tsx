@@ -163,14 +163,6 @@ export default function Dashboard() {
     };
   }, []);
 
-  // Local module-scope week buffer + tick to drive the series memo without
-  // adding a redundant state object (avoids unnecessary re-renders during realtime).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [weekTick, setWeekTick] = useState(0);
-  // eslint-disable-next-line prefer-const
-  let weekDataLocal: { id: string; total: number | null; created_at: string; status: string }[] | null = null;
-  weekDataLocal = weekData;
-
   /* ---- Derived ---- */
 
   const series7 = useMemo(() => {
@@ -178,18 +170,14 @@ export default function Dashboard() {
     const start = new Date();
     start.setDate(start.getDate() - 6);
     start.setHours(0, 0, 0, 0);
-    const list = weekDataLocal ?? [];
-    for (const o of list) {
+    for (const o of week) {
       const d = new Date(o.created_at);
       const idx = Math.floor((d.getTime() - start.getTime()) / 86400000);
       if (idx >= 0 && idx < 7) days[idx] += Number(o.total ?? 0);
     }
     return days;
-    // weekTick triggers recompute when realtime refreshes data
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weekTick]);
+  }, [week]);
 
-  const week = weekDataLocal ?? [];
   const weekTotal = series7.reduce((s, v) => s + v, 0);
   const yesterdayTotal = series7[series7.length - 2] ?? 0;
   const todayInWeek = series7[series7.length - 1] ?? 0;
