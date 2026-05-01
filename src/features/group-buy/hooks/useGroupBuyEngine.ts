@@ -134,7 +134,10 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
         prev ? { ...prev, current_quantity: prev.current_quantity + quantity } : prev,
       );
 
-      const { data, error: rpcErr } = await supabase.rpc("pledge_group_buy" as never, {
+      const { data, error: rpcErr } = await (supabase.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>)("pledge_group_buy", {
         _campaign_id: campaignId,
         _quantity: quantity,
       });
