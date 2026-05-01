@@ -79,7 +79,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
 
     try {
-      const { data: orderId, error } = await supabase.rpc(
+      const { data: orderId, error } = await (supabase as SupabaseClient<Database> & { rpc: SupabaseClient<Database>["rpc"] }).rpc(
         "place_order_atomic",
         {
           _user_id: userId,
