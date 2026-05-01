@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { placeOrder } from "@/server/checkout.functions";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useCart, type CartLineMeta } from "@/context/CartContext";
@@ -128,6 +129,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [guestNotes, setGuestNotes] = useState("");
   const [payment, setPayment] = useState<string>("wallet");
   const [submitting, setSubmitting] = useState(false);
+  // Double-submit guard — synchronous flag that beats React batching
+  const submittingRef = useRef(false);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [trustLimit, setTrustLimit] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
@@ -495,6 +498,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const selectedAddr = addresses.find((a) => a.id === addrId);
 
   const checkoutWA = async () => {
+    // Double-submit protection — runs synchronously, beats setState batching
+    if (submittingRef.current) {
+      console.warn("[checkout] duplicate submit blocked");
+      return;
+    }
+
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -515,6 +524,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
       return;
     }
+    submittingRef.current = true;
     setSubmitting(true);
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
@@ -541,54 +551,40 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       let savedOrderId: string | null = null;
 
       if (!isGuest && currentUser) {
-        const { data: order, error } = await supabase
-          .from("orders")
-          .insert({
-            user_id: currentUser.id,
+        const result = await placeOrder({
+          data: {
             total: grand,
             payment_method: payment,
             address_id: selectedAddr?.id ?? null,
-            status: "pending",
-            whatsapp_sent: true,
             notes: noteParts.length ? noteParts.join(" · ") : null,
-          })
-          .select("id")
-          .single();
+            service_type: "delivery",
+            delivery_zone: zone.id ?? null,
+            items: lines.map((l) => ({
+              product_id: l.product.id,
+              product_name: l.product.name,
+              product_image: l.product.image ?? null,
+              price: l.meta?.unitPrice ?? l.product.price,
+              quantity: l.qty,
+            })),
+          },
+        });
 
-        if (error || !order) {
-          console.error(error);
-          toast.error("تعذّر حفظ الطلب، حاول مرة أخرى");
+        if (!result.ok) {
+          console.error("[checkout] placeOrder failed:", result);
+          toast.error(result.error);
           setSubmitting(false);
+          submittingRef.current = false;
           return;
         }
-        savedOrderId = order.id;
+        savedOrderId = result.order_id;
 
-        const items = lines.map((l) => ({
-          order_id: order.id,
-          product_id: l.product.id,
-          product_name: l.product.name,
-          product_image: l.product.image,
-          price: l.product.price,
-          quantity: l.qty,
-        }));
-        const { error: itemsErr } = await supabase.from("order_items").insert(items);
-        if (itemsErr) {
-          console.error(itemsErr);
-          toast.error("تعذّر حفظ تفاصيل الطلب، حاول مرة أخرى");
-          setSubmitting(false);
-          return;
-        }
-
+        // Best-effort multi-warehouse allocation (non-blocking)
         try {
-          const { data: allocResult, error: allocErr } = await supabase.rpc(
+          const { error: allocErr } = await supabase.rpc(
             "allocate_order_inventory",
-            { _order_id: order.id, _zone: zone.id },
+            { _order_id: savedOrderId, _zone: zone.id },
           );
-          if (allocErr) {
-            console.warn("[allocation] failed", allocErr);
-          } else {
-            console.info("[allocation]", allocResult);
-          }
+          if (allocErr) console.warn("[allocation] failed", allocErr);
         } catch (e) {
           console.warn("[allocation] exception", e);
         }
@@ -864,11 +860,13 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       clear();
       fireConfetti();
       toast.success("تم إرسال طلبك إلى واتساب 🎉");
+      submittingRef.current = false;
       navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
     } catch (err) {
-      console.error(err);
+      console.error("[checkout] unexpected error:", err);
       toast.error("حدث خطأ غير متوقّع");
       setSubmitting(false);
+      submittingRef.current = false;
     }
   };
 
