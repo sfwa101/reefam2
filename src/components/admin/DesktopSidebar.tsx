@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import {
   Home, ShoppingBag, Package, Users, ShieldCheck, Wallet, Receipt, TrendingUp,
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
-  Star, BarChart3, Settings, FileClock, Warehouse, Store, Printer, FolderTree,
+  Star, BarChart3, Settings, FileClock, Warehouse, Store, Printer, FolderTree, Layout,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,9 @@ const groups = [
   { title: "التوصيل", items: [
     { to: "/admin/delivery", icon: Truck, label: "مهام التوصيل" },
     { to: "/admin/delivery/zones", icon: MapPin, label: "المناطق" },
+  ]},
+  { title: "إعداد المتجر", items: [
+    { to: "/admin/design", icon: Layout, label: "محرر التصميم" },
   ]},
   { title: "الإدارة", items: [
     { to: "/admin/staff", icon: UserCog, label: "الموظفون" },
