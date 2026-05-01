@@ -134,6 +134,18 @@ const Wallet = () => {
           </motion.div>
         )}
 
+        {c.tab === "charity" && (
+          <motion.div
+            key="charity"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.25 }}
+          >
+            <WalletCharityHub walletBalance={Number(c.balance?.balance ?? 0)} />
+          </motion.div>
+        )}
+
         {c.tab === "affiliate" && (
           <motion.div
             key="affiliate"
