@@ -10,6 +10,7 @@ import { CompareProvider } from "@/context/CompareContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
+import { SharedCartProvider } from "@/context/SharedCartContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { registerPWA } from "@/lib/pwa";
@@ -108,12 +109,14 @@ function RootComponent() {
             <AuthProvider>
               <LocationProvider>
                 <CartProvider>
-                  <CompareProvider>
-                    <FavoritesProvider>
-                      <Toaster />
-                      <Outlet />
-                    </FavoritesProvider>
-                  </CompareProvider>
+                  <SharedCartProvider>
+                    <CompareProvider>
+                      <FavoritesProvider>
+                        <Toaster />
+                        <Outlet />
+                      </FavoritesProvider>
+                    </CompareProvider>
+                  </SharedCartProvider>
                 </CartProvider>
               </LocationProvider>
             </AuthProvider>

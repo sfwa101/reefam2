@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Check, Clock, Gift, ShoppingBag, Sparkles, Tag, Truck, Zap } from "lucide-react";
+import { CalendarDays, Check, Clock, Gift, Lock, ShoppingBag, Sparkles, Tag, Truck, Zap } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { useCartOrchestrator } from "@/features/cart/hooks/useCartOrchestrator";
+import { useSharedCartContext } from "@/context/SharedCartContext";
 import { CartCrossSellRail } from "@/features/cart/components/CartCrossSellRail";
 import { CartAddressSelector } from "@/features/cart/components/CartAddressSelector";
 import { CartCheckoutActions } from "@/features/cart/components/CartCheckoutActions";
@@ -13,9 +16,28 @@ import { CartSummary } from "@/features/cart/components/CartSummary";
 import { NumberFlow } from "@/features/cart/components/NumberFlow";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { VendorGroupCard } from "@/features/cart/components/VendorGroupCard";
+import { SharedCartManager } from "@/features/cart/components/SharedCartManager";
+import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
-  const o = useCartOrchestrator();
+  const { sharedCartId } = useSharedCartContext();
+  const o = useCartOrchestrator({ sharedCartId });
+
+  const updateSplit = async (
+    participantId: string,
+    splitType: SharedCartSplitType,
+    splitValue: number,
+  ) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from("shared_cart_participants")
+      .update({ split_type: splitType, split_value: splitValue })
+      .eq("id", participantId);
+    if (error) throw error;
+  };
+
+  const isLocked =
+    o.isSharedMode && o.sharedCart?.status === "pending_approvals";
 
   if (o.lines.length === 0) {
     return (
@@ -104,6 +126,19 @@ const Cart = () => {
 
       <CartAddressSelector user={o.user} addresses={o.addresses} addrId={o.addrId} setAddrId={o.setAddrId} guestNotes={o.guestNotes} setGuestNotes={o.setGuestNotes} />
 
+      {o.isSharedMode && o.sharedCart && (
+        <SharedCartManager
+          cart={o.sharedCart}
+          participants={o.sharedParticipants}
+          isOwner={o.sharedIsOwner}
+          subtotal={o.subtotal}
+          onRequestApprovals={o.sharedRequestApprovals}
+          onReopenForEdits={o.sharedReopenForEdits}
+          onCancel={o.sharedCancel}
+          onUpdateSplit={updateSplit}
+        />
+      )}
+
       <CartPaymentMethods o={o} />
 
       {/* Promo */}
@@ -177,7 +212,18 @@ const Cart = () => {
         </section>
       )}
 
-      <CartCheckoutActions grand={o.grand} minOrderTotal={o.minOrderTotal} submitting={o.submitting} onCheckout={o.checkoutWA} />
+      <div className="relative">
+        <CartCheckoutActions grand={o.grand} minOrderTotal={o.minOrderTotal} submitting={o.submitting} onCheckout={isLocked ? () => toast.error("السلة مقفلة بانتظار موافقات المشاركين") : o.checkoutWA} />
+        {isLocked && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-foreground/70 backdrop-blur-sm">
+            <Lock className="h-5 w-5 text-background" />
+            <p className="text-xs font-extrabold text-background">مقفلة — بانتظار الموافقات</p>
+            <p className="text-[10px] font-bold text-background/80">
+              {o.sharedParticipants.filter((p) => p.approval_status === "pending").length} بانتظار الموافقة
+            </p>
+          </div>
+        )}
+      </div>
 
       <AnimatePresence>
         {o.showRecharge && o.user && (

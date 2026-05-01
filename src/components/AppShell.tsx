@@ -3,6 +3,7 @@ import TopBar from "@/components/TopBar";
 import TabBar from "@/components/TabBar";
 import SectionsPanel from "@/components/desktop/SectionsPanel";
 import CartPanel from "@/components/desktop/CartPanel";
+import GlobalApprovalBanner from "@/components/GlobalApprovalBanner";
 
 // Routes where the bottom TabBar should be HIDDEN to make room for a sticky CTA.
 const HIDE_TABBAR_ROUTES = [
@@ -21,6 +22,7 @@ const AppShell = () => {
 
   return (
     <div className="relative min-h-screen [overflow-x:clip]">
+      <GlobalApprovalBanner />
       <TopBar />
       <div className="mx-auto flex w-full max-w-[1400px] gap-5 px-4 pt-[64px] lg:gap-6 lg:px-6 lg:pt-[80px]">
         <SectionsPanel />
