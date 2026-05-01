@@ -137,6 +137,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [submitting, setSubmitting] = useState(false);
   // Double-submit guard — synchronous flag that beats React batching
   const submittingRef = useRef(false);
+  // WhatsApp fallback dialog (shown when popup is blocked)
+  const [waFallback, setWaFallback] = useState<WaFallbackPayload | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [trustLimit, setTrustLimit] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
