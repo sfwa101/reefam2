@@ -105,15 +105,16 @@ const SearchPage = () => {
       <BackHeader title="ابحث" subtitle={q ? `${toLatin(total)} نتيجة` : "اكتب اسم منتج أو قسم"} />
 
       <div className="glass-strong sticky top-2 z-10 flex items-center gap-2 rounded-2xl px-4 py-3 shadow-soft">
-        <SearchIcon className="h-4 w-4 text-muted-foreground" />
+        <SearchIcon className={`h-4 w-4 ${isDebouncing ? "animate-pulse text-primary" : "text-muted-foreground"}`} />
         <input
           autoFocus
-          value={q}
+          value={inputVal}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ابحث عن منتج، علامة، قسم…"
           className="flex-1 bg-transparent text-sm outline-none"
+          dir="rtl"
         />
-        {q && (
+        {inputVal && (
           <button onClick={() => setQuery("")} aria-label="مسح" className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/5">
             <X className="h-3.5 w-3.5" />
           </button>
