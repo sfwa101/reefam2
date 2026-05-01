@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { placeOrder } from "@/server/checkout.functions";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useCart, type CartLineMeta } from "@/context/CartContext";
