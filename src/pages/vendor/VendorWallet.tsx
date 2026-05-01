@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ArrowDownCircle, Banknote } from "lucide-react";
+import { VendorSettlementDashboard } from "@/features/vendor/components/VendorSettlementDashboard";
 
 type W = { vendor_id: string; available_balance: number; pending_balance: number; lifetime_earned: number; lifetime_paid_out: number };
 type Payout = { id: string; amount: number; method: string; reference: string | null; status: string; created_at: string };
@@ -72,6 +73,11 @@ export default function VendorWallet() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Phase 12 — event-sourced settlement engine */}
+      <div className="pt-2">
+        <VendorSettlementDashboard />
       </div>
     </div>
   );
