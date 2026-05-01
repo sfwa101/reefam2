@@ -34,10 +34,10 @@ const TabBar = () => {
         <Link
           to="/cart"
           aria-label={`السلة (${cartCount})`}
-          className="absolute -top-2 left-4 flex h-12 items-center gap-2 rounded-full bg-foreground px-3 text-background shadow-float ring-2 ring-background transition active:scale-95"
+          className="absolute bottom-full left-4 mb-2 flex h-10 items-center gap-1.5 rounded-full bg-foreground px-3 text-background shadow-float ring-2 ring-background transition active:scale-95"
         >
-          <ShoppingBag className="h-4 w-4" strokeWidth={2.4} />
-          <span className="text-[12px] font-extrabold tabular-nums">
+          <ShoppingBag className="h-3.5 w-3.5" strokeWidth={2.4} />
+          <span className="text-[11px] font-extrabold tabular-nums">
             {toLatin(cartCount)}
           </span>
         </Link>
