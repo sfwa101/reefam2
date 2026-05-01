@@ -27,14 +27,14 @@ const AppShell = () => {
   const cartLines = useCartLines();
   const cartUpdatedAtRef = useRef<number>(Date.now());
   const cartSnapshotRef = useRef<string>("");
-  const sig = cartLines.map((l) => `${l.productId}x${l.quantity}`).join("|");
+  const sig = cartLines.map((l) => `${l.product.id}x${l.qty}`).join("|");
   if (sig !== cartSnapshotRef.current) {
     cartSnapshotRef.current = sig;
     cartUpdatedAtRef.current = Date.now();
   }
   useHakimEdgeWorker({
     getCart: () => ({
-      items: cartLines.map((l) => ({ id: l.productId, quantity: l.quantity })),
+      items: cartLines.map((l) => ({ id: l.product.id, quantity: l.qty })),
       updatedAt: cartUpdatedAtRef.current,
     }),
   });
