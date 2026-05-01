@@ -55,10 +55,9 @@ export const WalletCharityHub = ({
       source: "direct" | "general_pool";
     }) => {
       const { data, error } = await supabase.rpc("donate_to_campaign", {
-        _campaign_id: vars.campaignId,
+        _campaign_id: vars.campaignId as unknown as string,
         _amount: vars.amount,
         _source: vars.source,
-        _note: null,
       });
       if (error) throw error;
       return data;
