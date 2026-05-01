@@ -44,6 +44,11 @@ export const WhatsAppFallbackDialog = ({ open, payload, onClose }: Props) => {
   const onConfirmSent = () => {
     const id = payload.orderId ?? "";
     const total = payload.total ?? 0;
+    try {
+      sessionStorage.removeItem("reef:checkout:wa-fallback");
+    } catch {
+      /* noop */
+    }
     onClose();
     navigate({ to: "/order-success", search: { id, total } });
   };
