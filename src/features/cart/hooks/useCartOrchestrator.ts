@@ -40,6 +40,7 @@ import {
   preOpenWindow,
   openWhatsApp,
   isMobileWaContext,
+  buildWaUrl,
 } from "@/lib/whatsapp";
 import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
 
@@ -825,9 +826,13 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const mainPhone = WA_NUMBER;
       const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
+      console.log("[checkout] attempting WhatsApp checkout URL", {
+        source,
+        url: buildWaUrl({ phone: mainPhone, text: mainMessage }),
+      });
       const openResult = openWhatsApp(
         { phone: mainPhone, text: mainMessage },
-        { preOpened, preferLocation: onMobile, source, allowWindowOpen: false },
+        { preOpened, preferLocation: onMobile, source },
       );
 
       if (!openResult.ok) {
@@ -845,7 +850,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         } catch (e) {
           console.warn("[checkout] failed to persist WhatsApp fallback", e);
         }
-        setWaFallback({ phone: mainPhone, text: mainMessage });
+        setWaFallback({ phone: mainPhone, text: mainMessage, orderId, total: orderTotal });
         toast.message("اضغط على فتح واتساب لإكمال الطلب", {
           description: "منع المتصفح الفتح التلقائي",
         });
@@ -881,10 +886,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       fireConfetti();
       if (openResult.ok) {
         toast.success("تم إرسال طلبك إلى واتساب 🎉");
+        navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
       }
       setSubmitting(false);
       submittingRef.current = false;
-      navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
     } catch (err) {
       console.error("[checkout] unexpected error:", err);
       toast.error("حدث خطأ غير متوقّع");
@@ -896,7 +901,11 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   /** Called by the Cart page when the WhatsApp fallback dialog closes. */
   const dismissWaFallback = () => {
+    const pending = waFallback;
     setWaFallback(null);
+    if (pending?.orderId) {
+      navigate({ to: "/order-success", search: { id: pending.orderId, total: pending.total ?? grand } });
+    }
   };
 
   return {
