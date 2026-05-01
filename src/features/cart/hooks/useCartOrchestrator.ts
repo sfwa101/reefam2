@@ -513,10 +513,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       return;
     }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const currentUser = (user ?? session?.user) || null;
+    const currentUser = user ?? null;
     const isGuest = !currentUser;
 
     if (isGuest) {
@@ -533,14 +530,17 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
       return;
     }
+    const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
+    const onMobile = isMobileWaContext();
+    const preOpened: Window | null = onMobile ? null : preOpenWindow(source);
+    console.info("[checkout] WhatsApp checkout invoked", {
+      source,
+      mode: onMobile ? "mobile-location" : "desktop-preopen",
+      preOpened: !!preOpened,
+      cartLines: lines.length,
+    });
     submittingRef.current = true;
     setSubmitting(true);
-    // CRITICAL: pre-open the WhatsApp tab inside the current user gesture.
-    // After awaits below, the gesture is gone and `window.open` would be
-    // blocked by every modern browser. We redirect this handle later.
-    // On mobile, `location.href` is more reliable than a popup, so skip pre-open.
-    const onMobile = isMobileWaContext();
-    const preOpened: Window | null = onMobile ? null : preOpenWindow();
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
       const noteParts = [
