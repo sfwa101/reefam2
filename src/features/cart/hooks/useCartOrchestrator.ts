@@ -136,8 +136,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [submitting, setSubmitting] = useState(false);
   // Double-submit guard — synchronous flag that beats React batching
   const submittingRef = useRef(false);
-  // Pending order-success navigation when fallback dialog is open
-  const pendingNavRef = useRef<{ id: string; total: number } | null>(null);
   // WhatsApp fallback dialog (shown when popup is blocked)
   const [waFallback, setWaFallback] = useState<WaFallbackPayload | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(0);
@@ -863,7 +861,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       }
       setSubmitting(false);
       submittingRef.current = false;
-      pendingNavRef.current = null;
       navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
     } catch (err) {
       console.error("[checkout] unexpected error:", err);
@@ -877,7 +874,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   /** Called by the Cart page when the WhatsApp fallback dialog closes. */
   const dismissWaFallback = () => {
     setWaFallback(null);
-    pendingNavRef.current = null;
   };
 
   return {
