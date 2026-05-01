@@ -23,8 +23,10 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as VendorWalletRouteImport } from './routes/vendor.wallet'
 import { Route as VendorProductsRouteImport } from './routes/vendor.products'
 import { Route as VendorOrdersRouteImport } from './routes/vendor.orders'
+import { Route as VendorDashboardRouteImport } from './routes/vendor.dashboard'
 import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
 import { Route as DriverMapRouteImport } from './routes/driver.map'
+import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
 import { Route as AdminZakatRouteImport } from './routes/admin.zakat'
 import { Route as AdminWarehousesRouteImport } from './routes/admin.warehouses'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
@@ -62,6 +64,7 @@ import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.drive
 import { Route as AdminDesignRouteImport } from './routes/admin.design'
 import { Route as AdminDeliverySettingsRouteImport } from './routes/admin.delivery-settings'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
 import { Route as AdminCharityRouteImport } from './routes/admin.charity'
@@ -189,6 +192,11 @@ const VendorOrdersRoute = VendorOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => VendorRoute,
 } as any)
+const VendorDashboardRoute = VendorDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => VendorRoute,
+} as any)
 const DriverWalletRoute = DriverWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -197,6 +205,11 @@ const DriverWalletRoute = DriverWalletRouteImport.update({
 const DriverMapRoute = DriverMapRouteImport.update({
   id: '/map',
   path: '/map',
+  getParentRoute: () => DriverRoute,
+} as any)
+const DriverDashboardRoute = DriverDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => DriverRoute,
 } as any)
 const AdminZakatRoute = AdminZakatRouteImport.update({
@@ -382,6 +395,11 @@ const AdminDeliverySettingsRoute = AdminDeliverySettingsRouteImport.update({
 const AdminDeliveryRoute = AdminDeliveryRouteImport.update({
   id: '/delivery',
   path: '/delivery',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
@@ -698,6 +716,7 @@ export interface FileRoutesByFullPath {
   '/admin/charity': typeof AdminCharityRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
@@ -735,8 +754,10 @@ export interface FileRoutesByFullPath {
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/zakat': typeof AdminZakatRoute
+  '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/vendor/dashboard': typeof VendorDashboardRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
   '/vendor/wallet': typeof VendorWalletRoute
@@ -804,6 +825,7 @@ export interface FileRoutesByTo {
   '/admin/charity': typeof AdminCharityRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
@@ -841,8 +863,10 @@ export interface FileRoutesByTo {
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/zakat': typeof AdminZakatRoute
+  '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/vendor/dashboard': typeof VendorDashboardRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
   '/vendor/wallet': typeof VendorWalletRoute
@@ -917,6 +941,7 @@ export interface FileRoutesById {
   '/admin/charity': typeof AdminCharityRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
@@ -954,8 +979,10 @@ export interface FileRoutesById {
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/zakat': typeof AdminZakatRoute
+  '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/vendor/dashboard': typeof VendorDashboardRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
   '/vendor/wallet': typeof VendorWalletRoute
@@ -1031,6 +1058,7 @@ export interface FileRouteTypes {
     | '/admin/charity'
     | '/admin/cost-bulk'
     | '/admin/customers'
+    | '/admin/dashboard'
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
@@ -1068,8 +1096,10 @@ export interface FileRouteTypes {
     | '/admin/wallets'
     | '/admin/warehouses'
     | '/admin/zakat'
+    | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/vendor/dashboard'
     | '/vendor/orders'
     | '/vendor/products'
     | '/vendor/wallet'
@@ -1137,6 +1167,7 @@ export interface FileRouteTypes {
     | '/admin/charity'
     | '/admin/cost-bulk'
     | '/admin/customers'
+    | '/admin/dashboard'
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
@@ -1174,8 +1205,10 @@ export interface FileRouteTypes {
     | '/admin/wallets'
     | '/admin/warehouses'
     | '/admin/zakat'
+    | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/vendor/dashboard'
     | '/vendor/orders'
     | '/vendor/products'
     | '/vendor/wallet'
@@ -1249,6 +1282,7 @@ export interface FileRouteTypes {
     | '/admin/charity'
     | '/admin/cost-bulk'
     | '/admin/customers'
+    | '/admin/dashboard'
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
@@ -1286,8 +1320,10 @@ export interface FileRouteTypes {
     | '/admin/wallets'
     | '/admin/warehouses'
     | '/admin/zakat'
+    | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/vendor/dashboard'
     | '/vendor/orders'
     | '/vendor/products'
     | '/vendor/wallet'
@@ -1446,6 +1482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorOrdersRouteImport
       parentRoute: typeof VendorRoute
     }
+    '/vendor/dashboard': {
+      id: '/vendor/dashboard'
+      path: '/dashboard'
+      fullPath: '/vendor/dashboard'
+      preLoaderRoute: typeof VendorDashboardRouteImport
+      parentRoute: typeof VendorRoute
+    }
     '/driver/wallet': {
       id: '/driver/wallet'
       path: '/wallet'
@@ -1458,6 +1501,13 @@ declare module '@tanstack/react-router' {
       path: '/map'
       fullPath: '/driver/map'
       preLoaderRoute: typeof DriverMapRouteImport
+      parentRoute: typeof DriverRoute
+    }
+    '/driver/dashboard': {
+      id: '/driver/dashboard'
+      path: '/dashboard'
+      fullPath: '/driver/dashboard'
+      preLoaderRoute: typeof DriverDashboardRouteImport
       parentRoute: typeof DriverRoute
     }
     '/admin/zakat': {
@@ -1717,6 +1767,13 @@ declare module '@tanstack/react-router' {
       path: '/delivery'
       fullPath: '/admin/delivery'
       preLoaderRoute: typeof AdminDeliveryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/customers': {
@@ -2271,6 +2328,7 @@ interface AdminRouteChildren {
   AdminCharityRoute: typeof AdminCharityRoute
   AdminCostBulkRoute: typeof AdminCostBulkRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
+  AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
   AdminDeliverySettingsRoute: typeof AdminDeliverySettingsRoute
   AdminDesignRoute: typeof AdminDesignRoute
@@ -2325,6 +2383,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCharityRoute: AdminCharityRoute,
   AdminCostBulkRoute: AdminCostBulkRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
+  AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
   AdminDeliverySettingsRoute: AdminDeliverySettingsRoute,
   AdminDesignRoute: AdminDesignRoute,
@@ -2370,12 +2429,14 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DriverRouteChildren {
+  DriverDashboardRoute: typeof DriverDashboardRoute
   DriverMapRoute: typeof DriverMapRoute
   DriverWalletRoute: typeof DriverWalletRoute
   DriverIndexRoute: typeof DriverIndexRoute
 }
 
 const DriverRouteChildren: DriverRouteChildren = {
+  DriverDashboardRoute: DriverDashboardRoute,
   DriverMapRoute: DriverMapRoute,
   DriverWalletRoute: DriverWalletRoute,
   DriverIndexRoute: DriverIndexRoute,
@@ -2385,6 +2446,7 @@ const DriverRouteWithChildren =
   DriverRoute._addFileChildren(DriverRouteChildren)
 
 interface VendorRouteChildren {
+  VendorDashboardRoute: typeof VendorDashboardRoute
   VendorOrdersRoute: typeof VendorOrdersRoute
   VendorProductsRoute: typeof VendorProductsRoute
   VendorWalletRoute: typeof VendorWalletRoute
@@ -2392,6 +2454,7 @@ interface VendorRouteChildren {
 }
 
 const VendorRouteChildren: VendorRouteChildren = {
+  VendorDashboardRoute: VendorDashboardRoute,
   VendorOrdersRoute: VendorOrdersRoute,
   VendorProductsRoute: VendorProductsRoute,
   VendorWalletRoute: VendorWalletRoute,
