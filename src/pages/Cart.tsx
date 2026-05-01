@@ -18,6 +18,7 @@ import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { useCartOrchestrator } from "@/features/cart/hooks/useCartOrchestrator";
+import { CartCrossSellRail } from "@/features/cart/components/CartCrossSellRail";
 import { CartAddressSelector } from "@/features/cart/components/CartAddressSelector";
 import { CartCheckoutActions } from "@/features/cart/components/CartCheckoutActions";
 import { CartPaymentMethods } from "@/features/cart/components/CartPaymentMethods";
