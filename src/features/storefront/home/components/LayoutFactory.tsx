@@ -15,7 +15,7 @@
  * push the key into the seed migration's `section_order`, and a future
  * Admin UI can re-order without code changes.
  */
-import type { ComponentType } from "react";
+import type { ReactElement } from "react";
 import { BestSellersRail } from "./BestSellersRail";
 import { BundlesRail } from "./BundlesRail";
 import { CategoriesGrid } from "./CategoriesGrid";
@@ -33,7 +33,7 @@ type FactoryContext = {
   showRails: boolean;
 };
 
-type SectionRenderer = (ctx: FactoryContext, cfg: SectionConfig) => JSX.Element | null;
+type SectionRenderer = (ctx: FactoryContext, cfg: SectionConfig) => ReactElement | null;
 
 const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
   HeroBanner: ({ theme }) => <HeroBanner theme={theme} />,
@@ -103,5 +103,3 @@ export const LayoutFactory = ({
   );
 };
 
-// satisfy unused import warning if a renderer is removed in future
-export type { ComponentType };
