@@ -3623,6 +3623,72 @@ export type Database = {
           },
         ]
       }
+      vendor_payout_requests: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          bank_details: Json
+          created_at: string
+          id: string
+          method: string
+          notes: string | null
+          payout_id: string | null
+          rejection_reason: string | null
+          requester_user_id: string | null
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_details?: Json
+          created_at?: string
+          id?: string
+          method?: string
+          notes?: string | null
+          payout_id?: string | null
+          rejection_reason?: string | null
+          requester_user_id?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          bank_details?: Json
+          created_at?: string
+          id?: string
+          method?: string
+          notes?: string | null
+          payout_id?: string | null
+          rejection_reason?: string | null
+          requester_user_id?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_payout_requests_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_payouts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_payout_requests_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_payouts: {
         Row: {
           amount: number
@@ -3669,6 +3735,72 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "vendor_payouts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendor_wallet_transactions: {
+        Row: {
+          amount: number
+          commission_pct: number | null
+          created_at: string
+          gross_amount: number | null
+          id: string
+          kind: string
+          notes: string | null
+          order_id: string | null
+          order_item_id: string | null
+          payout_request_id: string | null
+          product_id: string | null
+          product_name: string | null
+          status: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          commission_pct?: number | null
+          created_at?: string
+          gross_amount?: number | null
+          id?: string
+          kind: string
+          notes?: string | null
+          order_id?: string | null
+          order_item_id?: string | null
+          payout_request_id?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          status?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          commission_pct?: number | null
+          created_at?: string
+          gross_amount?: number | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          order_id?: string | null
+          order_item_id?: string | null
+          payout_request_id?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          status?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_wallet_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_wallet_transactions_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendors"
@@ -4333,6 +4465,7 @@ export type Database = {
         Returns: Json
       }
       progress_to_next_level: { Args: { _user_id: string }; Returns: Json }
+      recompute_vendor_wallet: { Args: { _vendor_id: string }; Returns: Json }
       recompute_wallet_balance: { Args: { _user: string }; Returns: number }
       redeem_coupon: {
         Args: { _code: string; _order_id: string; _order_total: number }
@@ -4348,6 +4481,15 @@ export type Database = {
         Returns: Json
       }
       release_order_reservation: { Args: { _order_id: string }; Returns: Json }
+      request_vendor_payout: {
+        Args: {
+          _amount: number
+          _bank_details: Json
+          _method: string
+          _vendor_id: string
+        }
+        Returns: Json
+      }
       resolve_fulfillment: {
         Args: { _branch_id: string; _product_id: string; _zone?: string }
         Returns: Json
