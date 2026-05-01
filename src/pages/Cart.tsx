@@ -17,6 +17,7 @@ import { NumberFlow } from "@/features/cart/components/NumberFlow";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { VendorGroupCard } from "@/features/cart/components/VendorGroupCard";
 import { SharedCartManager } from "@/features/cart/components/SharedCartManager";
+import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallbackDialog";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
@@ -230,6 +231,12 @@ const Cart = () => {
           <RechargeDialog onClose={() => o.setShowRecharge(false)} userId={o.user.id} currentBalance={o.walletBalance} shortfall={Math.max(0, o.grand - o.walletBalance)} />
         )}
       </AnimatePresence>
+
+      <WhatsAppFallbackDialog
+        open={!!o.waFallback}
+        payload={o.waFallback}
+        onClose={o.dismissWaFallback}
+      />
     </div>
   );
 };

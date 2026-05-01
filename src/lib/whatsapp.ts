@@ -1,0 +1,159 @@
+/**
+ * WhatsApp link helpers + robust open-with-fallback.
+ *
+ * Why this exists:
+ *   - `window.open(url, "_blank")` is silently blocked by browsers when
+ *     called after `await` because the user-gesture trust is lost.
+ *   - Mobile Safari, Chrome iOS, and most popup blockers will return `null`
+ *     from `window.open` in that case.
+ *   - Arabic text + emoji must be percent-encoded with `encodeURIComponent`,
+ *     which `URL`/`URLSearchParams` does correctly.
+ *
+ * Strategy:
+ *   1) Normalize the phone (digits only, no +/spaces).
+ *   2) Build a `wa.me` URL — the most reliable cross-platform format.
+ *   3) `openWhatsApp()` tries direct navigation first (works inside a user
+ *      gesture). If a pre-opened window handle is provided, redirect that
+ *      window — this preserves the gesture across awaits.
+ *   4) If everything fails, return `{ ok: false, url, text }` so the UI can
+ *      show a fallback dialog with copy-to-clipboard and a manual link.
+ */
+
+export type WaTarget = {
+  /** International phone, digits only. e.g. "201080068689". */
+  phone: string;
+  /** Plain text body — will be URL-encoded. */
+  text: string;
+};
+
+/** Normalize a phone number: keep digits only, drop leading +. */
+export const normalizeWaPhone = (raw: string): string => {
+  if (!raw) return "";
+  return String(raw).replace(/\D+/g, "");
+};
+
+/** Build a wa.me URL. Encodes text safely (Arabic + emoji ok). */
+export const buildWaUrl = ({ phone, text }: WaTarget): string => {
+  const p = normalizeWaPhone(phone);
+  const encoded = encodeURIComponent(text ?? "");
+  // wa.me is the canonical short link; falls back to api.whatsapp.com on
+  // some platforms automatically. Both desktop and mobile honor it.
+  return p
+    ? `https://wa.me/${p}?text=${encoded}`
+    : `https://wa.me/?text=${encoded}`;
+};
+
+/**
+ * Pre-open a placeholder window inside a user gesture.
+ * Call this at the *start* of a click handler, BEFORE any await.
+ * Later, redirect the returned handle with `redirectPreOpenedWindow()`.
+ *
+ * Returns `null` if the popup was blocked.
+ */
+export const preOpenWindow = (): Window | null => {
+  try {
+    const w = window.open("about:blank", "_blank", "noopener,noreferrer");
+    return w ?? null;
+  } catch {
+    return null;
+  }
+};
+
+/** Redirect a pre-opened window to the final URL. */
+export const redirectPreOpenedWindow = (
+  win: Window | null,
+  url: string,
+): boolean => {
+  if (!win || win.closed) return false;
+  try {
+    win.location.href = url;
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export type OpenResult =
+  | { ok: true; method: "preopened" | "window-open" | "location" }
+  | { ok: false; url: string; text: string; reason: string };
+
+/**
+ * Robust WhatsApp opener.
+ *   - If `preOpened` is provided and still alive, redirect it (best path).
+ *   - Otherwise try `window.open` — works only if still in a gesture.
+ *   - On mobile, fall back to `location.href` (replaces tab with WhatsApp).
+ *   - Returns a structured result so callers can show a fallback UI.
+ */
+export const openWhatsApp = (
+  target: WaTarget,
+  opts?: { preOpened?: Window | null; preferLocation?: boolean },
+): OpenResult => {
+  const url = buildWaUrl(target);
+  const text = target.text ?? "";
+
+  // 1) Redirect pre-opened window — survives awaits.
+  if (opts?.preOpened && !opts.preOpened.closed) {
+    if (redirectPreOpenedWindow(opts.preOpened, url)) {
+      return { ok: true, method: "preopened" };
+    }
+  }
+
+  // 2) Direct location replace (mobile-friendly, no popup needed).
+  if (opts?.preferLocation) {
+    try {
+      window.location.href = url;
+      return { ok: true, method: "location" };
+    } catch (e) {
+      console.warn("[wa] location.href failed", e);
+    }
+  }
+
+  // 3) window.open (works only inside gesture).
+  try {
+    const w = window.open(url, "_blank", "noopener,noreferrer");
+    if (w) return { ok: true, method: "window-open" };
+  } catch (e) {
+    console.warn("[wa] window.open threw", e);
+  }
+
+  // 4) Last resort — try location.href anyway.
+  try {
+    window.location.href = url;
+    return { ok: true, method: "location" };
+  } catch {
+    /* fall through */
+  }
+
+  return { ok: false, url, text, reason: "popup_blocked" };
+};
+
+/** Detect mobile (iOS/Android) for routing decisions. */
+export const isMobileWaContext = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
+
+/** Copy arbitrary text to clipboard with a graceful fallback. */
+export const copyTextToClipboard = async (text: string): Promise<boolean> => {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (e) {
+    console.warn("[wa] clipboard api failed, falling back", e);
+  }
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+};
