@@ -24,9 +24,21 @@ const SearchPage = () => {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [maxPrice, setMaxPrice] = useState<number>(0);
 
-  const setQuery = (val: string) => {
-    navigate({ to: "/search", search: { q: val }, replace: true });
-  };
+  // Local input mirrors URL `q` but debounces URL writes to avoid history thrash.
+  const [inputVal, setInputVal] = useState(q ?? "");
+  const [isDebouncing, setIsDebouncing] = useState(false);
+  useEffect(() => { setInputVal(q ?? ""); }, [q]);
+  useEffect(() => {
+    if (inputVal === q) { setIsDebouncing(false); return; }
+    setIsDebouncing(true);
+    const t = setTimeout(() => {
+      navigate({ to: "/search", search: { q: inputVal }, replace: true });
+      setIsDebouncing(false);
+    }, 220);
+    return () => clearTimeout(t);
+  }, [inputVal, q, navigate]);
+
+  const setQuery = (val: string) => setInputVal(val);
 
   const matches = useMemo(() => {
     const term = q.trim().toLowerCase();
