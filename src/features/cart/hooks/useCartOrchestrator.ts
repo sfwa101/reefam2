@@ -37,6 +37,12 @@ import {
   type SweetsBucket,
   type VendorGroup,
 } from "../types/cart.types";
+import {
+  preOpenWindow,
+  openWhatsApp,
+  isMobileWaContext,
+} from "@/lib/whatsapp";
+import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
 
 export const paymentOptions = [
   { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
