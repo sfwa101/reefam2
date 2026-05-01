@@ -5,18 +5,15 @@ import {
   Check,
   Clock,
   Gift,
-  Plus,
   ShoppingBag,
   Sparkles,
   Tag,
   Truck,
   Zap,
 } from "lucide-react";
-import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { fireMiniConfetti } from "@/lib/confetti";
 import { useCartOrchestrator } from "@/features/cart/hooks/useCartOrchestrator";
 import { CartCrossSellRail } from "@/features/cart/components/CartCrossSellRail";
 import { CartAddressSelector } from "@/features/cart/components/CartAddressSelector";
