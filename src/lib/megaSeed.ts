@@ -354,7 +354,8 @@ export async function runMegaSeed(): Promise<{ inserted: number; total: number; 
   const chunkSize = 80;
   for (let i = 0; i < all.length; i += chunkSize) {
     const chunk = all.slice(i, i + chunkSize);
-    const { error, count } = await supabase.from("products").insert(chunk, { count: "exact" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error, count } = await (supabase.from("products") as any).insert(chunk, { count: "exact" });
     if (error) errors.push(error.message);
     else inserted += count ?? chunk.length;
   }
