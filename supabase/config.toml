@@ -1,1 +1,4 @@
 project_id = "ilenojpgpazwmqjcvczr"
+
+[functions.generate-product-image]
+verify_jwt = false
