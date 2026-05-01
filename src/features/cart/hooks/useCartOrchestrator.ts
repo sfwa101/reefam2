@@ -525,7 +525,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         isSplit
           ? `دفع مُجزّأ: محفظة ${Math.round(walletApplied)} + ${secondaryLabel} ${Math.round(walletShortfall)}`
           : null,
-        showChangeJar && saveChange ? `ادخار الفكة: ${changeRemainder} ج.م للحصّالة` : null,
+        showChangeJar && saveChange && !donateChange
+          ? `ادخار الفكة: ${changeRemainder} ج.م للحصّالة`
+          : null,
+        showChangeJar && donateChange
+          ? `تبرع بالفكة: ${changeRemainder} ج.م للصندوق العام`
+          : null,
         sweetsRules.hasBooking ? `حجوزات: ${fmtMoney(sweetsRules.bookingSubtotal)}` : null,
         sweetsRules.hasBooking
           ? `يُدفع الآن من الحجوزات: ${fmtMoney(aggregateDeposit)}`
@@ -918,6 +923,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setShowRecharge,
     saveChange,
     setSaveChange,
+    donateChange,
+    setDonateChange,
     showChangeJar,
     roundedCash,
     changeRemainder,
