@@ -93,12 +93,6 @@ const Wallet = () => {
           else c.setTab(t as any);
         }}
       />
-        active={c.tab}
-        onChange={(t) => {
-          if (t === "affiliate") c.openAffiliateTab();
-          else c.setTab(t as any);
-        }}
-      />
 
       <AnimatePresence mode="wait">
         {c.tab === "balance" && (
