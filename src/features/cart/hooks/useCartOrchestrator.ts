@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useCart } from "@/context/CartContext";
+import { useCart, type CartLineMeta } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useSharedCartSync } from "./useSharedCartSync";
 import { useLocation } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney, toLatin } from "@/lib/format";
