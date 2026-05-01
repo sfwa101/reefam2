@@ -59,15 +59,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   // Adapt shared items into local-shaped lines so all downstream derivations
   // (vendor groups, sweets buckets, totals, cross-sell) keep working unchanged.
   const sharedLines = useMemo(() => {
-    if (!isSharedMode) return [];
-    return shared.items
-      .map((it) => {
-        const product = allProducts.find((p) => p.id === it.product_id);
-        if (!product) return null;
-        return { product, qty: it.quantity, meta: (it.meta as CartLineMeta | undefined) };
-      })
-      .filter((x): x is { product: Product; qty: number; meta?: CartLineMeta } => !!x);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!isSharedMode) return [] as { product: Product; qty: number; meta?: CartLineMeta }[];
+    const out: { product: Product; qty: number; meta?: CartLineMeta }[] = [];
+    for (const it of shared.items) {
+      const product = allProducts.find((p) => p.id === it.product_id);
+      if (!product) continue;
+      out.push({ product, qty: it.quantity, meta: it.meta as CartLineMeta | undefined });
+    }
+    return out;
   }, [isSharedMode, shared.items]);
 
   const lines = isSharedMode ? sharedLines : local.lines;
