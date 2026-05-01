@@ -482,10 +482,3 @@ export default function Dashboard() {
     </>
   );
 }
-
-/**
- * Module-scope buffer for the 7-day raw orders payload.
- * Kept outside React state to avoid re-render churn from realtime, while still
- * driving the `useMemo` recomputation through `weekTick` increments.
- */
-let weekData: { id: string; total: number | null; created_at: string; status: string }[] = [];
