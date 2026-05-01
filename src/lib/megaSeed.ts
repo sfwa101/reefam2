@@ -24,8 +24,71 @@ type SeedRow = {
 const slug = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
 
-const placeholder = (name: string) =>
-  `https://placehold.co/400x400/1a3c2a/ffffff?text=${encodeURIComponent(name.slice(0, 24))}`;
+// Unsplash professional imagery per category (high-quality real photos, no placeholders).
+const CATEGORY_IMAGES: Record<string, string[]> = {
+  supermarket: [
+    "https://images.unsplash.com/photo-1578774114113-72120431c769?w=600&q=80",
+    "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=600&q=80",
+    "https://images.unsplash.com/photo-1601598851547-4302969d0614?w=600&q=80",
+  ],
+  produce: [
+    "https://images.unsplash.com/photo-1566842600175-97dca489844f?w=600&q=80",
+    "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=600&q=80",
+    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
+  ],
+  meat: [
+    "https://images.unsplash.com/photo-1603048297172-c92544798d5e?w=600&q=80",
+    "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=600&q=80",
+    "https://images.unsplash.com/photo-1588347818111-a2cf90bf68b9?w=600&q=80",
+  ],
+  dairy: [
+    "https://images.unsplash.com/photo-1583019535741-42702991b13c?w=600&q=80",
+    "https://images.unsplash.com/photo-1628689469838-524a4a973b8e?w=600&q=80",
+    "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&q=80",
+  ],
+  sweets: [
+    "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80",
+    "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=600&q=80",
+    "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&q=80",
+  ],
+  pharmacy: [
+    "https://images.unsplash.com/photo-1576091160550-2173dba99965?w=600&q=80",
+    "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=600&q=80",
+    "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=600&q=80",
+  ],
+  library: [
+    "https://images.unsplash.com/photo-1521185496955-15097b20c5fe?w=600&q=80",
+    "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&q=80",
+    "https://images.unsplash.com/photo-1456406644174-8ddd4cd52a06?w=600&q=80",
+  ],
+  restaurants: [
+    "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80",
+    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&q=80",
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80",
+  ],
+  recipes: [
+    "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80",
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80",
+  ],
+  wholesale: [
+    "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=600&q=80",
+    "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80",
+  ],
+  village: [
+    "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=600&q=80",
+    "https://images.unsplash.com/photo-1601493700631-2b16ec4b4716?w=600&q=80",
+    "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&q=80",
+  ],
+  baskets: [
+    "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80",
+    "https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=600&q=80",
+  ],
+};
+
+const pickImage = (category: string): string => {
+  const arr = CATEGORY_IMAGES[category] ?? CATEGORY_IMAGES.supermarket;
+  return arr[Math.floor(Math.random() * arr.length)];
+};
 
 const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 const round = (n: number) => Math.round(n * 4) / 4;
@@ -50,22 +113,25 @@ function makeProduct(args: {
   const price = round(args.basePrice * (0.9 + Math.random() * 0.3));
   const hasDiscount = Math.random() < 0.35;
   const old_price = hasDiscount ? round(price * (1.1 + Math.random() * 0.25)) : null;
+  const img = pickImage(args.category);
+  // Keep DB-safe unit code (matches units_of_measure). Original verbose unit kept in metadata + name.
+  const safeUnit = "قطعة";
   return {
     id: mkId(args.source),
     name: args.name,
     brand: args.brand ?? null,
-    unit: args.unit,
+    unit: safeUnit,
     price,
     old_price,
-    image: placeholder(args.name),
-    image_url: placeholder(args.name),
+    image: img,
+    image_url: img,
     category: args.category,
     sub_category: args.sub,
     source: args.source,
     stock: rand(5, 250),
     is_active: true,
     fulfillment_type: args.fulfillment ?? "internal_stock",
-    metadata: args.metadata ?? {},
+    metadata: { ...(args.metadata ?? {}), display_unit: args.unit },
     description: `${args.name} — منتج محلي عالي الجودة 🇪🇬`,
   };
 }
@@ -351,7 +417,7 @@ export async function runMegaSeed(): Promise<{ inserted: number; total: number; 
   ];
   const errors: string[] = [];
   let inserted = 0;
-  const chunkSize = 80;
+  const chunkSize = 50;
   for (let i = 0; i < all.length; i += chunkSize) {
     const chunk = all.slice(i, i + chunkSize);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
