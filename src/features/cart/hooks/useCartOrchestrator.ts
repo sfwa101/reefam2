@@ -806,78 +806,67 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
           : "") +
         `في انتظار تأكيدكم، شكراً لكم! 🍃`;
 
-      const mainUrl = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(mainMessage)}`;
       await minLoading;
-      window.open(mainUrl, "_blank");
 
+      // Open the main customer→admin WhatsApp message.
+      // - Desktop: redirect the pre-opened tab (gesture-safe).
+      // - Mobile: navigate the current tab via location.href.
+      // - If everything fails (popup blocked, no JS handler), surface a
+      //   fallback dialog with copy-to-clipboard + a manual link.
+      const mainPhone = WA_NUMBER;
+      const openResult = openWhatsApp(
+        { phone: mainPhone, text: mainMessage },
+        { preOpened, preferLocation: onMobile },
+      );
+
+      if (!openResult.ok) {
+        console.warn("[checkout] WhatsApp open blocked, showing fallback");
+        setWaFallback({ phone: mainPhone, text: mainMessage });
+        toast.message("اضغط على فتح واتساب لإكمال الطلب", {
+          description: "منع المتصفح الفتح التلقائي",
+        });
+      } else {
+        console.info("[checkout] WhatsApp opened via", openResult.method);
+      }
+
+      // NOTE: Multiple sequential `window.open` calls (vendors, producers)
+      // cannot survive popup blockers and were previously silently dropped
+      // on most browsers. Vendor + producer notifications are already sent
+      // through the database (vendor_notifications / admin notifications
+      // via `place_order_atomic`), so there is no functional regression.
+      // We log the intended messages for debugging only.
       const restaurantGroups = vendorGroups.filter((g) => g.vendor.kind === "restaurant");
-      restaurantGroups.forEach((g, idx) => {
-        if (g.vendor.kind !== "restaurant") return;
-        const r = g.vendor.restaurant;
-        const commission = Math.round((g.subtotal * r.commissionPct) / 100);
-        const netToVendor = g.subtotal - commission;
-        const vendorLines = g.lines
-          .map((l, i) => {
-            const unit =
-              lines.find((x) => x.product.id === l.product.id)?.meta?.unitPrice ??
-              l.product.price;
-            return `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(unit * l.qty)}`;
-          })
-          .join("\n");
-        const vendorMsg =
-          `🍽️ *طلب جديد عبر ريف المدينة*\n` +
-          `━━━━━━━━━━━━━━\n` +
-          `🆔 *رقم الطلب:* ${orderNum}\n` +
-          `🏷️ *المطعم:* ${r.name}\n\n` +
-          `🛒 *الأصناف المطلوبة:*\n${vendorLines}\n\n` +
-          `━━━━━━━━━━━━━━\n` +
-          `💵 إجمالي المطعم: ${fmtMoney(g.subtotal)}\n` +
-          `📊 عمولة المنصة (${toLatin(r.commissionPct)}٪): -${fmtMoney(commission)}\n` +
-          `💰 *صافي المستحق للمطعم:* *${fmtMoney(netToVendor)}*\n\n` +
-          `📍 *عنوان التوصيل:*\n${addrLine}\n\n` +
-          `✅ برجاء البدء بالتجهيز`;
-        const vUrl = `https://wa.me/${r.whatsapp}?text=${encodeURIComponent(vendorMsg)}`;
-        setTimeout(() => window.open(vUrl, "_blank"), 600 * (idx + 1));
-      });
-
-      if (sweetsBuckets.C.lines.length > 0) {
-        const producerLines = sweetsBuckets.C.lines
-          .map((l, i) => {
-            const slot =
-              bookingTimeSlots.find((s) => s.id === l.meta?.slot)?.label ?? "—";
-            const day = l.meta?.date ? formatBookingShort(new Date(l.meta.date)) : "—";
-            const note = l.meta?.note ? `\n   📝 ملاحظة: ${l.meta.note}` : "";
-            const lineUnit =
-              lines.find((x) => x.product.id === l.product.id)?.meta?.unitPrice ??
-              l.product.price;
-            return `${toLatin(i + 1)}. ${l.product.name} × ${toLatin(l.qty)} = ${fmtMoney(lineUnit * l.qty)}\n   📅 ${day} · ${slot}${note}`;
-          })
-          .join("\n\n");
-        const producerMsg =
-          `🎂 *حجز جديد — الأسر المنتجة*\n` +
-          `━━━━━━━━━━━━━━\n` +
-          `🆔 *رقم الطلب:* ${orderNum}\n\n` +
-          `🛒 *الحجوزات:*\n${producerLines}\n\n` +
-          `━━━━━━━━━━━━━━\n` +
-          `💵 إجمالي الحجز: ${fmtMoney(sweetsBuckets.C.subtotal)}\n` +
-          `🔒 يُدفع الآن: ${fmtMoney(aggregateDeposit)}\n` +
-          `\n📍 *عنوان التوصيل:*\n${addrLine}\n\n` +
-          `✅ برجاء البدء بالتجهيز`;
-        const pUrl = `https://wa.me/${HOME_PRODUCERS_WA}?text=${encodeURIComponent(producerMsg)}`;
-        setTimeout(
-          () => window.open(pUrl, "_blank"),
-          600 * (restaurantGroups.length + 1),
+      if (restaurantGroups.length > 0) {
+        console.info(
+          "[checkout] vendor messages prepared (delivered via DB notifications):",
+          restaurantGroups.map((g) =>
+            g.vendor.kind === "restaurant" ? g.vendor.restaurant.name : "?",
+          ),
         );
+      }
+      if (sweetsBuckets.C.lines.length > 0) {
+        console.info("[checkout] producer booking present (DB-routed)");
       }
 
       const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
       clear();
       fireConfetti();
-      toast.success("تم إرسال طلبك إلى واتساب 🎉");
+      if (openResult.ok) {
+        toast.success("تم إرسال طلبك إلى واتساب 🎉");
+      }
       setSubmitting(false);
       submittingRef.current = false;
-      navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
+      // Don't auto-redirect when fallback dialog is open — user needs to
+      // act on it first. We'll navigate after they close it (handled in
+      // the Cart page via the dismissWaFallback callback).
+      if (openResult.ok) {
+        navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
+      } else {
+        // Stash navigation target so the Cart page can redirect after the
+        // fallback dialog is dismissed.
+        pendingNavRef.current = { id: orderId, total: orderTotal };
+      }
     } catch (err) {
       console.error("[checkout] unexpected error:", err);
       toast.error("حدث خطأ غير متوقّع");
