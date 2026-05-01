@@ -3557,6 +3557,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ui_layouts: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          page_key: string
+          section_config: Json
+          section_order: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          page_key: string
+          section_config?: Json
+          section_order?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          page_key?: string
+          section_config?: Json
+          section_order?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       units_of_measure: {
         Row: {
           code: string
