@@ -212,7 +212,18 @@ const Cart = () => {
         </section>
       )}
 
-      <CartCheckoutActions grand={o.grand} minOrderTotal={o.minOrderTotal} submitting={o.submitting} onCheckout={o.checkoutWA} />
+      <div className="relative">
+        <CartCheckoutActions grand={o.grand} minOrderTotal={o.minOrderTotal} submitting={o.submitting} onCheckout={isLocked ? () => toast.error("السلة مقفلة بانتظار موافقات المشاركين") : o.checkoutWA} />
+        {isLocked && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-foreground/70 backdrop-blur-sm">
+            <Lock className="h-5 w-5 text-background" />
+            <p className="text-xs font-extrabold text-background">مقفلة — بانتظار الموافقات</p>
+            <p className="text-[10px] font-bold text-background/80">
+              {o.sharedParticipants.filter((p) => p.approval_status === "pending").length} بانتظار الموافقة
+            </p>
+          </div>
+        )}
+      </div>
 
       <AnimatePresence>
         {o.showRecharge && o.user && (
