@@ -813,6 +813,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       // - If everything fails (popup blocked, no JS handler), surface a
       //   fallback dialog with copy-to-clipboard + a manual link.
       const mainPhone = WA_NUMBER;
+      const orderId = savedOrderId ?? orderNum;
+      const orderTotal = grand;
       const openResult = openWhatsApp(
         { phone: mainPhone, text: mainMessage },
         { preOpened, preferLocation: onMobile, source },
@@ -865,8 +867,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         console.info("[checkout] producer booking present (DB-routed)");
       }
 
-      const orderId = savedOrderId ?? orderNum;
-      const orderTotal = grand;
       clear();
       fireConfetti();
       if (openResult.ok) {
