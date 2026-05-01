@@ -401,6 +401,15 @@ export default function Products() {
             <Wand2 className="h-4 w-4" />
             <span>{fixingImages ? "جاري…" : "إصلاح الصور"}</span>
           </button>
+          <button
+            onClick={handleSeed}
+            disabled={seeding}
+            className="h-11 px-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center gap-1.5 press shadow-sm font-semibold text-[12px] disabled:opacity-60"
+            title="حقن كتالوج السوبر ماركت المصري"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>{seeding ? "جاري…" : "حقن السوبر ماركت"}</span>
+          </button>
         </div>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
