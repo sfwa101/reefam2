@@ -22,38 +22,129 @@ export default function Products() {
   const [seeding, setSeeding] = useState(false);
   const [fixingImages, setFixingImages] = useState(false);
 
-  const FIX_IMAGE_MAP: Record<string, string> = {
-    supermarket: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80",
-    produce: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=600&q=80",
-    meat: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=600&q=80",
-    dairy: "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=600&q=80",
-    sweets: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-    pharmacy: "https://images.unsplash.com/photo-1584308666744-24d5e4a8b792?auto=format&fit=crop&w=600&q=80",
-    library: "https://images.unsplash.com/photo-1542856204-0010166edc11?auto=format&fit=crop&w=600&q=80",
-    restaurants: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
-    recipes: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
+  // Keyword-based image matcher: لكل منتج صورة مناسبة لاسمه
+  const KEYWORD_IMAGES: { keys: string[]; url: string }[] = [
+    { keys: ["زيت", "سمن", "oil"], url: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["أرز", "ارز", "rice"], url: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["مكرونة", "مكرونه", "اسباجتي", "إسباجتي", "pasta"], url: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["سكر", "sugar"], url: "https://images.unsplash.com/photo-1610137310793-f02e2e553d1a?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["ملح", "salt"], url: "https://images.unsplash.com/photo-1518110925495-b37653e75e7e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["دقيق", "طحين", "flour"], url: "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["شاي", "tea"], url: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["قهوة", "قهوه", "بن", "نسكافيه", "coffee"], url: "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["عصير", "juice"], url: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["مياه", "ماء", "water"], url: "https://images.unsplash.com/photo-1564725075388-cc5e9bbb2a76?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كولا", "بيبسي", "سبرايت", "صودا", "غازي", "cola"], url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["شيبس", "بيج", "سناك", "chips"], url: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["شوكولا", "شيكولا", "كاكاو", "chocolate"], url: "https://images.unsplash.com/photo-1511381939415-e44015466834?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["بسكويت", "بسكوت", "كوكيز", "biscuit"], url: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كيك", "كعك", "cake"], url: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كنافة", "بقلاوة", "بسبوسة", "حلاوة", "حلويات"], url: "https://images.unsplash.com/photo-1601979031925-424e53b6caaa?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["عسل", "honey"], url: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["مربى", "jam"], url: "https://images.unsplash.com/photo-1597528380144-5f95293c5d09?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["حليب", "لبن", "milk"], url: "https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["زبادي", "روب", "yogurt"], url: "https://images.unsplash.com/photo-1571212515416-fef01fc43637?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["جبن", "جبنة", "cheese"], url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["زبدة", "butter"], url: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["قشطة", "قشده", "cream"], url: "https://images.unsplash.com/photo-1626078299034-94d6ee07ecb8?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["بيض", "egg"], url: "https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["لحم", "لحمة", "كندوز", "بقري", "beef"], url: "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["دجاج", "فراخ", "chicken"], url: "https://images.unsplash.com/photo-1587593810167-a84920ea0781?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["سمك", "أسماك", "اسماك", "بلطي", "fish"], url: "https://images.unsplash.com/photo-1535007813616-79dc02ba4021?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["جمبري", "روبيان", "shrimp"], url: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كبدة", "كبده"], url: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["نقانق", "سجق", "هوت دوج", "sausage"], url: "https://images.unsplash.com/photo-1601565124284-2e1c6800a673?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["طماطم", "بندورة", "tomato"], url: "https://images.unsplash.com/photo-1561136594-7f68413baa99?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["بطاطس", "بطاطا", "potato"], url: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["بصل", "onion"], url: "https://images.unsplash.com/photo-1620574387735-3624d75b2dbc?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["ثوم", "garlic"], url: "https://images.unsplash.com/photo-1615477550927-6ec8888d5a07?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["جزر", "carrot"], url: "https://images.unsplash.com/photo-1582515073490-39981397c445?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["خيار", "cucumber"], url: "https://images.unsplash.com/photo-1604977042946-1eecc30f269e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["فلفل", "pepper"], url: "https://images.unsplash.com/photo-1583119022894-919a68a3d0e3?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["باذنجان", "eggplant"], url: "https://images.unsplash.com/photo-1601648764658-cf37e8c89b70?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كوسة"], url: "https://images.unsplash.com/photo-1583687355032-89b902b7335f?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["خس", "lettuce", "جرجير", "سبانخ"], url: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["ملوخية"], url: "https://images.unsplash.com/photo-1607301406259-dfb186e15de7?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["تفاح", "apple"], url: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["موز", "banana"], url: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["برتقال", "يوسفي", "orange"], url: "https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["مانجو", "mango"], url: "https://images.unsplash.com/photo-1591073113125-e46713c829ed?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["عنب", "grape"], url: "https://images.unsplash.com/photo-1599819177626-b8e5f1d61937?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["فراولة", "strawberry"], url: "https://images.unsplash.com/photo-1543528176-61b239494933?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["بطيخ", "watermelon"], url: "https://images.unsplash.com/photo-1587049352851-8d4e89133924?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["شمام", "كانتالوب"], url: "https://images.unsplash.com/photo-1571575173700-afb9492e6a50?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["تين", "fig"], url: "https://images.unsplash.com/photo-1601379329542-31c59cf5e1c4?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["بلح", "تمر", "date"], url: "https://images.unsplash.com/photo-1609501676725-7186f017a4b7?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["ليمون", "lemon"], url: "https://images.unsplash.com/photo-1582287014914-1db836ad12b9?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["فول", "بسلة", "حمص", "عدس", "فاصوليا", "لوبيا"], url: "https://images.unsplash.com/photo-1515543904379-3d757afe72e4?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["خبز", "عيش", "توست", "bread"], url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["دواء", "أقراص", "اقراص", "شراب", "كبسول", "مرهم", "كريم", "فيتامين", "بنادول", "كونجستال"], url: "https://images.unsplash.com/photo-1584308666744-24d5e4a8b792?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["شامبو", "صابون", "معجون", "فرشاة", "منظف", "مسحوق", "غسيل"], url: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كراسة", "كراس", "قلم", "دفتر", "كتاب", "مسطرة", "ألوان", "الوان"], url: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["كشري", "بيتزا", "برجر", "ساندوتش", "شاورما", "وجبة", "وجبه"], url: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=600&q=80" },
+    { keys: ["سلة", "باسكت", "basket"], url: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80" },
+  ];
+
+  const SOURCE_POOL: Record<string, string[]> = {
+    supermarket: [
+      "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=600&q=80",
+    ],
+    produce: [
+      "https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=600&q=80",
+    ],
+    meat: [
+      "https://images.unsplash.com/photo-1603048297172-c92544798d5e?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=600&q=80",
+    ],
+    dairy: [
+      "https://images.unsplash.com/photo-1628088062854-d1870b4553da?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=600&q=80",
+    ],
+    sweets: [
+      "https://images.unsplash.com/photo-1601979031925-424e53b6caaa?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80",
+    ],
+    pharmacy: [
+      "https://images.unsplash.com/photo-1584308666744-24d5e4a8b792?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1576602976047-174e57a47881?auto=format&fit=crop&w=600&q=80",
+    ],
+    library: ["https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80"],
+    restaurants: ["https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"],
+    recipes: ["https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80"],
+    baskets: ["https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80"],
   };
   const FIX_IMAGE_DEFAULT = "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=600&q=80";
 
+  const pickImageFor = (name: string, source: string | null, idx: number): string => {
+    const n = (name || "").toLowerCase();
+    for (const entry of KEYWORD_IMAGES) {
+      if (entry.keys.some((k) => n.includes(k.toLowerCase()))) return entry.url;
+    }
+    const pool = SOURCE_POOL[(source ?? "").toLowerCase()];
+    if (pool && pool.length) return pool[idx % pool.length];
+    return FIX_IMAGE_DEFAULT;
+  };
+
   const handleFixImages = async () => {
-    if (!confirm("سيتم تحديث صور جميع المنتجات الحالية بصور احترافية ثابتة. متابعة؟")) return;
+    if (!confirm("سيتم تحديث صور كل المنتجات بصور احترافية مطابقة لاسم كل منتج. متابعة؟")) return;
     setFixingImages(true);
     const t = toast.loading("جاري إصلاح الصور…");
     try {
-      const { data, error } = await supabase.from("products").select("id, source").limit(5000);
+      const { data, error } = await supabase.from("products").select("id, name, source").limit(5000);
       if (error) throw error;
-      const all = (data ?? []) as { id: string; source: string | null }[];
-      // Group ids by target URL
+      const all = (data ?? []) as { id: string; name: string; source: string | null }[];
       const groups = new Map<string, string[]>();
-      for (const row of all) {
-        const url = FIX_IMAGE_MAP[(row.source ?? "").toLowerCase()] ?? FIX_IMAGE_DEFAULT;
+      all.forEach((row, i) => {
+        const url = pickImageFor(row.name, row.source, i);
         if (!groups.has(url)) groups.set(url, []);
         groups.get(url)!.push(row.id);
-      }
+      });
       let updated = 0;
       const errors: string[] = [];
       for (const [url, ids] of groups) {
-        // chunk of 50
         for (let i = 0; i < ids.length; i += 50) {
           const chunk = ids.slice(i, i + 50);
           const { error: upErr } = await supabase
@@ -66,7 +157,7 @@ export default function Products() {
       }
       toast.dismiss(t);
       if (errors.length) toast.error(`تم تحديث ${updated}/${all.length} — خطأ: ${errors[0]}`);
-      else toast.success(`✨ تم تحديث صور ${updated} منتج`);
+      else toast.success(`✨ تم تحديث صور ${updated} منتج بصور مطابقة`);
       await load();
     } catch (e) {
       toast.dismiss(t);
