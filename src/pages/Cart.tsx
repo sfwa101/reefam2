@@ -17,6 +17,7 @@ import { NumberFlow } from "@/features/cart/components/NumberFlow";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { VendorGroupCard } from "@/features/cart/components/VendorGroupCard";
 import { SharedCartManager } from "@/features/cart/components/SharedCartManager";
+import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallbackDialog";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
