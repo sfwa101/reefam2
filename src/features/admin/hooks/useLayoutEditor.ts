@@ -32,6 +32,11 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
   BestSellersRail: "الأكثر مبيعاً",
   ProductsGrid: "شبكة المنتجات",
   FlashDeals: "العروض السريعة",
+  // Phase 26 — Main Hub
+  MainSearchHeader: "ترويسة البحث الرئيسية",
+  StoryCircles: "دوائر القصص",
+  PromotionSlider: "شريط العروض",
+  DepartmentGrid: "شبكة الأقسام",
 };
 
 export const useLayoutEditor = (pageKey: string) => {
