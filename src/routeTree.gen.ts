@@ -58,6 +58,7 @@ import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
+import { Route as AdminDesignRouteImport } from './routes/admin.design'
 import { Route as AdminDeliverySettingsRouteImport } from './routes/admin.delivery-settings'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
@@ -360,6 +361,11 @@ const AdminDriversRoute = AdminDriversRouteImport.update({
 const AdminDriverSettlementsRoute = AdminDriverSettlementsRouteImport.update({
   id: '/driver-settlements',
   path: '/driver-settlements',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDesignRoute = AdminDesignRouteImport.update({
+  id: '/design',
+  path: '/design',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDeliverySettingsRoute = AdminDeliverySettingsRouteImport.update({
@@ -688,6 +694,7 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
+  '/admin/design': typeof AdminDesignRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
@@ -792,6 +799,7 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
+  '/admin/design': typeof AdminDesignRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
@@ -903,6 +911,7 @@ export interface FileRoutesById {
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
+  '/admin/design': typeof AdminDesignRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
@@ -1015,6 +1024,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/delivery'
     | '/admin/delivery-settings'
+    | '/admin/design'
     | '/admin/driver-settlements'
     | '/admin/drivers'
     | '/admin/executive'
@@ -1119,6 +1129,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/delivery'
     | '/admin/delivery-settings'
+    | '/admin/design'
     | '/admin/driver-settlements'
     | '/admin/drivers'
     | '/admin/executive'
@@ -1229,6 +1240,7 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/delivery'
     | '/admin/delivery-settings'
+    | '/admin/design'
     | '/admin/driver-settlements'
     | '/admin/drivers'
     | '/admin/executive'
@@ -1665,6 +1677,13 @@ declare module '@tanstack/react-router' {
       path: '/driver-settlements'
       fullPath: '/admin/driver-settlements'
       preLoaderRoute: typeof AdminDriverSettlementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/design': {
+      id: '/admin/design'
+      path: '/design'
+      fullPath: '/admin/design'
+      preLoaderRoute: typeof AdminDesignRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/delivery-settings': {
@@ -2235,6 +2254,7 @@ interface AdminRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
   AdminDeliverySettingsRoute: typeof AdminDeliverySettingsRoute
+  AdminDesignRoute: typeof AdminDesignRoute
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
   AdminDriversRoute: typeof AdminDriversRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
@@ -2287,6 +2307,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
   AdminDeliverySettingsRoute: AdminDeliverySettingsRoute,
+  AdminDesignRoute: AdminDesignRoute,
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
   AdminDriversRoute: AdminDriversRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
