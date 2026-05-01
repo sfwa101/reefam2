@@ -11,6 +11,13 @@ import {
 import type { Product } from "@/lib/products";
 import { trackBuyAgain } from "@/lib/buyAgain";
 import { logBehavior } from "@/lib/behavior";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchRemoteCart,
+  pushRemoteCart,
+  mergeCarts,
+  type LocalLine,
+} from "@/lib/cartSync";
 
 /**
  * Optional per-line meta. Used by the sweets section to attach a chosen
