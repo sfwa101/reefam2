@@ -178,7 +178,7 @@ export default function Orders() {
           </div>
         ) : (
           <div className="space-y-2.5">
-            {filtered.map(o => {
+            {pageItems!.map(o => {
               const s = statusMap[o.status] ?? { label: o.status, tone: "bg-muted text-foreground-secondary", dot: "bg-muted-foreground" };
               return (
                 <Link key={o.id} to="/admin/orders/$orderId" params={{ orderId: o.id }}>
@@ -207,6 +207,14 @@ export default function Orders() {
                 </Link>
               );
             })}
+            {hasMore && (
+              <button
+                onClick={() => setVisible(v => v + PAGE_SIZE)}
+                className="w-full h-11 rounded-2xl bg-surface border border-border/40 text-[13px] font-semibold text-primary press"
+              >
+                تحميل المزيد ({filtered!.length - visible})
+              </button>
+            )}
           </div>
         )}
       </div>
