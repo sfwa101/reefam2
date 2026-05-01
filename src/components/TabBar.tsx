@@ -21,13 +21,27 @@ const items: TabItem[] = [
 
 const TabBar = () => {
   const { pathname } = useLocation();
+  const cartCount = useCartCount();
 
   return (
     <nav
       aria-label="التنقل الرئيسي"
+      dir="rtl"
       className="fixed inset-x-0 bottom-0 z-30 px-4 pb-5 pt-2 lg:hidden"
       style={{ paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))" }}
     >
+      {cartCount > 0 && (
+        <Link
+          to="/cart"
+          aria-label={`السلة (${cartCount})`}
+          className="absolute -top-2 left-4 flex h-12 items-center gap-2 rounded-full bg-foreground px-3 text-background shadow-float ring-2 ring-background transition active:scale-95"
+        >
+          <ShoppingBag className="h-4 w-4" strokeWidth={2.4} />
+          <span className="text-[12px] font-extrabold tabular-nums">
+            {toLatin(cartCount)}
+          </span>
+        </Link>
+      )}
       <div className="glass-strong mx-auto flex max-w-md items-end justify-between rounded-[1.75rem] px-3 py-2 shadow-float">
         {items.map((item) => {
           const Icon = item.icon;
