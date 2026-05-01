@@ -511,23 +511,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       return;
     }
 
-    const currentUser = user ?? null;
-    const isGuest = !currentUser;
-
-    if (isGuest) {
-      const n = guestName.trim();
-      const p = guestPhone.trim();
-      const a = guestAddress.trim();
-      if (!n || !p || !a) {
-        toast.error("من فضلك اكتب الاسم ورقم الهاتف وعنوان التوصيل");
-        return;
-      }
-    }
-
-    if (minOrderTotal > 0 && grand < minOrderTotal) {
-      toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
-      return;
-    }
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
     const onMobile = isMobileWaContext();
     const preOpened: Window | null = onMobile ? null : preOpenWindow(source);
@@ -541,6 +524,33 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setSubmitting(true);
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const currentUser = (user ?? session?.user) || null;
+      const isGuest = !currentUser;
+
+      if (isGuest) {
+        const n = guestName.trim();
+        const p = guestPhone.trim();
+        const a = guestAddress.trim();
+        if (!n || !p || !a) {
+          toast.error("من فضلك اكتب الاسم ورقم الهاتف وعنوان التوصيل");
+          setSubmitting(false);
+          submittingRef.current = false;
+          try { preOpened?.close(); } catch { /* noop */ }
+          return;
+        }
+      }
+
+      if (minOrderTotal > 0 && grand < minOrderTotal) {
+        toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
+        setSubmitting(false);
+        submittingRef.current = false;
+        try { preOpened?.close(); } catch { /* noop */ }
+        return;
+      }
+
       const noteParts = [
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
         tip > 0 ? `إكرامية: ${tip}` : null,
