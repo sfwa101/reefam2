@@ -830,7 +830,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const waUrl = buildWaUrl({ phone: mainPhone, text: mainMessage });
       console.log("[checkout] attempting WhatsApp checkout URL", { source, url: waUrl });
       const openResult: OpenResult = onMobile
-        ? (() => {
+        ? ((): OpenResult => {
             try {
               console.log("[checkout] mobile window.location.href", { source, url: waUrl });
               window.location.href = waUrl;
