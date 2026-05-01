@@ -71,6 +71,7 @@ export default function Dashboard() {
   });
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [topCats, setTopCats] = useState<{ label: string; value: number }[]>([]);
+  const [week, setWeek] = useState<{ id: string; total: number | null; created_at: string; status: string }[]>([]);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
   useEffect(() => {
