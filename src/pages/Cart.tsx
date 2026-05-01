@@ -231,6 +231,12 @@ const Cart = () => {
           <RechargeDialog onClose={() => o.setShowRecharge(false)} userId={o.user.id} currentBalance={o.walletBalance} shortfall={Math.max(0, o.grand - o.walletBalance)} />
         )}
       </AnimatePresence>
+
+      <WhatsAppFallbackDialog
+        open={!!o.waFallback}
+        payload={o.waFallback}
+        onClose={o.dismissWaFallback}
+      />
     </div>
   );
 };
