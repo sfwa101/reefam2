@@ -191,8 +191,7 @@ export default function Dashboard() {
       { label: "في الطريق", value: counts("out_for_delivery"), tone: "bg-info" },
       { label: "تم التسليم", value: counts("delivered"), tone: "bg-success" },
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [weekTick]);
+  }, [week]);
 
   const recent = orders.slice(0, 8);
 
