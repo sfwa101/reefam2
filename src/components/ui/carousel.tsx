@@ -44,6 +44,10 @@ const Carousel = React.forwardRef<
 >(({ orientation = "horizontal", opts, setApi, plugins, className, children, ...props }, ref) => {
   const [carouselRef, api] = useEmblaCarousel(
     {
+      direction:
+        typeof document !== "undefined" && document.documentElement.dir === "rtl"
+          ? "rtl"
+          : "ltr",
       ...opts,
       axis: orientation === "horizontal" ? "x" : "y",
     },
@@ -177,6 +181,8 @@ CarouselItem.displayName = "CarouselItem";
 const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
   ({ className, variant = "outline", size = "icon", ...props }, ref) => {
     const { orientation, scrollPrev, canScrollPrev } = useCarousel();
+    const isRtl =
+      typeof document !== "undefined" && document.documentElement.dir === "rtl";
 
     return (
       <Button
@@ -186,7 +192,9 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         className={cn(
           "absolute  h-8 w-8 rounded-full",
           orientation === "horizontal"
-            ? "-left-12 top-1/2 -translate-y-1/2"
+            ? isRtl
+              ? "-right-12 top-1/2 -translate-y-1/2"
+              : "-left-12 top-1/2 -translate-y-1/2"
             : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
           className,
         )}
@@ -194,7 +202,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         onClick={scrollPrev}
         {...props}
       >
-        <ArrowLeft className="h-4 w-4" />
+        {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
         <span className="sr-only">Previous slide</span>
       </Button>
     );
@@ -205,6 +213,8 @@ CarouselPrevious.displayName = "CarouselPrevious";
 const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
   ({ className, variant = "outline", size = "icon", ...props }, ref) => {
     const { orientation, scrollNext, canScrollNext } = useCarousel();
+    const isRtl =
+      typeof document !== "undefined" && document.documentElement.dir === "rtl";
 
     return (
       <Button
@@ -214,7 +224,9 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         className={cn(
           "absolute h-8 w-8 rounded-full",
           orientation === "horizontal"
-            ? "-right-12 top-1/2 -translate-y-1/2"
+            ? isRtl
+              ? "-left-12 top-1/2 -translate-y-1/2"
+              : "-right-12 top-1/2 -translate-y-1/2"
             : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
           className,
         )}
@@ -222,7 +234,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         onClick={scrollNext}
         {...props}
       >
-        <ArrowRight className="h-4 w-4" />
+        {isRtl ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
         <span className="sr-only">Next slide</span>
       </Button>
     );
