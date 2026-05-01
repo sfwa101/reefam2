@@ -54,16 +54,11 @@ const Auth = () => {
       const res = mode === "signin" ? await signInWithPhone(phone, password) : await signUpWithPhone(phone, password, fullName.trim());
       if (res.error) toast.error(res.error);
       else {
-        if (mode === "signin") {
-          await new Promise((resolve) => setTimeout(resolve, 800));
-          await supabase.auth.getSession();
-          toast.success("تم تسجيل الدخول بنجاح");
-          navigate({ to: "/", replace: true });
-          return;
-        }
-        toast.success("تم إنشاء حسابك بنجاح");
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        await supabase.auth.getSession();
         const { data: { user: u } } = await supabase.auth.getUser();
         const to = u ? await resolveRedirectPath(u.id) : "/";
+        toast.success(mode === "signin" ? "تم تسجيل الدخول بنجاح" : "تم إنشاء حسابك بنجاح");
         navigate({ to, replace: true });
       }
     } finally { setBusy(false); }
