@@ -26,6 +26,7 @@ import { useUiLayout } from "../hooks/useUiLayout";
 import type { SectionConfig, SectionKey } from "../types/sdui.types";
 import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
 import type { CatId } from "../types";
+import { SectionFrame } from "@/features/sdui/SectionFrame";
 
 // Phase 26 — Main Hub stem cells (orchestrator-free, self-contained)
 import { MainSearchHeader } from "@/features/main-hub/components/MainSearchHeader";
@@ -111,9 +112,15 @@ export const LayoutFactory = ({
         const cfg = layout.section_config?.[key] ?? {};
         if (cfg.enabled === false) return null;
         const Render = REGISTRY[key];
-        if (!Render) return null; // gracefully skip unknown sections (e.g. FlashDeals)
+        if (!Render) return null; // gracefully skip unknown sections
         const node = Render(ctx, cfg);
-        return node ? <div key={`${key}-${idx}`}>{node}</div> : null;
+        if (!node) return null;
+        const customTitle = layout.section_titles?.[key] ?? null;
+        return (
+          <SectionFrame key={`${key}-${idx}`} cfg={cfg} customTitle={customTitle}>
+            {node}
+          </SectionFrame>
+        );
       })}
     </>
   );

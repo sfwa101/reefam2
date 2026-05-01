@@ -3587,33 +3587,90 @@ export type Database = {
         }
         Relationships: []
       }
+      ui_layout_history: {
+        Row: {
+          id: string
+          note: string | null
+          page_key: string
+          published_at: string
+          published_by: string | null
+          section_config: Json
+          section_order: Json
+          section_titles: Json
+          title: string | null
+          version: number
+        }
+        Insert: {
+          id?: string
+          note?: string | null
+          page_key: string
+          published_at?: string
+          published_by?: string | null
+          section_config: Json
+          section_order: Json
+          section_titles?: Json
+          title?: string | null
+          version: number
+        }
+        Update: {
+          id?: string
+          note?: string | null
+          page_key?: string
+          published_at?: string
+          published_by?: string | null
+          section_config?: Json
+          section_order?: Json
+          section_titles?: Json
+          title?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
       ui_layouts: {
         Row: {
           created_at: string
           id: string
           is_active: boolean
           page_key: string
+          published_at: string | null
+          published_by: string | null
           section_config: Json
           section_order: Json
+          section_titles: Json
+          status: string
+          title: string | null
           updated_at: string
+          version: number
         }
         Insert: {
           created_at?: string
           id?: string
           is_active?: boolean
           page_key: string
+          published_at?: string | null
+          published_by?: string | null
           section_config?: Json
           section_order?: Json
+          section_titles?: Json
+          status?: string
+          title?: string | null
           updated_at?: string
+          version?: number
         }
         Update: {
           created_at?: string
           id?: string
           is_active?: boolean
           page_key?: string
+          published_at?: string | null
+          published_by?: string | null
           section_config?: Json
           section_order?: Json
+          section_titles?: Json
+          status?: string
+          title?: string | null
           updated_at?: string
+          version?: number
         }
         Relationships: []
       }

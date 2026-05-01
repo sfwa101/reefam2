@@ -34,10 +34,17 @@ export type SectionConfig = {
   density?: "compact" | "comfortable" | "spacious";
 };
 
+export type LayoutStatus = "draft" | "published";
+
 export type UiLayout = {
   id: string;
   page_key: string;
   section_order: SectionKey[];
   section_config: Partial<Record<SectionKey, SectionConfig>>;
+  /** Per-section custom display titles (Arabic). */
+  section_titles?: Partial<Record<SectionKey, string>>;
   is_active: boolean;
+  status?: LayoutStatus;
+  version?: number;
+  title?: string | null;
 };
