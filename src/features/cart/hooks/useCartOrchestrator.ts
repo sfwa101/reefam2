@@ -817,7 +817,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const orderTotal = grand;
       const openResult = openWhatsApp(
         { phone: mainPhone, text: mainMessage },
-        { preOpened, preferLocation: onMobile, source },
+        { preOpened, preferLocation: onMobile, source, allowWindowOpen: false },
       );
 
       if (!openResult.ok) {
