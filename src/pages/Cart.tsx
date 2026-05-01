@@ -1,16 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  CalendarDays,
-  Check,
-  Clock,
-  Gift,
-  ShoppingBag,
-  Sparkles,
-  Tag,
-  Truck,
-  Zap,
-} from "lucide-react";
+import { CalendarDays, Check, Clock, Gift, ShoppingBag, Sparkles, Tag, Truck, Zap } from "lucide-react";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
 import { fmtMoney, toLatin } from "@/lib/format";
