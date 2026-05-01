@@ -527,7 +527,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     submittingRef.current = true;
     setSubmitting(true);
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
-    const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
       const noteParts = [
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
