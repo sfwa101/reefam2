@@ -74,6 +74,29 @@ type CartCtxValue = {
 const Ctx = createContext<CartCtxValue | null>(null);
 const STORAGE_KEY = "reef-cart-v1";
 
+// localStorage is blocked in some sandboxed iframes (e.g. Lovable preview
+// inside cross-origin contexts). Wrap every access and fall back to an
+// in-memory map so the cart still works even when persistence is denied.
+const memoryStore: Record<string, string> = {};
+const safeStorage = {
+  get: (key: string): string | null => {
+    try {
+      const v = localStorage.getItem(key);
+      return v ?? memoryStore[key] ?? null;
+    } catch {
+      return memoryStore[key] ?? null;
+    }
+  },
+  set: (key: string, value: string): void => {
+    memoryStore[key] = value;
+    try { localStorage.setItem(key, value); } catch { /* ignore */ }
+  },
+  remove: (key: string): void => {
+    delete memoryStore[key];
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+  },
+};
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Store lines in a ref so updates do not trigger provider re-renders.
   // Components subscribe via useSyncExternalStore with a selector, so each
@@ -108,20 +131,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     (updater: (prev: CartLine[]) => CartLine[]) => {
       linesRef.current = updater(linesRef.current);
       emit();
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(linesRef.current));
-      } catch {
-        /* ignore quota errors */
-      }
+      safeStorage.set(STORAGE_KEY, JSON.stringify(linesRef.current));
       schedulePush();
     },
     [emit, schedulePush],
   );
 
-  // Hydrate from localStorage on mount (client-only — SSR-safe)
+  // Hydrate from storage on mount (client-only — SSR-safe)
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = safeStorage.get(STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
@@ -155,11 +174,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         skipNextPushRef.current = true;
         linesRef.current = merged;
         emit();
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        } catch {
-          /* ignore */
-        }
+        safeStorage.set(STORAGE_KEY, JSON.stringify(merged));
 
         // Only push back if the merge actually changed remote (i.e. guest
         // contributed lines) or this is the first sync of the session.
