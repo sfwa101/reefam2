@@ -1,10 +1,59 @@
 import { useSearch, useNavigate, Link } from "@tanstack/react-router";
 import { Search as SearchIcon, X, PackageSearch, SlidersHorizontal, ArrowUpDown, Star, CheckCircle2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { products, useProductsVersion } from "@/lib/products";
+import { products, useProductsVersion, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import BackHeader from "@/components/BackHeader";
 import { toLatin } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
+
+const FALLBACK_IMG =
+  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
+
+// Live Supabase search — merges with the local in-memory `products` array.
+// Returns DB-only matches (already-cached products are skipped to avoid dupes).
+function useSupabaseProductSearch(term: string, knownIds: Set<string>) {
+  const [remote, setRemote] = useState<Product[]>([]);
+  useEffect(() => {
+    const t = term.trim();
+    if (t.length < 2) { setRemote([]); return; }
+    let cancelled = false;
+    const handle = setTimeout(async () => {
+      try {
+        const like = `%${t}%`;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error } = await (supabase as any)
+          .from("products")
+          .select("id,name,brand,unit,price,old_price,image,image_url,rating,category,sub_category,source,badge")
+          .eq("is_active", true)
+          .or(`name.ilike.${like},brand.ilike.${like},category.ilike.${like},sub_category.ilike.${like}`)
+          .limit(40);
+        if (cancelled) return;
+        if (error) { setRemote([]); return; }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const mapped: Product[] = (data ?? []).map((r: any) => ({
+          id: String(r.id),
+          name: r.name,
+          brand: r.brand ?? undefined,
+          unit: r.unit ?? "",
+          price: Number(r.price ?? 0),
+          oldPrice: r.old_price != null ? Number(r.old_price) : undefined,
+          image: r.image_url || r.image || FALLBACK_IMG,
+          rating: r.rating != null ? Number(r.rating) : undefined,
+          category: r.category ?? "",
+          subCategory: r.sub_category ?? undefined,
+          source: (r.source as Product["source"]) ?? "supermarket",
+          badge: (r.badge as Product["badge"]) ?? undefined,
+        }));
+        setRemote(mapped.filter((p) => !knownIds.has(p.id)));
+      } catch {
+        if (!cancelled) setRemote([]);
+      }
+    }, 250);
+    return () => { cancelled = true; clearTimeout(handle); };
+  }, [term, knownIds]);
+  return remote;
+}
 
 type SortId = "relevance" | "price-asc" | "price-desc" | "rating";
 
