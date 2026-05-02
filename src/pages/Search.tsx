@@ -89,9 +89,9 @@ const SearchPage = () => {
 
   const setQuery = (val: string) => setInputVal(val);
 
-  const matches = useMemo(() => {
+  const localMatches = useMemo(() => {
     const term = q.trim().toLowerCase();
-    if (!term) return [] as typeof products;
+    if (!term) return [] as Product[];
     return products.filter(
       (p) =>
         p.name.toLowerCase().includes(term) ||
@@ -100,6 +100,15 @@ const SearchPage = () => {
         (p.brand ?? "").toLowerCase().includes(term),
     );
   }, [q, _pv]);
+
+  // Pull additional results from Supabase (server-side products that may not
+  // be in the in-memory `products` cache yet). De-duplicated by id.
+  const knownIds = useMemo(() => new Set(localMatches.map((p) => p.id)), [localMatches]);
+  const remoteMatches = useSupabaseProductSearch(q, knownIds);
+  const matches = useMemo(
+    () => [...localMatches, ...remoteMatches],
+    [localMatches, remoteMatches],
+  );
 
   const priceCeiling = useMemo(
     () => (matches.length ? Math.max(...matches.map((p) => p.price)) : 0),
