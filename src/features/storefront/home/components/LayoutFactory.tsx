@@ -98,8 +98,38 @@ export const LayoutFactory = ({
   orchestrator?: HomeOrchestrator | null;
   theme: { hue: string; ink: string; soft: string; gradient: string };
 }) => {
-  const { layout } = useUiLayout(pageKey);
-  if (!layout) return null;
+  const { layout, loading } = useUiLayout(pageKey);
+
+  if (loading) {
+    return (
+      <div className="space-y-3 px-4 pt-4">
+        <div className="h-12 w-3/4 animate-pulse rounded-2xl bg-foreground/10" />
+        <div className="h-32 animate-pulse rounded-3xl bg-foreground/5" />
+        <div className="flex gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-20 w-20 shrink-0 animate-pulse rounded-2xl bg-foreground/5" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!layout || !layout.section_order || layout.section_order.length === 0) {
+    // Fallback hero — shown when no SDUI config exists for this page yet.
+    return (
+      <div className="px-4 pt-4">
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary/15 via-primary/8 to-transparent p-5">
+          <p className="text-[11px] font-bold text-primary">🌿 ريف المدينة</p>
+          <h1 className="mt-1 font-display text-2xl font-extrabold text-foreground">
+            عبق الريف داخل المدينة
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            منتجات طازجة وأسواق متنوعة — توصيل سريع لبابك
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const showRails = orchestrator
     ? orchestrator.cat === "all" && !orchestrator.q
